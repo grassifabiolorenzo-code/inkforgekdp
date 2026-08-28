@@ -14,13 +14,242 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      credit_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          operation_id: string
+          source: string
+          subscription_id: string | null
+          tool_id: string
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          operation_id: string
+          source?: string
+          subscription_id?: string | null
+          tool_id: string
+          transaction_type?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          operation_id?: string
+          source?: string
+          subscription_id?: string | null
+          tool_id?: string
+          transaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_transactions_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plans: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          lemon_squeezy_variant_id: string | null
+          monthly_limit: number | null
+          name: string
+          price: number
+          slug: string
+          sort_order: number
+          unlimited: boolean
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          lemon_squeezy_variant_id?: string | null
+          monthly_limit?: number | null
+          name: string
+          price: number
+          slug: string
+          sort_order?: number
+          unlimited?: boolean
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          lemon_squeezy_variant_id?: string | null
+          monthly_limit?: number | null
+          name?: string
+          price?: number
+          slug?: string
+          sort_order?: number
+          unlimited?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar: string | null
+          bonus_credits_remaining: number
+          created_at: string
+          email: string | null
+          id: string
+          name: string | null
+          starter_bonus_granted: boolean
+          starter_bonus_used: boolean
+          updated_at: string
+        }
+        Insert: {
+          avatar?: string | null
+          bonus_credits_remaining?: number
+          created_at?: string
+          email?: string | null
+          id: string
+          name?: string | null
+          starter_bonus_granted?: boolean
+          starter_bonus_used?: boolean
+          updated_at?: string
+        }
+        Update: {
+          avatar?: string | null
+          bonus_credits_remaining?: number
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string | null
+          starter_bonus_granted?: boolean
+          starter_bonus_used?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          cancelled_at: string | null
+          created_at: string
+          credits_used: number
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          lemon_squeezy_customer_id: string | null
+          lemon_squeezy_subscription_id: string | null
+          plan_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          created_at?: string
+          credits_used?: number
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          lemon_squeezy_customer_id?: string | null
+          lemon_squeezy_subscription_id?: string | null
+          plan_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          created_at?: string
+          credits_used?: number
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          lemon_squeezy_customer_id?: string | null
+          lemon_squeezy_subscription_id?: string | null
+          plan_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usage: {
+        Row: {
+          created_at: string
+          id: string
+          period_end: string | null
+          period_start: string | null
+          subscription_id: string | null
+          tool_id: string
+          updated_at: string
+          usage_count: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          period_end?: string | null
+          period_start?: string | null
+          subscription_id?: string | null
+          tool_id: string
+          updated_at?: string
+          usage_count?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          period_end?: string | null
+          period_start?: string | null
+          subscription_id?: string | null
+          tool_id?: string
+          updated_at?: string
+          usage_count?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      consume_credit: {
+        Args: { _description?: string; _operation_id: string; _tool_id: string }
+        Returns: Json
+      }
+      get_credit_state: { Args: never; Returns: Json }
+      grant_starter_bonus: {
+        Args: { _amount?: number; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
