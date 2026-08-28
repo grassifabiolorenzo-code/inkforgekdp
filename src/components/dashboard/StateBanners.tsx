@@ -68,6 +68,25 @@ export function InactiveSubscriptionState({ state }: { state?: CreditState }) {
   );
 }
 
+/** Tool non incluso nel piano attivo (es. A+ KDPstudio su Starter). */
+export function ToolNotInPlanState({ toolName }: { toolName: string }) {
+  return (
+    <div className="panel-highlight space-y-4 p-8 text-center">
+      <span className="icon-tile mx-auto size-12">
+        <Lock className="size-5 text-accent" />
+      </span>
+      <h2 className="text-lg font-semibold">{toolName} è disponibile con Pro e Business</h2>
+      <p className="mx-auto max-w-md text-sm text-muted-foreground">
+        Il tuo piano attuale non include questo strumento. Passa a Pro (€35/mese, 300 utilizzi) o
+        Business (€99/mese, utilizzo illimitato) per sbloccarlo.
+      </p>
+      <Button asChild className="bg-gradient-brand text-primary-foreground hover:opacity-90">
+        <Link to="/dashboard/subscription">Passa a Pro o Business</Link>
+      </Button>
+    </div>
+  );
+}
+
 /** Modal mostrato quando il limite mensile è esaurito. */
 export function CreditBlockDialog({
   block,
