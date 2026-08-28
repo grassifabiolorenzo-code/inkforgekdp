@@ -136,3 +136,34 @@ export const canConsume = createServerFn({ method: "GET" })
       state,
     };
   });
+
+const toolAccessInput = z.object({ toolId: z.string().min(1) });
+
+export interface ToolAccessResult {
+  allowed: boolean;
+  reason: null | "subscription_inactive" | "tool_not_in_plan" | "limit_reached";
+  state: CreditState;
+}
+
+/**
+ * Gating server-side per tool: unica fonte di verità.
+ * Anche forzando l'operazione dal frontend, il credito non viene scalato
+ * (consume_credit rifiuta) e questa verifica nega l'avvio dell'operazione.
+ */
+export const checkToolAccess = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => toolAccessInput.parse(data))
+  .handler(async ({ data, context }): Promise<ToolAccessResult> => {
+    const { data: raw, error } = await context.supabase.rpc("get_credit_state");
+    if (error) throw new Error(error.message);
+    const state = raw as unknown as CreditState;
+
+    if (!state.active) return { allowed: false, reason: "subscription_inactive", state };
+    if (state.allowed_tools && !state.allowed_tools.includes(data.toolId)) {
+      return { allowed: false, reason: "tool_not_in_plan", state };
+    }
+    if (!state.unlimited && state.remaining <= 0) {
+      return { allowed: false, reason: "limit_reached", state };
+    }
+    return { allowed: true, reason: null, state };
+  });

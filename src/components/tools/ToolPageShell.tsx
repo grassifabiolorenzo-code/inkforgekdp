@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { Coins } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -16,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { ToolConfig } from "@/config/tools";
 import { useAccount, useToolCredit } from "@/hooks/useAccount";
-import type { ConsumeResult, CreditState } from "@/lib/credits.functions";
+import { checkToolAccess, type ConsumeResult, type CreditState } from "@/lib/credits.functions";
 
 export interface ToolRuntime {
   /** Scala 1 credito. Da chiamare SOLO al completamento dell'operazione. */
@@ -27,6 +28,11 @@ export interface ToolRuntime {
   state: CreditState;
   /** Mostra il modal di limite raggiunto senza tentare l'operazione. */
   blockOperation: () => void;
+  /**
+   * Verifica server-side (piano + crediti) prima di avviare l'operazione.
+   * Ritorna false e mostra il blocco se l'utente non è autorizzato.
+   */
+  ensureAccess: () => Promise<boolean>;
 }
 
 /**
@@ -42,6 +48,22 @@ export function ToolPageShell({
 }) {
   const account = useAccount();
   const credit = useToolCredit(tool);
+  const verifyAccess = useServerFn(checkToolAccess);
+
+  // Gating server-side: la decisione finale non arriva mai dal frontend.
+  const ensureAccess = async () => {
+    try {
+      const result = await verifyAccess({ data: { toolId: tool.id } });
+      if (!result.allowed) {
+        credit.setBlock(result.reason ?? "limit_reached");
+        return false;
+      }
+      return true;
+    } catch {
+      credit.setBlock("limit_reached");
+      return false;
+    }
+  };
 
   const state = account.data?.credits;
 
@@ -99,6 +121,7 @@ export function ToolPageShell({
             canOperate: state.unlimited || state.remaining > 0,
             state,
             blockOperation: () => credit.setBlock("limit_reached"),
+            ensureAccess,
           })}
 
         <CreditBlockDialog

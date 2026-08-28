@@ -12,6 +12,7 @@ import type { PlanSlug } from "@/config/plans";
 import { useAccount } from "@/hooks/useAccount";
 import {
   cancelMySubscription,
+  changePlan,
   createCheckout,
   getManageSubscriptionUrl,
 } from "@/lib/billing.functions";
@@ -33,12 +34,26 @@ function SubscriptionPage() {
   const checkout = useServerFn(createCheckout);
   const manage = useServerFn(getManageSubscriptionUrl);
   const cancel = useServerFn(cancelMySubscription);
+  const switchPlan = useServerFn(changePlan);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   async function handleSelect(slug: PlanSlug) {
     setLoadingPlan(slug);
     try {
+      // Abbonamento già attivo → upgrade/downgrade sulla sottoscrizione esistente.
+      if (state?.has_subscription && state.active) {
+        const changed = await switchPlan({ data: { planSlug: slug } });
+        if (changed.ok) {
+          toast.success("Piano aggiornato. Lo stato si sincronizza in pochi secondi.");
+          await account.refetch();
+          return;
+        }
+        if (changed.reason === "variant_not_configured") {
+          toast.error("Piano non ancora collegato a Lemon Squeezy.");
+          return;
+        }
+      }
       const result = await checkout({
         data: { planSlug: slug, redirectUrl: `${window.location.origin}/dashboard/subscription` },
       });

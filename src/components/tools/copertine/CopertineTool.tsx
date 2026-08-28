@@ -46,6 +46,9 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
       runtime.blockOperation();
       return;
     }
+
+    // Verifica server-side del piano e dei crediti.
+    if (!(await runtime.ensureAccess())) return;
     setExporting(true);
     const operationId = newOperationId("copertine-export");
 

@@ -68,3 +68,36 @@ export const cancelMySubscription = createServerFn({ method: "POST" })
     // Lo stato reale viene aggiornato dal webhook subscription_cancelled.
     return { ok: true };
   });
+
+const changePlanInput = z.object({ planSlug: z.enum(["starter", "pro", "business"]) });
+
+/**
+ * Upgrade/downgrade di un abbonamento già attivo.
+ * Lo stato definitivo arriva dal webhook subscription_updated.
+ */
+export const changePlan = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => changePlanInput.parse(data))
+  .handler(async ({ data, context }) => {
+    const { data: sub } = await context.supabase
+      .from("subscriptions")
+      .select("lemon_squeezy_subscription_id, status")
+      .eq("user_id", context.userId)
+      .not("lemon_squeezy_subscription_id", "is", null)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (!sub?.lemon_squeezy_subscription_id) {
+      return { ok: false as const, reason: "no_subscription" as const };
+    }
+
+    const { readLemonConfig, updateSubscriptionVariant } = await import("./lemon-squeezy.server");
+    const variantId = readLemonConfig().variants[data.planSlug];
+    if (!variantId) {
+      return { ok: false as const, reason: "variant_not_configured" as const };
+    }
+
+    await updateSubscriptionVariant(sub.lemon_squeezy_subscription_id, variantId);
+    return { ok: true as const, reason: null };
+  });

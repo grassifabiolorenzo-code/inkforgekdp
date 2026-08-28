@@ -144,3 +144,17 @@ export async function verifyWebhookSignature(rawBody: string, signature: string 
   }
   return diff === 0;
 }
+
+/** Upgrade/downgrade: cambia la variant dell'abbonamento esistente. */
+export async function updateSubscriptionVariant(subscriptionId: string, variantId: string) {
+  await lemonFetch(`/subscriptions/${subscriptionId}`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      data: {
+        type: "subscriptions",
+        id: String(subscriptionId),
+        attributes: { variant_id: Number(variantId), invoice_immediately: true },
+      },
+    }),
+  });
+}
