@@ -28,7 +28,7 @@ export function useUsageBreakdown() {
   return useQuery({ queryKey: usageQueryKey, queryFn: () => fetchUsage() });
 }
 
-export type CreditBlock = null | "subscription_inactive" | "limit_reached";
+export type CreditBlock = null | "subscription_inactive" | "limit_reached" | "tool_not_in_plan";
 
 /**
  * Hook centralizzato per il consumo dei crediti.
