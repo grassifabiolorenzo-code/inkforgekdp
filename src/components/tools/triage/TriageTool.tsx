@@ -66,7 +66,7 @@ export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
     try {
       const { default: JSZip } = await import("jszip");
       const zip = new JSZip();
-      const folders: Record<Bucket, ReturnType<InstanceType<typeof JSZip>["folder"]>> = {
+      const folders: Record<Bucket, InstanceType<typeof JSZip> | null> = {
         approvate: zip.folder("01_approvate"),
         da_migliorare: zip.folder("02_da_migliorare"),
         scartate: zip.folder("03_scartate"),
