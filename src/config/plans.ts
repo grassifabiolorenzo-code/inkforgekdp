@@ -14,6 +14,8 @@ export interface PlanConfig {
   interval: "month";
   monthlyLimit: number | null;
   unlimited: boolean;
+  /** Tool inclusi nel piano (deve rispecchiare plans.allowed_tools sul database). */
+  allowedTools: string[];
   /** Bonus crediti concesso una sola volta, al primo abbonamento. */
   firstMonthBonus: number;
   recommended: boolean;
