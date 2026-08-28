@@ -28,6 +28,9 @@ export interface PlanConfig {
 
 export const STARTER_BONUS_CREDITS = 50;
 
+/** Tool disponibile solo nei piani superiori. */
+export const PRO_ONLY_TOOLS = ["aplus"];
+
 export const PLANS: PlanConfig[] = [
   {
     slug: "starter",
@@ -37,11 +40,12 @@ export const PLANS: PlanConfig[] = [
     interval: "month",
     monthlyLimit: 50,
     unlimited: false,
+    allowedTools: ["copertine", "pubblicazione", "triage"],
     firstMonthBonus: STARTER_BONUS_CREDITS,
     recommended: false,
     tagline: "Per iniziare a pubblicare con metodo.",
     features: [
-      "Tutti e 4 i tool",
+      "Copertine, Pubblicazione e Triage",
       "50 utilizzi al mese",
       "+50 utilizzi bonus il primo mese",
       "Storico utilizzi",
@@ -52,18 +56,19 @@ export const PLANS: PlanConfig[] = [
   {
     slug: "pro",
     name: "Pro",
-    price: 20,
+    price: 35,
     currency: "EUR",
     interval: "month",
-    monthlyLimit: 250,
+    monthlyLimit: 300,
     unlimited: false,
+    allowedTools: ["copertine", "pubblicazione", "aplus", "triage"],
     firstMonthBonus: 0,
     recommended: true,
     badge: "PIÙ SCELTO",
     tagline: "Il piano ideale per chi pubblica ogni settimana.",
     features: [
-      "Tutti e 4 i tool",
-      "250 utilizzi al mese",
+      "Tutti e 4 i tool, incluso A+ KDPstudio",
+      "300 utilizzi al mese",
       "Storico utilizzi completo",
       "Priorità di elaborazione",
       "Supporto prioritario",
@@ -73,18 +78,19 @@ export const PLANS: PlanConfig[] = [
   {
     slug: "business",
     name: "Business",
-    price: 25,
+    price: 99,
     currency: "EUR",
     interval: "month",
     monthlyLimit: null,
     unlimited: true,
+    allowedTools: ["copertine", "pubblicazione", "aplus", "triage"],
     firstMonthBonus: 0,
     recommended: false,
     badge: "PREMIUM",
     tagline: "Nessun limite, per studi editoriali e team.",
     features: [
-      "Tutti e 4 i tool",
-      "Utilizzo illimitato",
+      "Tutti e 4 i tool, incluso A+ KDPstudio",
+      "Utilizzo illimitato di tutti i tool",
       "Storico e analytics utilizzi",
       "Massima priorità di elaborazione",
       "Supporto dedicato",
@@ -92,6 +98,14 @@ export const PLANS: PlanConfig[] = [
     variantEnvKey: "VITE_LEMON_SQUEEZY_BUSINESS_VARIANT_ID",
   },
 ];
+
+/** Il piano include il tool indicato? */
+export const planAllowsTool = (slug: string | null | undefined, toolId: string) =>
+  getPlan(slug)?.allowedTools.includes(toolId) ?? false;
+
+/** Piani che includono il tool indicato. */
+export const plansWithTool = (toolId: string) =>
+  PLANS.filter((p) => p.allowedTools.includes(toolId));
 
 export const getPlan = (slug: string | null | undefined): PlanConfig | undefined =>
   PLANS.find((p) => p.slug === slug);
