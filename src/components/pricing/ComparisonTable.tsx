@@ -7,7 +7,7 @@ export function ComparisonTable() {
   const rows = [
     ...TOOLS.map((tool) => ({
       label: tool.name,
-      values: PLANS.map(() => "check" as const),
+      values: PLANS.map((p) => (p.allowedTools.includes(tool.id) ? "check" : "dash") as string),
     })),
     {
       label: "Utilizzi / mese",
