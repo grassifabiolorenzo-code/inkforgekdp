@@ -13,11 +13,18 @@ const title = "Accedi o registrati — OP+studioKdp";
 const description =
   "Accedi a OP+studioKdp per usare i tool Copertine, Pubblicazione, A+ KDPstudio e Triage.";
 
+interface AuthSearch {
+  mode?: "login" | "signup";
+  plan?: string;
+}
+
 export const Route = createFileRoute("/auth")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    mode: search.mode === "signup" ? ("signup" as const) : ("login" as const),
-    plan: typeof search.plan === "string" ? search.plan : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): AuthSearch => {
+    const parsed: AuthSearch = {};
+    if (search["mode"] === "signup" || search["mode"] === "login") parsed.mode = search["mode"];
+    if (typeof search["plan"] === "string") parsed.plan = search["plan"];
+    return parsed;
+  },
   head: () => ({
     meta: [
       { title },

@@ -8,7 +8,7 @@ import { PricingSection } from "@/components/pricing/PricingSection";
 
 const title = "Prezzi e piani — OP+studioKdp";
 const description =
-  "Starter €15/mese con 50 utilizzi e +50 bonus il primo mese, Pro €20/mese con 250 utilizzi, Business €25/mese illimitato. Tutti i 4 tool inclusi.";
+  "Starter €15/mese con 50 utilizzi e +50 bonus il primo mese, Pro €35/mese con 300 utilizzi, Business €99/mese illimitato. A+ KDPstudio incluso in Pro e Business.";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({

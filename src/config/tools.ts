@@ -81,3 +81,6 @@ export const getTool = (id: string): ToolConfig | undefined => TOOLS.find((t) =>
 
 export const getToolBySlot = (slot: number): ToolConfig | undefined =>
   TOOLS.find((t) => t.slot === slot);
+
+/** Tool disponibile solo nei piani Pro e Business. */
+export const isToolRestricted = (id: string) => id === "aplus";

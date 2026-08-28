@@ -28,7 +28,7 @@ export function useUsageBreakdown() {
   return useQuery({ queryKey: usageQueryKey, queryFn: () => fetchUsage() });
 }
 
-export type CreditBlock = null | "subscription_inactive" | "limit_reached";
+export type CreditBlock = null | "subscription_inactive" | "limit_reached" | "tool_not_in_plan";
 
 /**
  * Hook centralizzato per il consumo dei crediti.
@@ -58,7 +58,9 @@ export function useToolCredit(tool: ToolConfig) {
 
   const charge = useCallback(
     async (operationId: string, description?: string) => {
-      const result = await mutation.mutateAsync({ operationId, description });
+      const result = await mutation.mutateAsync(
+        description === undefined ? { operationId } : { operationId, description },
+      );
       return result;
     },
     [mutation],

@@ -8,7 +8,9 @@ import {
   ErrorState,
   InactiveSubscriptionState,
   LoadingState,
+  ToolNotInPlanState,
 } from "@/components/dashboard/StateBanners";
+import { planAllowsTool } from "@/config/plans";
 import { ToolIcon } from "@/components/tools/ToolIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,6 +45,13 @@ export function ToolPageShell({
 
   const state = account.data?.credits;
 
+  // Il piano include questo tool? (fonte di verità: allowed_tools dal database)
+  const toolIncluded = state
+    ? (state.allowed_tools
+        ? state.allowed_tools.includes(tool.id)
+        : planAllowsTool(state.plan?.slug, tool.id))
+    : false;
+
   return (
     <DashboardShell
       title={tool.name}
@@ -72,13 +81,18 @@ export function ToolPageShell({
         {account.isError && (
           <ErrorState
             message={account.error instanceof Error ? account.error.message : undefined}
-            onRetry={() => account.refetch()}
+            onRetry={() => {
+              void account.refetch();
+            }}
           />
         )}
 
         {state && !state.active && <InactiveSubscriptionState state={state} />}
 
+        {state?.active && !toolIncluded && <ToolNotInPlanState toolName={tool.name} />}
+
         {state?.active &&
+          toolIncluded &&
           children({
             charge: credit.charge,
             charging: credit.charging,

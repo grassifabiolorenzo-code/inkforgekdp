@@ -50,7 +50,7 @@ function TermsPage() {
           <section className="space-y-2">
             <h2 className="text-lg font-semibold text-foreground">3. Crediti di utilizzo</h2>
             <p>
-              Ogni piano include un numero di utilizzi per periodo (Starter 50, Pro 250, Business
+              Ogni piano include un numero di utilizzi per periodo (Starter 50, Pro 300, Business
               illimitato). Un credito viene consumato soltanto al completamento dell'operazione
               finale del tool. Le operazioni fallite non vengono addebitate. I crediti non utilizzati
               non vengono trasferiti al periodo successivo.

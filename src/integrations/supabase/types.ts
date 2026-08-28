@@ -64,6 +64,7 @@ export type Database = {
       plans: {
         Row: {
           active: boolean
+          allowed_tools: string[]
           created_at: string
           id: string
           lemon_squeezy_variant_id: string | null
@@ -77,6 +78,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          allowed_tools?: string[]
           created_at?: string
           id?: string
           lemon_squeezy_variant_id?: string | null
@@ -90,6 +92,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          allowed_tools?: string[]
           created_at?: string
           id?: string
           lemon_squeezy_variant_id?: string | null

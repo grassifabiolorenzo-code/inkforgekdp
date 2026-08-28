@@ -18,6 +18,8 @@ export interface CreditState {
   limit: number;
   used: number;
   bonus_remaining: number;
+  /** Tool inclusi nel piano attivo. */
+  allowed_tools?: string[];
   /** -1 = illimitato */
   remaining: number;
   current_period_start?: string | null;
@@ -98,7 +100,7 @@ const consumeInput = z.object({
 export interface ConsumeResult {
   ok: boolean;
   duplicate?: boolean;
-  reason?: "subscription_inactive" | "limit_reached";
+  reason?: "subscription_inactive" | "limit_reached" | "tool_not_in_plan";
   plan?: string;
   source?: string;
   state?: CreditState;

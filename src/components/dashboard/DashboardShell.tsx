@@ -35,7 +35,7 @@ const accountNav: NavItem[] = [
   { to: "/dashboard/settings", label: "Impostazioni", icon: Settings },
 ];
 
-function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
+function NavLinks({ onNavigate }: { onNavigate?: (() => void) | undefined }) {
   const linkClass =
     "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground";
   const activeClass = "bg-sidebar-accent text-foreground";

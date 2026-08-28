@@ -24,7 +24,13 @@ export function LoadingState() {
   );
 }
 
-export function EmptyState({ title, description }: { title: string; description?: string }) {
+export function EmptyState({
+  title,
+  description,
+}: {
+  title: string;
+  description?: string | undefined;
+}) {
   return (
     <div className="panel p-10 text-center">
       <p className="font-medium">{title}</p>
@@ -33,7 +39,13 @@ export function EmptyState({ title, description }: { title: string; description?
   );
 }
 
-export function ErrorState({ message, onRetry }: { message?: string; onRetry?: () => void }) {
+export function ErrorState({
+  message,
+  onRetry,
+}: {
+  message?: string | undefined;
+  onRetry?: (() => void) | undefined;
+}) {
   return (
     <div className="panel space-y-3 p-8 text-center">
       <AlertTriangle className="mx-auto size-6 text-destructive" />
@@ -48,7 +60,7 @@ export function ErrorState({ message, onRetry }: { message?: string; onRetry?: (
   );
 }
 
-export function InactiveSubscriptionState({ state }: { state?: CreditState }) {
+export function InactiveSubscriptionState({ state }: { state?: CreditState | undefined }) {
   return (
     <div className="panel-highlight space-y-4 p-8 text-center">
       <span className="icon-tile mx-auto size-12">
@@ -68,6 +80,25 @@ export function InactiveSubscriptionState({ state }: { state?: CreditState }) {
   );
 }
 
+/** Tool non incluso nel piano attivo (es. A+ KDPstudio su Starter). */
+export function ToolNotInPlanState({ toolName }: { toolName: string }) {
+  return (
+    <div className="panel-highlight space-y-4 p-8 text-center">
+      <span className="icon-tile mx-auto size-12">
+        <Lock className="size-5 text-accent" />
+      </span>
+      <h2 className="text-lg font-semibold">{toolName} è disponibile con Pro e Business</h2>
+      <p className="mx-auto max-w-md text-sm text-muted-foreground">
+        Il tuo piano attuale non include questo strumento. Passa a Pro (€35/mese, 300 utilizzi) o
+        Business (€99/mese, utilizzo illimitato) per sbloccarlo.
+      </p>
+      <Button asChild className="bg-gradient-brand text-primary-foreground hover:opacity-90">
+        <Link to="/dashboard/subscription">Passa a Pro o Business</Link>
+      </Button>
+    </div>
+  );
+}
+
 /** Modal mostrato quando il limite mensile è esaurito. */
 export function CreditBlockDialog({
   block,
@@ -82,23 +113,30 @@ export function CreditBlockDialog({
   const nextPlan = upgrades[0];
 
   const isLimit = block === "limit_reached";
+  const isToolBlocked = block === "tool_not_in_plan";
   const planName = planSlug === "pro" ? "Pro" : planSlug === "starter" ? "Starter" : "attuale";
+
+  const title = isToolBlocked
+    ? "Tool non incluso nel tuo piano"
+    : isLimit
+      ? "Hai esaurito i tuoi crediti mensili"
+      : "Abbonamento non attivo";
+
+  const description = isToolBlocked
+    ? "Questo strumento è disponibile solo con i piani Pro e Business."
+    : isLimit
+      ? `Hai raggiunto il limite mensile del piano ${planName}. I crediti si rinnovano al prossimo periodo di fatturazione.`
+      : "Per eseguire questa operazione è necessario un abbonamento attivo.";
 
   return (
     <Dialog open={block !== null} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            {isLimit ? "Hai esaurito i tuoi crediti mensili" : "Abbonamento non attivo"}
-          </DialogTitle>
-          <DialogDescription>
-            {isLimit
-              ? `Hai raggiunto il limite mensile del piano ${planName}. I crediti si rinnovano al prossimo periodo di fatturazione.`
-              : "Per eseguire questa operazione è necessario un abbonamento attivo."}
-          </DialogDescription>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
-        {isLimit && upgrades.length > 0 && (
+        {(isLimit || isToolBlocked) && upgrades.length > 0 && (
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">Alternative disponibili:</p>
             {upgrades.map((plan) => (
