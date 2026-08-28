@@ -18,10 +18,14 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
+import { Route as AuthenticatedDashboardProfileRouteImport } from './routes/_authenticated/dashboard.profile'
+import { Route as AuthenticatedDashboardSettingsRouteImport } from './routes/_authenticated/dashboard.settings'
+import { Route as AuthenticatedDashboardSubscriptionRouteImport } from './routes/_authenticated/dashboard.subscription'
 import { Route as AuthenticatedDashboardTool1RouteImport } from './routes/_authenticated/dashboard.tool-1'
 import { Route as AuthenticatedDashboardTool2RouteImport } from './routes/_authenticated/dashboard.tool-2'
 import { Route as AuthenticatedDashboardTool3RouteImport } from './routes/_authenticated/dashboard.tool-3'
 import { Route as AuthenticatedDashboardTool4RouteImport } from './routes/_authenticated/dashboard.tool-4'
+import { Route as AuthenticatedDashboardUsageRouteImport } from './routes/_authenticated/dashboard.usage'
 import { Route as ApiPublicLemonSqueezyWebhookRouteImport } from './routes/api/public/lemon-squeezy.webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -69,6 +73,24 @@ const AuthenticatedDashboardIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedDashboardProfileRoute =
+  AuthenticatedDashboardProfileRouteImport.update({
+    id: '/profile',
+    path: '/profile',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const AuthenticatedDashboardSettingsRoute =
+  AuthenticatedDashboardSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const AuthenticatedDashboardSubscriptionRoute =
+  AuthenticatedDashboardSubscriptionRouteImport.update({
+    id: '/subscription',
+    path: '/subscription',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const AuthenticatedDashboardTool1Route =
   AuthenticatedDashboardTool1RouteImport.update({
     id: '/tool-1',
@@ -93,6 +115,12 @@ const AuthenticatedDashboardTool4Route =
     path: '/tool-4',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedDashboardUsageRoute =
+  AuthenticatedDashboardUsageRouteImport.update({
+    id: '/usage',
+    path: '/usage',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const ApiPublicLemonSqueezyWebhookRoute =
   ApiPublicLemonSqueezyWebhookRouteImport.update({
     id: '/api/public/lemon-squeezy/webhook',
@@ -108,10 +136,14 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
+  '/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
+  '/dashboard/subscription': typeof AuthenticatedDashboardSubscriptionRoute
   '/dashboard/tool-1': typeof AuthenticatedDashboardTool1Route
   '/dashboard/tool-2': typeof AuthenticatedDashboardTool2Route
   '/dashboard/tool-3': typeof AuthenticatedDashboardTool3Route
   '/dashboard/tool-4': typeof AuthenticatedDashboardTool4Route
+  '/dashboard/usage': typeof AuthenticatedDashboardUsageRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/api/public/lemon-squeezy/webhook': typeof ApiPublicLemonSqueezyWebhookRoute
 }
@@ -122,10 +154,14 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
+  '/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
+  '/dashboard/subscription': typeof AuthenticatedDashboardSubscriptionRoute
   '/dashboard/tool-1': typeof AuthenticatedDashboardTool1Route
   '/dashboard/tool-2': typeof AuthenticatedDashboardTool2Route
   '/dashboard/tool-3': typeof AuthenticatedDashboardTool3Route
   '/dashboard/tool-4': typeof AuthenticatedDashboardTool4Route
+  '/dashboard/usage': typeof AuthenticatedDashboardUsageRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/api/public/lemon-squeezy/webhook': typeof ApiPublicLemonSqueezyWebhookRoute
 }
@@ -139,10 +175,14 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/_authenticated/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
+  '/_authenticated/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
+  '/_authenticated/dashboard/subscription': typeof AuthenticatedDashboardSubscriptionRoute
   '/_authenticated/dashboard/tool-1': typeof AuthenticatedDashboardTool1Route
   '/_authenticated/dashboard/tool-2': typeof AuthenticatedDashboardTool2Route
   '/_authenticated/dashboard/tool-3': typeof AuthenticatedDashboardTool3Route
   '/_authenticated/dashboard/tool-4': typeof AuthenticatedDashboardTool4Route
+  '/_authenticated/dashboard/usage': typeof AuthenticatedDashboardUsageRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/api/public/lemon-squeezy/webhook': typeof ApiPublicLemonSqueezyWebhookRoute
 }
@@ -156,10 +196,14 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/terms'
     | '/dashboard'
+    | '/dashboard/profile'
+    | '/dashboard/settings'
+    | '/dashboard/subscription'
     | '/dashboard/tool-1'
     | '/dashboard/tool-2'
     | '/dashboard/tool-3'
     | '/dashboard/tool-4'
+    | '/dashboard/usage'
     | '/dashboard/'
     | '/api/public/lemon-squeezy/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -170,10 +214,14 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/terms'
+    | '/dashboard/profile'
+    | '/dashboard/settings'
+    | '/dashboard/subscription'
     | '/dashboard/tool-1'
     | '/dashboard/tool-2'
     | '/dashboard/tool-3'
     | '/dashboard/tool-4'
+    | '/dashboard/usage'
     | '/dashboard'
     | '/api/public/lemon-squeezy/webhook'
   id:
@@ -186,10 +234,14 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/terms'
     | '/_authenticated/dashboard'
+    | '/_authenticated/dashboard/profile'
+    | '/_authenticated/dashboard/settings'
+    | '/_authenticated/dashboard/subscription'
     | '/_authenticated/dashboard/tool-1'
     | '/_authenticated/dashboard/tool-2'
     | '/_authenticated/dashboard/tool-3'
     | '/_authenticated/dashboard/tool-4'
+    | '/_authenticated/dashboard/usage'
     | '/_authenticated/dashboard/'
     | '/api/public/lemon-squeezy/webhook'
   fileRoutesById: FileRoutesById
@@ -270,6 +322,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardIndexRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/dashboard/profile': {
+      id: '/_authenticated/dashboard/profile'
+      path: '/profile'
+      fullPath: '/dashboard/profile'
+      preLoaderRoute: typeof AuthenticatedDashboardProfileRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_authenticated/dashboard/settings': {
+      id: '/_authenticated/dashboard/settings'
+      path: '/settings'
+      fullPath: '/dashboard/settings'
+      preLoaderRoute: typeof AuthenticatedDashboardSettingsRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_authenticated/dashboard/subscription': {
+      id: '/_authenticated/dashboard/subscription'
+      path: '/subscription'
+      fullPath: '/dashboard/subscription'
+      preLoaderRoute: typeof AuthenticatedDashboardSubscriptionRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/_authenticated/dashboard/tool-1': {
       id: '/_authenticated/dashboard/tool-1'
       path: '/tool-1'
@@ -298,6 +371,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardTool4RouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/dashboard/usage': {
+      id: '/_authenticated/dashboard/usage'
+      path: '/usage'
+      fullPath: '/dashboard/usage'
+      preLoaderRoute: typeof AuthenticatedDashboardUsageRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/api/public/lemon-squeezy/webhook': {
       id: '/api/public/lemon-squeezy/webhook'
       path: '/api/public/lemon-squeezy/webhook'
@@ -309,19 +389,28 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedDashboardRouteChildren {
+  AuthenticatedDashboardProfileRoute: typeof AuthenticatedDashboardProfileRoute
+  AuthenticatedDashboardSettingsRoute: typeof AuthenticatedDashboardSettingsRoute
+  AuthenticatedDashboardSubscriptionRoute: typeof AuthenticatedDashboardSubscriptionRoute
   AuthenticatedDashboardTool1Route: typeof AuthenticatedDashboardTool1Route
   AuthenticatedDashboardTool2Route: typeof AuthenticatedDashboardTool2Route
   AuthenticatedDashboardTool3Route: typeof AuthenticatedDashboardTool3Route
   AuthenticatedDashboardTool4Route: typeof AuthenticatedDashboardTool4Route
+  AuthenticatedDashboardUsageRoute: typeof AuthenticatedDashboardUsageRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
 }
 
 const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
   {
+    AuthenticatedDashboardProfileRoute: AuthenticatedDashboardProfileRoute,
+    AuthenticatedDashboardSettingsRoute: AuthenticatedDashboardSettingsRoute,
+    AuthenticatedDashboardSubscriptionRoute:
+      AuthenticatedDashboardSubscriptionRoute,
     AuthenticatedDashboardTool1Route: AuthenticatedDashboardTool1Route,
     AuthenticatedDashboardTool2Route: AuthenticatedDashboardTool2Route,
     AuthenticatedDashboardTool3Route: AuthenticatedDashboardTool3Route,
     AuthenticatedDashboardTool4Route: AuthenticatedDashboardTool4Route,
+    AuthenticatedDashboardUsageRoute: AuthenticatedDashboardUsageRoute,
     AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
   }
 
