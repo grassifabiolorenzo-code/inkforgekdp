@@ -91,7 +91,7 @@ export async function createCheckoutUrl(opts: {
             custom: { user_id: opts.userId, plan_slug: opts.planSlug },
           },
           product_options: { redirect_url: opts.redirectUrl, enabled_variants: [Number(variantId)] },
-ચ        },
+},
         relationships: {
           store: { data: { type: "stores", id: String(storeId) } },
           variant: { data: { type: "variants", id: String(variantId) } },
