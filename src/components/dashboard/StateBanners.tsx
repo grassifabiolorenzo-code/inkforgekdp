@@ -101,20 +101,27 @@ export function CreditBlockDialog({
   const nextPlan = upgrades[0];
 
   const isLimit = block === "limit_reached";
+  const isToolBlocked = block === "tool_not_in_plan";
   const planName = planSlug === "pro" ? "Pro" : planSlug === "starter" ? "Starter" : "attuale";
+
+  const title = isToolBlocked
+    ? "Tool non incluso nel tuo piano"
+    : isLimit
+      ? "Hai esaurito i tuoi crediti mensili"
+      : "Abbonamento non attivo";
+
+  const description = isToolBlocked
+    ? "Questo strumento è disponibile solo con i piani Pro e Business."
+    : isLimit
+      ? `Hai raggiunto il limite mensile del piano ${planName}. I crediti si rinnovano al prossimo periodo di fatturazione.`
+      : "Per eseguire questa operazione è necessario un abbonamento attivo.";
 
   return (
     <Dialog open={block !== null} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            {isLimit ? "Hai esaurito i tuoi crediti mensili" : "Abbonamento non attivo"}
-          </DialogTitle>
-          <DialogDescription>
-            {isLimit
-              ? `Hai raggiunto il limite mensile del piano ${planName}. I crediti si rinnovano al prossimo periodo di fatturazione.`
-              : "Per eseguire questa operazione è necessario un abbonamento attivo."}
-          </DialogDescription>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
         {isLimit && upgrades.length > 0 && (
