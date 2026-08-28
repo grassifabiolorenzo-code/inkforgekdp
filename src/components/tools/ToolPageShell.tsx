@@ -80,7 +80,10 @@ export function ToolPageShell({
 
         {state && !state.active && <InactiveSubscriptionState state={state} />}
 
+        {state?.active && !toolIncluded && <ToolNotInPlanState toolName={tool.name} />}
+
         {state?.active &&
+          toolIncluded &&
           children({
             charge: credit.charge,
             charging: credit.charging,
