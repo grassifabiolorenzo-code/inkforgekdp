@@ -60,6 +60,9 @@ export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
       return;
     }
 
+    // Verifica server-side del piano e dei crediti.
+    if (!(await runtime.ensureAccess())) return;
+
     setDownloading(true);
     const operationId = newOperationId("triage-download");
 

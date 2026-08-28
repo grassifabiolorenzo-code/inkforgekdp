@@ -55,6 +55,9 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
       return;
     }
 
+    // Verifica server-side del piano e dei crediti.
+    if (!(await runtime.ensureAccess())) return;
+
     setGenerating(true);
     const operationId = newOperationId("aplus-gen");
 
