@@ -45,6 +45,13 @@ export function ToolPageShell({
 
   const state = account.data?.credits;
 
+  // Il piano include questo tool? (fonte di verità: allowed_tools dal database)
+  const toolIncluded = state
+    ? (state.allowed_tools
+        ? state.allowed_tools.includes(tool.id)
+        : planAllowsTool(state.plan?.slug, tool.id))
+    : false;
+
   return (
     <DashboardShell
       title={tool.name}
