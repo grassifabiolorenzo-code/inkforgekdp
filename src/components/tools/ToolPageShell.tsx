@@ -8,7 +8,9 @@ import {
   ErrorState,
   InactiveSubscriptionState,
   LoadingState,
+  ToolNotInPlanState,
 } from "@/components/dashboard/StateBanners";
+import { planAllowsTool } from "@/config/plans";
 import { ToolIcon } from "@/components/tools/ToolIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
