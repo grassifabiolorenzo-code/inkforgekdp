@@ -1,0 +1,48 @@
+import { createFileRoute } from "@tanstack/react-router";
+
+import { FaqSection } from "@/components/landing/FaqSection";
+import { SiteFooter } from "@/components/landing/SiteFooter";
+import { SiteNav } from "@/components/landing/SiteNav";
+import { ComparisonTable } from "@/components/pricing/ComparisonTable";
+import { PricingSection } from "@/components/pricing/PricingSection";
+
+const title = "Prezzi e piani — OP+studioKdp";
+const description =
+  "Starter €15/mese con 50 utilizzi e +50 bonus il primo mese, Pro €20/mese con 250 utilizzi, Business €25/mese illimitato. Tutti i 4 tool inclusi.";
+
+export const Route = createFileRoute("/pricing")({
+  head: () => ({
+    meta: [
+      { title },
+      { name: "description", content: description },
+      { property: "og:title", content: title },
+      { property: "og:description", content: description },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: PricingPage,
+});
+
+function PricingPage() {
+  return (
+    <div className="min-h-screen">
+      <SiteNav />
+      <main>
+        <div className="relative overflow-hidden pt-16 text-center">
+          <div className="hero-aura aura-violet -top-24 left-1/3 size-96" aria-hidden />
+          <h1 className="relative text-4xl font-black tracking-tight sm:text-5xl">
+            Un piano per <span className="text-gradient">ogni ritmo di pubblicazione</span>
+          </h1>
+          <p className="relative mx-auto mt-4 max-w-xl px-4 text-muted-foreground">
+            Tutti e 4 i tool sono inclusi in ogni piano. Cambia solo il numero di utilizzi mensili.
+          </p>
+        </div>
+        <PricingSection />
+        <ComparisonTable />
+        <FaqSection />
+      </main>
+      <SiteFooter />
+    </div>
+  );
+}
