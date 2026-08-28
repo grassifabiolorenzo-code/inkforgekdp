@@ -154,14 +154,14 @@ export const Route = createFileRoute("/api/public/lemon-squeezy/webhook")({
         if (existing) {
           const { error } = await supabaseAdmin
             .from("subscriptions")
-            .update(patch)
+            .update(patch as never)
             .eq("id", existing.id);
           if (error) {
             console.error("[lemon-webhook] update failed", error.message);
             return new Response("db error", { status: 500 });
           }
         } else {
-          const { error } = await supabaseAdmin.from("subscriptions").insert(patch);
+          const { error } = await supabaseAdmin.from("subscriptions").insert(patch as never);
           if (error) {
             console.error("[lemon-webhook] insert failed", error.message);
             return new Response("db error", { status: 500 });

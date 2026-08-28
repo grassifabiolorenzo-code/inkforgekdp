@@ -81,7 +81,9 @@ export function ToolPageShell({
         {account.isError && (
           <ErrorState
             message={account.error instanceof Error ? account.error.message : undefined}
-            onRetry={() => account.refetch()}
+            onRetry={() => {
+              void account.refetch();
+            }}
           />
         )}
 

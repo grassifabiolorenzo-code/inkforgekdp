@@ -58,7 +58,9 @@ export function useToolCredit(tool: ToolConfig) {
 
   const charge = useCallback(
     async (operationId: string, description?: string) => {
-      const result = await mutation.mutateAsync({ operationId, description });
+      const result = await mutation.mutateAsync(
+        description === undefined ? { operationId } : { operationId, description },
+      );
       return result;
     },
     [mutation],

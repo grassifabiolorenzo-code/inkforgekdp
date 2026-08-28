@@ -24,7 +24,13 @@ export function LoadingState() {
   );
 }
 
-export function EmptyState({ title, description }: { title: string; description?: string }) {
+export function EmptyState({
+  title,
+  description,
+}: {
+  title: string;
+  description?: string | undefined;
+}) {
   return (
     <div className="panel p-10 text-center">
       <p className="font-medium">{title}</p>
@@ -33,7 +39,13 @@ export function EmptyState({ title, description }: { title: string; description?
   );
 }
 
-export function ErrorState({ message, onRetry }: { message?: string; onRetry?: () => void }) {
+export function ErrorState({
+  message,
+  onRetry,
+}: {
+  message?: string | undefined;
+  onRetry?: (() => void) | undefined;
+}) {
   return (
     <div className="panel space-y-3 p-8 text-center">
       <AlertTriangle className="mx-auto size-6 text-destructive" />
@@ -48,7 +60,7 @@ export function ErrorState({ message, onRetry }: { message?: string; onRetry?: (
   );
 }
 
-export function InactiveSubscriptionState({ state }: { state?: CreditState }) {
+export function InactiveSubscriptionState({ state }: { state?: CreditState | undefined }) {
   return (
     <div className="panel-highlight space-y-4 p-8 text-center">
       <span className="icon-tile mx-auto size-12">
