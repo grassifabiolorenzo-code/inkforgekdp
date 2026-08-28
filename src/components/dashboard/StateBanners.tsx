@@ -124,7 +124,7 @@ export function CreditBlockDialog({
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
-        {isLimit && upgrades.length > 0 && (
+        {(isLimit || isToolBlocked) && upgrades.length > 0 && (
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">Alternative disponibili:</p>
             {upgrades.map((plan) => (
