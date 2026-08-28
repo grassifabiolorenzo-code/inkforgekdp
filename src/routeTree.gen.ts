@@ -10,33 +10,44 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPublicLemonSqueezyWebhookRouteImport } from './routes/api/public/lemon-squeezy.webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicLemonSqueezyWebhookRoute =
+  ApiPublicLemonSqueezyWebhookRouteImport.update({
+    id: '/api/public/lemon-squeezy/webhook',
+    path: '/api/public/lemon-squeezy/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/public/lemon-squeezy/webhook': typeof ApiPublicLemonSqueezyWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/public/lemon-squeezy/webhook': typeof ApiPublicLemonSqueezyWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/public/lemon-squeezy/webhook': typeof ApiPublicLemonSqueezyWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/api/public/lemon-squeezy/webhook'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/api/public/lemon-squeezy/webhook'
+  id: '__root__' | '/' | '/api/public/lemon-squeezy/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiPublicLemonSqueezyWebhookRoute: typeof ApiPublicLemonSqueezyWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +59,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/lemon-squeezy/webhook': {
+      id: '/api/public/lemon-squeezy/webhook'
+      path: '/api/public/lemon-squeezy/webhook'
+      fullPath: '/api/public/lemon-squeezy/webhook'
+      preLoaderRoute: typeof ApiPublicLemonSqueezyWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiPublicLemonSqueezyWebhookRoute: ApiPublicLemonSqueezyWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
