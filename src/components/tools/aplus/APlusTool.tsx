@@ -463,7 +463,16 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
         <article className="panel space-y-3 p-6">
           <h4 className="text-sm font-semibold">Modulo 1: Hero Banner Brand (970×300 px)</h4>
           <div className="overflow-x-auto rounded-md border border-border bg-surface p-2">
-            <canvas id="aplus-hero" width={970} height={300} className="h-auto w-full max-w-2xl" />
+            <canvas
+              id="aplus-hero"
+              width={970}
+              height={300}
+              className={`h-auto w-full max-w-2xl touch-none ${canvasesReady && logoFile ? "cursor-move" : ""}`}
+              onPointerDown={handleHeroPointerDown}
+              onPointerMove={handleHeroPointerMove}
+              onPointerUp={handleHeroPointerUp}
+              onPointerCancel={handleHeroPointerUp}
+            />
           </div>
           {texts && (
             <pre className="whitespace-pre-wrap rounded-md border border-border bg-surface p-3 text-xs">
