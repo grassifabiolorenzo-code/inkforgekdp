@@ -330,6 +330,18 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
           )}
         </div>
 
+        <div className="flex items-start justify-between gap-3 rounded-md border border-border bg-surface p-3">
+          <div className="space-y-0.5">
+            <Label htmlFor="p-use-ai" className="text-sm">
+              AI sui contenuti reali (gratuita)
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              Analizza copertina e pagine interne per testi inerenti, con impronta SEO + AIDA + PAS.
+            </p>
+          </div>
+          <Switch id="p-use-ai" checked={useAi} onCheckedChange={setUseAi} />
+        </div>
+
         <Button
           onClick={handleGenerate}
           disabled={generating || runtime.charging}
@@ -342,10 +354,12 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
           )}
           Genera listing PAS &amp; AIDA (1 credito)
         </Button>
+        {aiStep && <p className="text-xs italic text-accent">{aiStep}</p>}
         <p className="text-xs text-muted-foreground">
           Ogni generazione completata consuma 1 credito. Le generazioni non riuscite non vengono
           addebitate.
         </p>
+
       </div>
 
       <div className="space-y-4">
