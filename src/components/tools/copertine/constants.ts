@@ -59,7 +59,58 @@ export const FONTS_DATABASE = [
   "Satisfy",
   "VT323",
   "Jost",
+  // --- 30 font aggiuntivi ---
+  "Abril Fatface",
+  "Amatic SC",
+  "Anton",
+  "Archivo Black",
+  "Barlow",
+  "Bitter",
+  "Cabin",
+  "Comfortaa",
+  "Cookie",
+  "Courgette",
+  "Crimson Text",
+  "DM Serif Display",
+  "EB Garamond",
+  "Gloria Hallelujah",
+  "Indie Flower",
+  "Kalam",
+  "Libre Baskerville",
+  "Lobster",
+  "Merriweather",
+  "Open Sans",
+  "Permanent Marker",
+  "Quicksand",
+  "Raleway",
+  "Roboto",
+  "Rubik",
+  "Sacramento",
+  "Shadows Into Light",
+  "Source Sans 3",
+  "Titillium Web",
+  "Yellowtail",
 ];
+
+/**
+ * Carica (una sola volta) tutti i font del database da Google Fonts.
+ * Sicuro da chiamare più volte: la richiesta viene eseguita solo al primo uso
+ * e solo lato browser. Necessario affinché il rendering canvas/html2canvas
+ * usi i font reali anche nell'export HD.
+ */
+export function ensureFontsLoaded(): void {
+  if (typeof document === "undefined") return;
+  const id = "copertine-fonts-loader";
+  if (document.getElementById(id)) return;
+  const families = FONTS_DATABASE.map(
+    (f) => `family=${encodeURIComponent(f).replace(/%20/g, "+")}:wght@400;700`,
+  ).join("&");
+  const link = document.createElement("link");
+  link.id = id;
+  link.rel = "stylesheet";
+  link.href = `https://fonts.googleapis.com/css2?${families}&display=swap`;
+  document.head.appendChild(link);
+}
 
 export const PALETTES = [
   { id: "violet", label: "Violet Studio", from: "#7c3aed", to: "#22c55e" },

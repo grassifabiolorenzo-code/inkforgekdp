@@ -15,6 +15,7 @@ import { DraggableBox } from "./DraggableBox";
 import { TextFieldEditor } from "./TextFieldEditor";
 import {
   EXPORT_DPI,
+  ensureFontsLoaded,
   KDP_BLEED_IN,
   KDP_PAPER_LABELS,
   KDP_PAPER_THICKNESS,
@@ -197,6 +198,11 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
   const bgRef = useRef<BackgroundImageState | null>(null);
   bgRef.current = bgImage;
 
+  // Carica tutti i font del database (Google Fonts) una sola volta al mount.
+  useEffect(() => {
+    ensureFontsLoaded();
+  }, []);
+
   useEffect(() => {
     const el = canvasRef.current;
     if (!el) return;
@@ -247,6 +253,8 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
       await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 30)));
 
       const { default: html2canvas } = await import("html2canvas");
+      // Attendi il caricamento completo dei font web prima del rendering HD.
+      await document.fonts.ready;
       const node = canvasRef.current;
       if (!node) throw new Error("Canvas non disponibile");
 
