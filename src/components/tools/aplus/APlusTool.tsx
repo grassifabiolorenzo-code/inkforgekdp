@@ -1,5 +1,5 @@
 import { Download, Loader2, Sparkles, Upload } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -46,7 +46,13 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
   const [texts, setTexts] = useState<GeneratedModulesText | null>(null);
   const [canvasesReady, setCanvasesReady] = useState(false);
 
+  const chargeGuard = useRef(false);
+
   async function handleGenerate() {
+    // Guardia sincrona: blocca doppio click/rientranza prima di qualsiasi await.
+    if (chargeGuard.current) return;
+    chargeGuard.current = true;
+    try {
     if (!coverFile || !interiorFile) {
       toast.error("Carica sia il PDF di copertina che il PDF interno.");
       return;
@@ -130,6 +136,9 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
       toast.error(message);
     } finally {
       setGenerating(false);
+    }
+  } finally {
+      chargeGuard.current = false;
     }
   }
 
@@ -448,4 +457,4 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
       </div>
     </div>
   );
-}
+  }

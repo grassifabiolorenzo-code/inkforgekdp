@@ -158,7 +158,13 @@ export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
     });
   }
 
+  const chargeGuard = useRef(false);
+
   async function handleDownload() {
+    // Guardia sincrona: blocca doppio click/rientranza prima di qualsiasi await.
+    if (chargeGuard.current) return;
+    chargeGuard.current = true;
+    try {
     if (!runtime.canOperate) {
       runtime.blockOperation();
       return;
@@ -191,6 +197,9 @@ export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
       toast.error(error instanceof Error ? error.message : "Download non riuscito");
     } finally {
       setDownloading(false);
+    }
+  } finally {
+      chargeGuard.current = false;
     }
   }
 
@@ -442,7 +451,7 @@ export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
       </AlertDialog>
     </div>
   );
-}
+  }
 
 // Etichette categoria mantenute per eventuali usi futuri (report, tooltip, ecc.).
 export const TRIAGE_CATEGORY_LABEL = CATEGORY_LABEL;
