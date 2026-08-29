@@ -20,6 +20,8 @@ import type { ValueModuleStyle } from "@/components/tools/aplus/canvasRenderers"
 import { exportModulesAsZip, type ModuleCanvases } from "@/components/tools/aplus/zipExport";
 import { extractCoverContent, extractPdfContent } from "@/components/tools/pdfContent";
 import { generateAplusCopy } from "@/lib/aiCopy.functions";
+import { AiStyleControls } from "@/components/tools/ai/AiStyleControls";
+import { DEFAULT_CREATIVITY, DEFAULT_TONE, type AiToneId } from "@/components/tools/ai/aiStyle";
 
 
 /**
@@ -59,6 +61,8 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
   const [canvasesReady, setCanvasesReady] = useState(false);
   const [useAi, setUseAi] = useState(true);
   const [aiUsed, setAiUsed] = useState(false);
+  const [tone, setTone] = useState<AiToneId>(DEFAULT_TONE);
+  const [creativity, setCreativity] = useState(DEFAULT_CREATIVITY);
 
   // Modulo 3: stile tipografico personalizzabile del blocco "Value Highlights".
   const DEFAULT_VALUE_STYLE: ValueModuleStyle = {
@@ -240,6 +244,8 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
               niche,
               age,
               title,
+              tone,
+              creativity,
               interiorText: interior.text || undefined,
               interiorImages: interior.images,
               coverImages: cover.images,
@@ -580,6 +586,15 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
           </div>
           <Switch id="aplus-use-ai" checked={useAi} onCheckedChange={setUseAi} />
         </div>
+
+        <AiStyleControls
+          idPrefix="aplus-ai"
+          tone={tone}
+          onToneChange={setTone}
+          creativity={creativity}
+          onCreativityChange={setCreativity}
+          disabled={!useAi}
+        />
         {aiUsed && (
           <p className="text-xs text-accent">
             ✨ Testi dell&apos;ultima generazione scritti dall&apos;AI sui contenuti analizzati.
