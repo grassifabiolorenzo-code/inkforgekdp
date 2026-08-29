@@ -91,6 +91,34 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
     setTexts((prev) => (prev ? { ...prev, value: { ...next } } : prev));
   }
 
+  /** Tutti i testi dei moduli restano modificabili prima della copia o del download. */
+  function updateHeroText(field: "heading" | "body" | "alt", next: string) {
+    setTexts((prev) => (prev ? { ...prev, hero: { ...prev.hero, [field]: next } } : prev));
+  }
+
+  function updateProofText(field: "heading" | "body" | "alt", next: string) {
+    setTexts((prev) => (prev ? { ...prev, proof: { ...prev.proof, [field]: next } } : prev));
+  }
+
+  function updateGridItem(index: number, field: "title" | "desc", next: string) {
+    setTexts((prev) =>
+      prev
+        ? {
+            ...prev,
+            grid: {
+              ...prev.grid,
+              items: prev.grid.items.map((item, i) => (i === index ? { ...item, [field]: next } : item)),
+            },
+          }
+        : prev,
+    );
+  }
+
+  function updateCompText(field: "instructions" | "alt", next: string) {
+    setTexts((prev) => (prev ? { ...prev, comp: { ...prev.comp, [field]: next } } : prev));
+  }
+
+
 
 
 
