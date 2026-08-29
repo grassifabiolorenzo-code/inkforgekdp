@@ -83,6 +83,11 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
     setTexts((prev) => (prev ? { ...prev, value: { ...prev.value, [field]: next } } : prev));
   }
 
+  function updateValueTextAll(next: GeneratedModulesText["value"]) {
+    setTexts((prev) => (prev ? { ...prev, value: { ...next } } : prev));
+  }
+
+
 
 
   // Sorgenti dell'ultimo rendering hero: permettono di riposizionare il logo senza rigenerare.
