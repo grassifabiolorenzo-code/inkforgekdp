@@ -1,5 +1,5 @@
-import { Download, Loader2, Sparkles, Upload } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Download, Loader2, RotateCcw, Sparkles, Upload } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import type { ToolRuntime } from "@/components/tools/ToolPageShell";
 import { newOperationId } from "@/hooks/useAccount";
 
@@ -14,7 +16,9 @@ import { AGES, NICHES } from "@/components/tools/aplus/constants";
 import { OutputLanguageSelect, useOutputLanguage } from "@/components/tools/OutputLanguageSelect";
 import { generateModulesText, nextCopyVariationIndex } from "@/components/tools/aplus/copyEngine";
 import type { AgeId, GeneratedModulesText, LangId, NicheId } from "@/components/tools/aplus/types";
+import type { ValueModuleStyle } from "@/components/tools/aplus/canvasRenderers";
 import { exportModulesAsZip, type ModuleCanvases } from "@/components/tools/aplus/zipExport";
+
 
 /**
  * TOOL — A+1 KDP Studio (modulo indipendente).
@@ -51,6 +55,40 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
   const [status, setStatus] = useState("In attesa dei file sorgente...");
   const [texts, setTexts] = useState<GeneratedModulesText | null>(null);
   const [canvasesReady, setCanvasesReady] = useState(false);
+
+  // Modulo 3: stile tipografico personalizzabile del blocco "Value Highlights".
+  const DEFAULT_VALUE_STYLE: ValueModuleStyle = {
+    titleSize: 21,
+    itemSize: 13,
+    marker: "✓",
+    numbered: false,
+    uppercase: true,
+  };
+  const [valueStyle, setValueStyle] = useState<ValueModuleStyle>(DEFAULT_VALUE_STYLE);
+  // Copy generato dal motore: consente il ripristino dopo le modifiche manuali.
+  const baseValue = useRef<GeneratedModulesText["value"] | null>(null);
+
+  const redrawValue = useCallback(async (value: GeneratedModulesText["value"], style: ValueModuleStyle) => {
+    const canvas = document.getElementById("aplus-value") as HTMLCanvasElement | null;
+    if (!canvas) return;
+    const { drawValueModule } = await import("@/components/tools/aplus/canvasRenderers");
+    drawValueModule(canvas, bgColor, accentColor, value, style);
+  }, [bgColor, accentColor]);
+
+  useEffect(() => {
+    if (canvasesReady && texts) void redrawValue(texts.value, valueStyle);
+  }, [canvasesReady, texts, valueStyle, redrawValue]);
+
+  function updateValueText(field: "title" | "text1" | "text2" | "text3" | "alt", next: string) {
+    setTexts((prev) => (prev ? { ...prev, value: { ...prev.value, [field]: next } } : prev));
+  }
+
+  function updateValueTextAll(next: GeneratedModulesText["value"]) {
+    setTexts((prev) => (prev ? { ...prev, value: { ...next } } : prev));
+  }
+
+
+
 
   // Sorgenti dell'ultimo rendering hero: permettono di riposizionare il logo senza rigenerare.
   const heroSources = useRef<{
@@ -175,7 +213,9 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
       heroSources.current = { front: frontCoverImg, back: backCoverImg, logo: logoImg, drawHero };
       drawHero(heroCanvas, frontCoverImg, backCoverImg, bgColor, logoImg, logoScale / 100, logoOffset);
       drawProof(proofCanvas, intImg1, intImg2, bgColor);
-      drawValueModule(valueCanvas, bgColor, accentColor, generatedTexts.value);
+      drawValueModule(valueCanvas, bgColor, accentColor, generatedTexts.value, valueStyle);
+      baseValue.current = generatedTexts.value;
+
       drawGridSquare(grid1Canvas, intImg1, bgColor);
       drawGridSquare(grid2Canvas, intImg2, bgColor);
       drawGridSquare(grid3Canvas, intImg3, bgColor);
@@ -490,6 +530,111 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
             <canvas id="aplus-value" width={970} height={300} className="h-auto w-full max-w-2xl" />
           </div>
           {texts && (
+            <div className="space-y-4 rounded-md border border-border bg-surface p-4">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Personalizza testi e stile
+                </p>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    if (baseValue.current) updateValueTextAll(baseValue.current);
+                    setValueStyle(DEFAULT_VALUE_STYLE);
+                  }}
+                >
+                  <RotateCcw className="mr-1 size-3.5" />
+                  Ripristina
+                </Button>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="a-value-title">Titolo sezione</Label>
+                <Input
+                  id="a-value-title"
+                  value={texts.value.title}
+                  onChange={(e) => updateValueText("title", e.target.value)}
+                />
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-3">
+                {(["text1", "text2", "text3"] as const).map((field, i) => (
+                  <div key={field} className="space-y-1.5">
+                    <Label htmlFor={`a-value-${field}`}>Punto {i + 1}</Label>
+                    <Textarea
+                      id={`a-value-${field}`}
+                      rows={3}
+                      value={texts.value[field]}
+                      onChange={(e) => updateValueText(field, e.target.value)}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label>Dimensione titolo: {valueStyle.titleSize}px</Label>
+                  <Slider
+                    min={14}
+                    max={40}
+                    step={1}
+                    value={[valueStyle.titleSize ?? 21]}
+                    onValueChange={(v) => setValueStyle((s) => ({ ...s, titleSize: v[0] ?? 21 }))}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Dimensione punti: {valueStyle.itemSize}px</Label>
+                  <Slider
+                    min={9}
+                    max={26}
+                    step={1}
+                    value={[valueStyle.itemSize ?? 13]}
+                    onValueChange={(v) => setValueStyle((s) => ({ ...s, itemSize: v[0] ?? 13 }))}
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label>Badge dei punti</Label>
+                  <Select
+                    value={valueStyle.numbered ? "numbers" : valueStyle.marker ? valueStyle.marker : "none"}
+                    onValueChange={(v) =>
+                      setValueStyle((s) => ({
+                        ...s,
+                        numbered: v === "numbers",
+                        marker: v === "numbers" ? "✓" : v === "none" ? "" : v,
+                      }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="✓">Spunta ✓</SelectItem>
+                      <SelectItem value="★">Stella ★</SelectItem>
+                      <SelectItem value="●">Punto ●</SelectItem>
+                      <SelectItem value="✚">Croce ✚</SelectItem>
+                      <SelectItem value="numbers">Numeri 1 · 2 · 3</SelectItem>
+                      <SelectItem value="none">Nessun badge</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-end justify-between gap-3">
+                  <Label htmlFor="a-value-upper" className="text-sm">
+                    Punti in MAIUSCOLO
+                  </Label>
+                  <Switch
+                    id="a-value-upper"
+                    checked={valueStyle.uppercase !== false}
+                    onCheckedChange={(checked) => setValueStyle((s) => ({ ...s, uppercase: checked }))}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          {texts && (
+
             <pre className="whitespace-pre-wrap rounded-md border border-border bg-surface p-3 text-xs">
               {`TITOLO SEZIONE:\n${texts.value.title}\n\nPUNTI CHIAVE:\n1. ${texts.value.text1}\n2. ${texts.value.text2}\n3. ${texts.value.text3}\n\nALT-TEXT SEO:\n${texts.value.alt}`}
             </pre>

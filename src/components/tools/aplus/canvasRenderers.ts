@@ -107,12 +107,37 @@ export function drawProof(canvas: HTMLCanvasElement, int1: ImgSource, int2: ImgS
   renderMockup(ctx, int2, 530, 25, 260, 250, 2);
 }
 
+export type ValueModuleStyle = {
+  /** Dimensione del titolo in px. */
+  titleSize?: number;
+  /** Dimensione dei testi dei tre punti in px. */
+  itemSize?: number;
+  /** Simbolo mostrato nei badge circolari; stringa vuota = nessun badge. */
+  marker?: string;
+  /** Se true, i badge mostrano 1 / 2 / 3 invece del simbolo. */
+  numbered?: boolean;
+  /** Font family dei testi. */
+  fontFamily?: string;
+  /** Se true i testi dei punti restano in maiuscolo (default true). */
+  uppercase?: boolean;
+};
+
 export function drawValueModule(
   canvas: HTMLCanvasElement,
   bg: string,
   accent: string,
   valueCopy: { title: string; text1: string; text2: string; text3: string },
+  style: ValueModuleStyle = {},
 ) {
+  const {
+    titleSize = 21,
+    itemSize = 13,
+    marker = "✓",
+    numbered = false,
+    fontFamily = "Montserrat",
+    uppercase = true,
+  } = style;
+
   const ctx = canvas.getContext("2d")!;
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = "high";
@@ -120,32 +145,43 @@ export function drawValueModule(
   ctx.fillRect(0, 0, 970, 300);
 
   ctx.fillStyle = accent;
-  ctx.font = '900 21px "Montserrat", sans-serif';
+  ctx.font = `900 ${titleSize}px "${fontFamily}", sans-serif`;
   ctx.textAlign = "center";
   ctx.fillText(valueCopy.title.toUpperCase(), 485, 65);
 
   const items = [valueCopy.text1, valueCopy.text2, valueCopy.text3];
   const positions = [182, 485, 788];
+  const showBadge = numbered || marker.trim() !== "";
 
   items.forEach((item, index) => {
     const x = positions[index]!;
     const circleY = 145;
 
-    ctx.beginPath();
-    ctx.arc(x, circleY, 26, 0, Math.PI * 2);
-    ctx.fillStyle = accent;
-    ctx.fill();
+    if (showBadge) {
+      ctx.beginPath();
+      ctx.arc(x, circleY, 26, 0, Math.PI * 2);
+      ctx.fillStyle = accent;
+      ctx.fill();
 
-    ctx.fillStyle = "#ffffff";
-    ctx.font = '900 18px "Montserrat", sans-serif';
-    ctx.fillText("✓", x, circleY + 6);
+      ctx.fillStyle = "#ffffff";
+      ctx.font = `900 18px "${fontFamily}", sans-serif`;
+      ctx.fillText(numbered ? String(index + 1) : marker, x, circleY + 6);
+    }
 
     ctx.fillStyle = accent;
-    ctx.font = '700 13px "Montserrat", sans-serif';
-    formatWrappedText(ctx, item.toUpperCase(), x, circleY + 55, 230, 18);
+    ctx.font = `700 ${itemSize}px "${fontFamily}", sans-serif`;
+    formatWrappedText(
+      ctx,
+      uppercase ? item.toUpperCase() : item,
+      x,
+      showBadge ? circleY + 55 : circleY + 10,
+      230,
+      Math.round(itemSize * 1.4),
+    );
   });
   ctx.textAlign = "left";
 }
+
 
 export function drawGridSquare(canvas: HTMLCanvasElement, img: ImgSource, bg: string) {
   const ctx = canvas.getContext("2d")!;
