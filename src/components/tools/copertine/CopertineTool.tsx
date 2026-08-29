@@ -15,6 +15,7 @@ import { DraggableBox } from "./DraggableBox";
 import { TextFieldEditor } from "./TextFieldEditor";
 import {
   EXPORT_DPI,
+  ensureFontsLoaded,
   KDP_BLEED_IN,
   KDP_PAPER_LABELS,
   KDP_PAPER_THICKNESS,
@@ -196,6 +197,11 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
   // Zoom con rotella sullo sfondo, ancorato al puntatore.
   const bgRef = useRef<BackgroundImageState | null>(null);
   bgRef.current = bgImage;
+
+  // Carica tutti i font del database (Google Fonts) una sola volta al mount.
+  useEffect(() => {
+    ensureFontsLoaded();
+  }, []);
 
   useEffect(() => {
     const el = canvasRef.current;
