@@ -181,6 +181,9 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
           PAS &amp; AIDA + Long-Tail SEO + Audit AI qualità interno
         </p>
 
+        <OutputLanguageSelect id="p-output-lang" />
+
+
         <div className="space-y-1.5">
           <Label htmlFor="p-subject">Soggetto / Personaggio</Label>
           <Input
