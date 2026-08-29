@@ -38,8 +38,22 @@ function SubscriptionPage() {
   const manage = useServerFn(getManageSubscriptionUrl);
   const cancel = useServerFn(cancelMySubscription);
   const switchPlan = useServerFn(changePlan);
+  const billingStatusFn = useServerFn(getBillingStatus);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  // Stato configurazione pagamenti letto dal server: disabilita solo il checkout.
+  const billingStatus = useQuery({
+    queryKey: ["billing-status"],
+    queryFn: () => billingStatusFn(),
+    staleTime: 60_000,
+  });
+  const unavailablePlans = billingStatus.data
+    ? (["starter", "pro", "business"] as const).filter(
+        (slug) =>
+          !billingStatus.data.apiKey || !billingStatus.data.storeId || !billingStatus.data.variants[slug],
+      )
+    : [];
 
   async function handleSelect(slug: PlanSlug) {
     setLoadingPlan(slug);
