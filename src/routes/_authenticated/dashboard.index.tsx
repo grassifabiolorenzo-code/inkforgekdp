@@ -47,29 +47,6 @@ function DashboardHome() {
 
         {state && !state.active && <InactiveSubscriptionState state={state} />}
 
-        {state?.active && (
-          <div className="grid gap-6 lg:grid-cols-[20rem_1fr]">
-            <CreditsCard state={state} />
-            <div className="panel space-y-2 p-6">
-              <p className="text-sm text-muted-foreground">Piano attivo</p>
-              <p className="text-xl font-bold">{state.plan?.name ?? "—"}</p>
-              {state.current_period_end && (
-                <p className="text-sm text-muted-foreground">
-                  Rinnovo il{" "}
-                  {new Date(state.current_period_end).toLocaleDateString("it-IT", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </p>
-              )}
-              <Button variant="outline" size="sm" asChild className="mt-2">
-                <Link to="/dashboard/subscription">Gestisci abbonamento</Link>
-              </Button>
-            </div>
-          </div>
-        )}
-
         <div>
           <h2 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">
             I tuoi tool
