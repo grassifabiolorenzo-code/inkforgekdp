@@ -215,7 +215,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
     if (!el) return;
     const onWheel = (e: WheelEvent) => {
       const bg = bgRef.current;
-      if (!bg) return;
+      if (!bg || bgLockedRef.current) return;
       e.preventDefault();
       const dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 100 : 1);
       const factor = Math.exp(-dy * 0.0015);
@@ -490,6 +490,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
                     <span className="font-mono text-[10px] text-accent">{Math.round(bgImage.width)}px</span>
                   </div>
                   <Slider
+                    disabled={bgLocked}
                     min={60}
                     max={3000}
                     value={[bgImage.width]}
@@ -515,11 +516,21 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
                       />
                     </div>
                   </div>
+                  <Button
+                    size="sm"
+                    variant={bgLocked ? "default" : "outline"}
+                    className="w-full"
+                    onClick={() => setBgLocked((v) => !v)}
+                  >
+                    {bgLocked ? <Lock className="mr-1.5 size-3.5" /> : <LockOpen className="mr-1.5 size-3.5" />}
+                    {bgLocked ? "Sfondo bloccato — clicca per sbloccare" : "Blocca sfondo (posizione e zoom)"}
+                  </Button>
                   <div className="flex gap-2">
                     <Button
                       size="sm"
                       variant="secondary"
                       className="flex-1"
+                      disabled={bgLocked}
                       onClick={() => setBgImage((b) => (b ? { ...b, width: previewW, top: 0, left: 0 } : b))}
                     >
                       Adatta Canvas
@@ -557,6 +568,15 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
               <Button size="sm" variant="outline" onClick={() => setShowGuides((v) => !v)}>
                 <Ruler className="mr-1.5 size-3.5 text-accent" /> Guide KDP & Bleed
               </Button>
+              <Button
+                size="sm"
+                variant={bgLocked ? "default" : "outline"}
+                disabled={!bgImage}
+                onClick={() => setBgLocked((v) => !v)}
+                title={bgLocked ? "Sblocca sfondo" : "Blocca sfondo"}
+              >
+                {bgLocked ? <Lock className="size-3.5" /> : <LockOpen className="size-3.5" />}
+              </Button>
             </div>
           </div>
 
@@ -579,6 +599,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
                 onSelect={() => setSelectedId("bg")}
                 onMove={(top, left) => setBgImage((b) => (b ? { ...b, top, left } : b))}
                 onResize={(width) => setBgImage((b) => (b ? { ...b, width } : b))}
+                locked={bgLocked}
                 className="z-0"
               >
                 <img src={bgImage.src} alt="Sfondo copertina" className="pointer-events-none block h-auto w-full" />
