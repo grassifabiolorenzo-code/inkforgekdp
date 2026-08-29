@@ -9,6 +9,28 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
  * è eseguita server-side tramite funzioni atomiche del database.
  */
 
+/* ---------------------------------------------------------------------------
+ * ⚠️⚠️⚠️  MODALITÀ TEST — TEMPORANEA  ⚠️⚠️⚠️
+ * Con `true` TUTTI i controlli su abbonamento, piano e crediti sono bypassati:
+ * qualsiasi utente autenticato accede a tutti i tool senza consumare crediti.
+ * ⛔ IMPOSTARE A `false` PRIMA DELLA MESSA IN VENDITA / PUBBLICAZIONE. ⛔
+ * ------------------------------------------------------------------------- */
+const SUBSCRIPTION_CHECK_DISABLED = true;
+
+/** Stato fittizio "tutto sbloccato" usato in modalità test. */
+const TEST_MODE_STATE: CreditState = {
+  has_subscription: true,
+  active: true,
+  status: "test_mode",
+  plan: { slug: "business", name: "Modalità test", price: 0 },
+  unlimited: true,
+  limit: -1,
+  used: 0,
+  bonus_remaining: 0,
+  allowed_tools: ["copertine", "pubblicazione", "aplus", "triage"],
+  remaining: -1,
+};
+
 export interface CreditState {
   has_subscription: boolean;
   active: boolean;
