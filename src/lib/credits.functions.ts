@@ -80,6 +80,11 @@ export const getAccountState = createServerFn({ method: "GET" })
       ensured = created ?? null;
     }
 
+    // MODALITÀ TEST: stato fittizio con tutto sbloccato (vedi flag in testa al file).
+    if (SUBSCRIPTION_CHECK_DISABLED) {
+      return { profile: ensured, credits: TEST_MODE_STATE };
+    }
+
     const { data: state, error } = await supabase.rpc("get_credit_state");
     if (error) throw new Error(error.message);
 
@@ -136,6 +141,10 @@ export const consumeCredit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => consumeInput.parse(data))
   .handler(async ({ data, context }): Promise<ConsumeResult> => {
+    // MODALITÀ TEST: operazione sempre riuscita, nessun credito scalato.
+    if (SUBSCRIPTION_CHECK_DISABLED) {
+      return { ok: true, source: "test_mode", state: TEST_MODE_STATE };
+    }
     const { supabase } = context;
     const { data: result, error } = await supabase.rpc("consume_credit", {
       _tool_id: data.toolId,
@@ -150,6 +159,10 @@ export const consumeCredit = createServerFn({ method: "POST" })
 export const canConsume = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    // MODALITÀ TEST: sempre consentito.
+    if (SUBSCRIPTION_CHECK_DISABLED) {
+      return { allowed: true, state: TEST_MODE_STATE };
+    }
     const { data, error } = await context.supabase.rpc("get_credit_state");
     if (error) throw new Error(error.message);
     const state = data as unknown as CreditState;
@@ -176,6 +189,10 @@ export const checkToolAccess = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => toolAccessInput.parse(data))
   .handler(async ({ data, context }): Promise<ToolAccessResult> => {
+    // MODALITÀ TEST: accesso sempre consentito a qualsiasi tool.
+    if (SUBSCRIPTION_CHECK_DISABLED) {
+      return { allowed: true, reason: null, state: TEST_MODE_STATE };
+    }
     const { data: raw, error } = await context.supabase.rpc("get_credit_state");
     if (error) throw new Error(error.message);
     const state = raw as unknown as CreditState;
