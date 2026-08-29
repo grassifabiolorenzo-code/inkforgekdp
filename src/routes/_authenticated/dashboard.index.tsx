@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { planAllowsTool } from "@/config/plans";
 import { TOOLS } from "@/config/tools";
 import { useAccount } from "@/hooks/useAccount";
+import { useI18n, useToolCopy } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/dashboard/")({
   head: () => ({
@@ -28,12 +29,14 @@ export const Route = createFileRoute("/_authenticated/dashboard/")({
 function DashboardHome() {
   const account = useAccount();
   const state = account.data?.credits;
+  const { t } = useI18n();
+  const copyOf = useToolCopy();
 
   const isAllowed = (toolId: string) =>
     state?.allowed_tools ? state.allowed_tools.includes(toolId) : planAllowsTool(state?.plan?.slug, toolId);
 
   return (
-    <DashboardShell title="Dashboard" description="Tutti i tuoi strumenti in un unico posto">
+    <DashboardShell title={t("dash.dashboard")} description={t("tools.sub")}>
       <div className="mx-auto max-w-6xl space-y-8">
         {account.isLoading && <LoadingState />}
         {account.isError && (
@@ -60,7 +63,7 @@ function DashboardHome() {
                     <ToolIcon tool={tool} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold">{tool.name}</h3>
+                        <h3 className="font-semibold">{copyOf(tool.id).name}</h3>
                         {!allowed && (
                           <Badge variant="outline" className="gap-1 border-border text-[11px]">
                             <Lock className="size-3" />
@@ -68,11 +71,11 @@ function DashboardHome() {
                           </Badge>
                         )}
                       </div>
-                      <p className="mt-1 text-sm text-muted-foreground">{tool.description}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">{copyOf(tool.id).description}</p>
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    1 credito — {tool.creditEvent.toLowerCase()}
+                    {t("dash.creditEvent", { event: copyOf(tool.id).creditEvent.toLowerCase() })}
                   </p>
                   <Button
                     variant={allowed ? "outline" : "ghost"}

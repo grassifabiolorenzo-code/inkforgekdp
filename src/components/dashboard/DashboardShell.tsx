@@ -16,26 +16,34 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { TOOLS } from "@/config/tools";
 import { signOut } from "@/hooks/useAuth";
+import { useI18n, useToolCopy } from "@/lib/i18n";
+import type { MessageKey } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
+
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 import { ToolIcon } from "@/components/tools/ToolIcon";
 
 interface NavItem {
   to: string;
-  label: string;
+  labelKey: MessageKey;
   icon?: LucideIcon;
   toolIndex?: number;
 }
 
-const mainNav: NavItem[] = [{ to: "/dashboard", label: "Dashboard", icon: LayoutDashboard }];
+const mainNav: NavItem[] = [
+  { to: "/dashboard", labelKey: "dash.dashboard", icon: LayoutDashboard },
+];
 const accountNav: NavItem[] = [
-  { to: "/dashboard/usage", label: "Utilizzo", icon: BarChart3 },
-  { to: "/dashboard/subscription", label: "Il mio abbonamento", icon: CreditCard },
-  { to: "/dashboard/profile", label: "Profilo", icon: User },
-  { to: "/dashboard/settings", label: "Impostazioni", icon: Settings },
+  { to: "/dashboard/usage", labelKey: "dash.usage", icon: BarChart3 },
+  { to: "/dashboard/subscription", labelKey: "dash.subscription", icon: CreditCard },
+  { to: "/dashboard/profile", labelKey: "dash.profile", icon: User },
+  { to: "/dashboard/settings", labelKey: "dash.settings", icon: Settings },
 ];
 
 function NavLinks({ onNavigate }: { onNavigate?: (() => void) | undefined }) {
+  const { t } = useI18n();
+  const copyOf = useToolCopy();
   const linkClass =
     "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground";
   const activeClass = "bg-sidebar-accent text-foreground";
@@ -53,14 +61,14 @@ function NavLinks({ onNavigate }: { onNavigate?: (() => void) | undefined }) {
             activeOptions={{ exact: true }}
           >
             {item.icon && <item.icon className="size-4" />}
-            {item.label}
+            {t(item.labelKey)}
           </Link>
         ))}
       </div>
 
       <div className="space-y-1">
         <p className="px-3 pb-1 text-[11px] font-semibold tracking-wider text-muted-foreground/70 uppercase">
-          Tool
+          {t("dash.tools")}
         </p>
         {TOOLS.map((tool) => (
           <Link
@@ -71,14 +79,14 @@ function NavLinks({ onNavigate }: { onNavigate?: (() => void) | undefined }) {
             activeProps={{ className: activeClass }}
           >
             <ToolIcon tool={tool} size="sm" className="size-7" />
-            <span className="truncate">{tool.name}</span>
+            <span className="truncate">{copyOf(tool.id).name}</span>
           </Link>
         ))}
       </div>
 
       <div className="space-y-1">
         <p className="px-3 pb-1 text-[11px] font-semibold tracking-wider text-muted-foreground/70 uppercase">
-          Account
+          {t("dash.account")}
         </p>
         {accountNav.map((item) => (
           <Link
@@ -89,7 +97,7 @@ function NavLinks({ onNavigate }: { onNavigate?: (() => void) | undefined }) {
             activeProps={{ className: activeClass }}
           >
             {item.icon && <item.icon className="size-4" />}
-            {item.label}
+            {t(item.labelKey)}
           </Link>
         ))}
       </div>
@@ -110,6 +118,7 @@ export function DashboardShell({
 }) {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   async function handleLogout() {
     await signOut();
@@ -131,7 +140,7 @@ export function DashboardShell({
           onClick={handleLogout}
         >
           <LogOut className="size-4" />
-          Logout
+          {t("dash.logout")}
         </Button>
       </div>
     </div>
@@ -147,7 +156,7 @@ export function DashboardShell({
         <header className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-border bg-background/85 px-4 backdrop-blur-xl">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild className="lg:hidden">
-              <Button variant="ghost" size="icon" aria-label="Apri menu">
+              <Button variant="ghost" size="icon" aria-label={t("nav.menu")}>
                 <Menu className="size-5" />
               </Button>
             </SheetTrigger>
@@ -162,7 +171,10 @@ export function DashboardShell({
               <p className="truncate text-xs text-muted-foreground">{description}</p>
             )}
           </div>
-          <div className={cn("flex items-center gap-2")}>{actions}</div>
+          <div className={cn("flex items-center gap-2")}>
+            {actions}
+            <LanguageSwitcher />
+          </div>
         </header>
 
         <main className="flex-1 px-4 py-6 lg:px-8">{children}</main>

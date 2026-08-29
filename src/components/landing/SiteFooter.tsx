@@ -1,58 +1,60 @@
 import { Link } from "@tanstack/react-router";
 
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Logo } from "@/components/brand/Logo";
+import { useI18n } from "@/lib/i18n";
 
 export function SiteFooter() {
+  const { t } = useI18n();
+
   return (
     <footer className="border-t border-border/70 bg-background">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
         <div className="space-y-3">
           <Logo />
-          <p className="text-sm text-muted-foreground">
-            La suite di strumenti per chi pubblica su Amazon KDP: copertine, listing, contenuti A+ e
-            triage immagini.
-          </p>
+          <p className="text-sm text-muted-foreground">{t("footer.tagline")}</p>
+          <LanguageSwitcher variant="full" className="-ml-2" />
         </div>
 
         <div className="space-y-2 text-sm">
-          <p className="font-medium text-foreground">Prodotto</p>
+          <p className="font-medium text-foreground">{t("footer.product")}</p>
           <Link to="/" className="block text-muted-foreground hover:text-foreground">
-            Home
+            {t("nav.home")}
           </Link>
           <Link to="/pricing" className="block text-muted-foreground hover:text-foreground">
-            Prezzi
+            {t("nav.pricing")}
           </Link>
           <Link to="/faq" className="block text-muted-foreground hover:text-foreground">
-            FAQ
+            {t("nav.faq")}
           </Link>
         </div>
 
         <div className="space-y-2 text-sm">
-          <p className="font-medium text-foreground">Account</p>
+          <p className="font-medium text-foreground">{t("footer.account")}</p>
           <Link to="/auth" className="block text-muted-foreground hover:text-foreground">
-            Accedi
+            {t("nav.login")}
           </Link>
           <Link
             to="/auth"
             search={{ mode: "signup" }}
             className="block text-muted-foreground hover:text-foreground"
           >
-            Registrati
+            {t("nav.register")}
           </Link>
         </div>
 
         <div className="space-y-2 text-sm">
-          <p className="font-medium text-foreground">Legale</p>
+          <p className="font-medium text-foreground">{t("footer.legal")}</p>
           <Link to="/privacy" className="block text-muted-foreground hover:text-foreground">
-            Privacy Policy
+            {t("footer.privacy")}
           </Link>
           <Link to="/terms" className="block text-muted-foreground hover:text-foreground">
-            Termini e condizioni
+            {t("footer.terms")}
           </Link>
         </div>
       </div>
       <div className="border-t border-border/70 py-6 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} OP+studioKdp. Tutti i diritti riservati.
+        © {new Date().getFullYear()} OP+studioKdp. {t("footer.rights")}
       </div>
     </footer>
   );
