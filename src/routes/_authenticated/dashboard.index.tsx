@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Lock } from "lucide-react";
 
-import { CreditsCard } from "@/components/dashboard/CreditsCard";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import {
   ErrorState,
