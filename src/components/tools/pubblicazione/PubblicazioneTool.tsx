@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { ToolRuntime } from "@/components/tools/ToolPageShell";
+import { OutputLanguageSelect, useOutputLanguage } from "@/components/tools/OutputLanguageSelect";
 import { newOperationId } from "@/hooks/useAccount";
 
 import {
@@ -41,6 +42,7 @@ const AUDIENCES: { id: Audience; label: string }[] = [
 ];
 
 export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
+  const outputLocale = useOutputLanguage();
   const [subject, setSubject] = useState("");
   const [bookType, setBookType] = useState<BookType>("coloring");
   const [audience, setAudience] = useState<Audience>("toddlers");
@@ -125,6 +127,7 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
 
     try {
       const result = generateListing({
+        locale: outputLocale,
         subject,
         bookType,
         audience,
