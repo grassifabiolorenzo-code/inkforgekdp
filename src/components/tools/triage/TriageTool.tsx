@@ -201,7 +201,7 @@ export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
   } finally {
       chargeGuard.current = false;
     }
-  
+  }
 
   function resetAll() {
     setPhase("upload");

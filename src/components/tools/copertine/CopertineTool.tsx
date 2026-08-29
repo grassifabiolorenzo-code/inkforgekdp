@@ -258,7 +258,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
   } finally {
       chargeGuard.current = false;
     }
-  
+  }
 
   return (
     <div className="grid gap-6 lg:grid-cols-[380px_1fr]">

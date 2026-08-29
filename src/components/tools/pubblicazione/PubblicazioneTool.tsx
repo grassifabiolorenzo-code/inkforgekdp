@@ -148,7 +148,7 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
   } finally {
       chargeGuard.current = false;
     }
-  
+  }
 
   function copyToClipboard(text: string, label: string) {
     void navigator.clipboard.writeText(text);

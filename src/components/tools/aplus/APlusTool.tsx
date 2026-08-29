@@ -140,7 +140,7 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
   } finally {
       chargeGuard.current = false;
     }
-  
+  }
 
   async function handleExportZip() {
     if (!texts || !canvasesReady) {
