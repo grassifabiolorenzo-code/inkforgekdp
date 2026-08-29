@@ -1,5 +1,5 @@
-import { Download, Loader2, Sparkles, Upload } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Download, Loader2, RotateCcw, Sparkles, Upload } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import type { ToolRuntime } from "@/components/tools/ToolPageShell";
 import { newOperationId } from "@/hooks/useAccount";
 
@@ -14,7 +16,9 @@ import { AGES, NICHES } from "@/components/tools/aplus/constants";
 import { OutputLanguageSelect, useOutputLanguage } from "@/components/tools/OutputLanguageSelect";
 import { generateModulesText, nextCopyVariationIndex } from "@/components/tools/aplus/copyEngine";
 import type { AgeId, GeneratedModulesText, LangId, NicheId } from "@/components/tools/aplus/types";
+import type { ValueModuleStyle } from "@/components/tools/aplus/canvasRenderers";
 import { exportModulesAsZip, type ModuleCanvases } from "@/components/tools/aplus/zipExport";
+
 
 /**
  * TOOL — A+1 KDP Studio (modulo indipendente).
