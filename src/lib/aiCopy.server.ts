@@ -198,7 +198,11 @@ Contesto:
 - target d'età: ${input.age}
 
 Analizza la copertina e le pagine interne allegate. I testi devono descrivere i contenuti
-reali visti nelle immagini, con impronta SEO + AIDA + PAS e frasi brevi adatte ai banner A+.
+reali visti nelle immagini (soggetti, tratto, esercizi, spazi bianchi), con voce umana e naturale,
+impronta SEO + AIDA + PAS e frasi brevi adatte ai banner A+. Ogni modulo deve dire qualcosa di
+diverso e specifico di QUESTO libro: nessuna frase generica riutilizzabile per un altro titolo,
+nessun superlativo vuoto, nessuna emoji.
+
 
 Rispondi con JSON di questa forma esatta:
 {
