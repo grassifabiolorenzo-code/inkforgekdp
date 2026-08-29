@@ -46,6 +46,8 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
   const [texts, setTexts] = useState<GeneratedModulesText | null>(null);
   const [canvasesReady, setCanvasesReady] = useState(false);
 
+  const chargeGuard = useRef(false);
+
   async function handleGenerate() {
     // Guardia sincrona: blocca doppio click/rientranza prima di qualsiasi await.
     if (chargeGuard.current) return;
@@ -452,4 +454,7 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
       </div>
     </div>
   );
-}
+    } finally {
+      chargeGuard.current = false;
+    }
+  }

@@ -203,6 +203,8 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
     setImageLayers((prev) => prev.filter((l) => l.id !== id));
   }
 
+  const chargeGuard = useRef(false);
+
   async function handleExport() {
     // Guardia sincrona: blocca doppio click/rientranza prima di qualsiasi await.
     if (chargeGuard.current) return;
@@ -638,4 +640,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
       </div>
     </div>
   );
-}
+    } finally {
+      chargeGuard.current = false;
+    }
+  }

@@ -105,6 +105,8 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
     }
   }
 
+  const chargeGuard = useRef(false);
+
   async function handleGenerate() {
     // Guardia sincrona: blocca doppio click/rientranza prima di qualsiasi await.
     if (chargeGuard.current) return;
@@ -400,4 +402,7 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
       </div>
     </div>
   );
-}
+    } finally {
+      chargeGuard.current = false;
+    }
+  }

@@ -158,6 +158,8 @@ export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
     });
   }
 
+  const chargeGuard = useRef(false);
+
   async function handleDownload() {
     // Guardia sincrona: blocca doppio click/rientranza prima di qualsiasi await.
     if (chargeGuard.current) return;
@@ -446,7 +448,10 @@ export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
       </AlertDialog>
     </div>
   );
-}
+    } finally {
+      chargeGuard.current = false;
+    }
+  }
 
 // Etichette categoria mantenute per eventuali usi futuri (report, tooltip, ecc.).
 export const TRIAGE_CATEGORY_LABEL = CATEGORY_LABEL;
