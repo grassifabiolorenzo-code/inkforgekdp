@@ -224,6 +224,7 @@ export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
     <div className="space-y-6">
       {phase === "upload" && (
         <div className="panel space-y-5 p-6">
+          <OutputLanguageSelect id="triage-output-lang" className="rounded-lg border border-border bg-surface p-4" />
           <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <Label htmlFor="triage-batch-size" className="text-accent">
