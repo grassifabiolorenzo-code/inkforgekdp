@@ -31,6 +31,33 @@ export function readLemonConfig(): LemonConfig {
   };
 }
 
+/** Stato di configurazione dei pagamenti (senza esporre valori sensibili). */
+export interface BillingConfigStatus {
+  ready: boolean;
+  apiKey: boolean;
+  storeId: boolean;
+  webhookSecret: boolean;
+  variants: Record<"starter" | "pro" | "business", boolean>;
+}
+
+export function getBillingConfigStatus(): BillingConfigStatus {
+  const config = readLemonConfig();
+  const variants = {
+    starter: Boolean(config.variants["starter"]),
+    pro: Boolean(config.variants["pro"]),
+    business: Boolean(config.variants["business"]),
+  };
+  const apiKey = Boolean(config.apiKey);
+  const storeId = Boolean(config.storeId);
+  return {
+    apiKey,
+    storeId,
+    webhookSecret: Boolean(process.env["LEMON_SQUEEZY_WEBHOOK_SECRET"]),
+    variants,
+    ready: apiKey && storeId && variants.starter && variants.pro && variants.business,
+  };
+}
+
 export function planSlugForVariant(variantId: string | number | null | undefined): string | null {
   const id = String(variantId ?? "");
   const { variants } = readLemonConfig();
