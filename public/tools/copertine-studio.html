@@ -814,9 +814,8 @@
                     renderTitle.style.fontFamily = `'${e.target.value}', sans-serif`;
                 });
                 titleColor.addEventListener('input', (e) => {
-                    if (!renderTitle.classList.contains('fx-none') && !renderTitle.classList.contains('fx-none')) {
-                        renderTitle.style.color = e.target.value;
-                    }
+                    renderTitle.style.color = e.target.value;
+                    renderTitle.style.webkitTextFillColor = e.target.value;
                 });
                 titleSize.addEventListener('input', (e) => {
                     renderTitle.style.fontSize = `${e.target.value}px`;
@@ -825,11 +824,8 @@
                 titleFx.addEventListener('change', (e) => {
                     const fxVal = e.target.value;
                     renderTitle.className = `render-text text-4xl font-extrabold uppercase tracking-wide ${fxVal}`;
-                    if (fxVal === 'fx-none' || fxVal === 'fx-none') {
-                        renderTitle.style.color = 'transparent';
-                    } else {
-                        renderTitle.style.color = titleColor.value;
-                    }
+                    renderTitle.style.color = titleColor.value;
+                    renderTitle.style.webkitTextFillColor = titleColor.value;
                 });
             }
 
@@ -848,9 +844,8 @@
                     renderAuthor.style.fontFamily = `'${e.target.value}', sans-serif`;
                 });
                 authorColor.addEventListener('input', (e) => {
-                    if (!renderAuthor.classList.contains('fx-none') && !renderAuthor.classList.contains('fx-none')) {
-                        renderAuthor.style.color = e.target.value;
-                    }
+                    renderAuthor.style.color = e.target.value;
+                    renderAuthor.style.webkitTextFillColor = e.target.value;
                 });
                 authorSize.addEventListener('input', (e) => {
                     renderAuthor.style.fontSize = `${e.target.value}px`;
@@ -858,11 +853,8 @@
                 authorFx.addEventListener('change', (e) => {
                     const fxVal = e.target.value;
                     renderAuthor.className = `render-text text-xs font-bold uppercase tracking-widest ${fxVal}`;
-                    if (fxVal === 'fx-none' || fxVal === 'fx-none') {
-                        renderAuthor.style.color = 'transparent';
-                    } else {
-                        renderAuthor.style.color = authorColor.value;
-                    }
+                    renderAuthor.style.color = authorColor.value;
+                    renderAuthor.style.webkitTextFillColor = authorColor.value;
                 });
             }
 
@@ -1107,31 +1099,9 @@
                             scale: 3,
                             useCORS: true,
                             backgroundColor: null,
-                            onclone: (clonedDoc) => {
-                                // Sostituisci tutti gli elementi fx-none/fx-none con immagini PNG generate via Canvas 2D
-                                clonedDoc.querySelectorAll('.fx-none, .fx-none').forEach(el => {
-                                    const isGold = el.classList.contains('fx-none');
-                                    const text = el.innerText || el.textContent;
-                                    if (!text || !text.trim()) return;
-
-                                    const style = window.getComputedStyle(el);
-                                    const fontSize = parseFloat(style.fontSize) || 36;
-                                    const fontFamily = (style.fontFamily || 'sans-serif').replace(/['"]/g, '');
-                                    const fontWeight = style.fontWeight || 'bold';
-
-                                    // Genera l'immagine PNG ad alta definizione
-                                    const img = createGradientTextImage(text, fontSize, fontFamily, fontWeight, isGold);
-                                    
-                                    // Sostituisci il contenuto dell'elemento con l'immagine renderizzata
-                                    el.style.background = 'none';
-                                    el.style.webkitBackgroundClip = 'unset';
-                                    el.style.backgroundClip = 'unset';
-                                    el.style.color = 'transparent';
-                                    el.style.display = 'block';
-                                    el.style.textAlign = 'center';
-                                    el.innerHTML = '';
-                                    el.appendChild(img);
-                                });
+                            onclone: () => {
+                                // Nessuna sostituzione: i testi vengono renderizzati così come sono,
+                                // rispettando colore, font ed effetto scelti dall'utente.
                             }
                         });
 
