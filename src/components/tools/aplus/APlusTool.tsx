@@ -525,6 +525,111 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
             <canvas id="aplus-value" width={970} height={300} className="h-auto w-full max-w-2xl" />
           </div>
           {texts && (
+            <div className="space-y-4 rounded-md border border-border bg-surface p-4">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Personalizza testi e stile
+                </p>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    if (baseValue.current) updateValueTextAll(baseValue.current);
+                    setValueStyle(DEFAULT_VALUE_STYLE);
+                  }}
+                >
+                  <RotateCcw className="mr-1 size-3.5" />
+                  Ripristina
+                </Button>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="a-value-title">Titolo sezione</Label>
+                <Input
+                  id="a-value-title"
+                  value={texts.value.title}
+                  onChange={(e) => updateValueText("title", e.target.value)}
+                />
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-3">
+                {(["text1", "text2", "text3"] as const).map((field, i) => (
+                  <div key={field} className="space-y-1.5">
+                    <Label htmlFor={`a-value-${field}`}>Punto {i + 1}</Label>
+                    <Textarea
+                      id={`a-value-${field}`}
+                      rows={3}
+                      value={texts.value[field]}
+                      onChange={(e) => updateValueText(field, e.target.value)}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label>Dimensione titolo: {valueStyle.titleSize}px</Label>
+                  <Slider
+                    min={14}
+                    max={40}
+                    step={1}
+                    value={[valueStyle.titleSize ?? 21]}
+                    onValueChange={(v) => setValueStyle((s) => ({ ...s, titleSize: v[0] ?? 21 }))}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Dimensione punti: {valueStyle.itemSize}px</Label>
+                  <Slider
+                    min={9}
+                    max={26}
+                    step={1}
+                    value={[valueStyle.itemSize ?? 13]}
+                    onValueChange={(v) => setValueStyle((s) => ({ ...s, itemSize: v[0] ?? 13 }))}
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label>Badge dei punti</Label>
+                  <Select
+                    value={valueStyle.numbered ? "numbers" : valueStyle.marker === "" ? "none" : valueStyle.marker}
+                    onValueChange={(v) =>
+                      setValueStyle((s) => ({
+                        ...s,
+                        numbered: v === "numbers",
+                        marker: v === "numbers" ? "✓" : v === "none" ? "" : v,
+                      }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="✓">Spunta ✓</SelectItem>
+                      <SelectItem value="★">Stella ★</SelectItem>
+                      <SelectItem value="●">Punto ●</SelectItem>
+                      <SelectItem value="✚">Croce ✚</SelectItem>
+                      <SelectItem value="numbers">Numeri 1 · 2 · 3</SelectItem>
+                      <SelectItem value="none">Nessun badge</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-end justify-between gap-3">
+                  <Label htmlFor="a-value-upper" className="text-sm">
+                    Punti in MAIUSCOLO
+                  </Label>
+                  <Switch
+                    id="a-value-upper"
+                    checked={valueStyle.uppercase !== false}
+                    onCheckedChange={(checked) => setValueStyle((s) => ({ ...s, uppercase: checked }))}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          {texts && (
+
             <pre className="whitespace-pre-wrap rounded-md border border-border bg-surface p-3 text-xs">
               {`TITOLO SEZIONE:\n${texts.value.title}\n\nPUNTI CHIAVE:\n1. ${texts.value.text1}\n2. ${texts.value.text2}\n3. ${texts.value.text3}\n\nALT-TEXT SEO:\n${texts.value.alt}`}
             </pre>
