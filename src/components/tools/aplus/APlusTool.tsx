@@ -91,6 +91,34 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
     setTexts((prev) => (prev ? { ...prev, value: { ...next } } : prev));
   }
 
+  /** Tutti i testi dei moduli restano modificabili prima della copia o del download. */
+  function updateHeroText(field: "heading" | "body" | "alt", next: string) {
+    setTexts((prev) => (prev ? { ...prev, hero: { ...prev.hero, [field]: next } } : prev));
+  }
+
+  function updateProofText(field: "heading" | "body" | "alt", next: string) {
+    setTexts((prev) => (prev ? { ...prev, proof: { ...prev.proof, [field]: next } } : prev));
+  }
+
+  function updateGridItem(index: number, field: "title" | "desc", next: string) {
+    setTexts((prev) =>
+      prev
+        ? {
+            ...prev,
+            grid: {
+              ...prev.grid,
+              items: prev.grid.items.map((item, i) => (i === index ? { ...item, [field]: next } : item)),
+            },
+          }
+        : prev,
+    );
+  }
+
+  function updateCompText(field: "instructions" | "alt", next: string) {
+    setTexts((prev) => (prev ? { ...prev, comp: { ...prev.comp, [field]: next } } : prev));
+  }
+
+
 
 
 
@@ -603,9 +631,36 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
             />
           </div>
           {texts && (
-            <pre className="whitespace-pre-wrap rounded-md border border-border bg-surface p-3 text-xs">
-              {`${texts.hero.title}\n\nTITOLO A+:\n${texts.hero.heading}\n\nTESTO DESCRITTIVO:\n${texts.hero.body}\n\nALT-TEXT SEO:\n${texts.hero.alt}`}
-            </pre>
+            <div className="space-y-3 rounded-md border border-border bg-surface p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {texts.hero.title} — testi modificabili
+              </p>
+              <div className="space-y-1.5">
+                <Label htmlFor="a-hero-heading">Titolo A+</Label>
+                <Input
+                  id="a-hero-heading"
+                  value={texts.hero.heading}
+                  onChange={(e) => updateHeroText("heading", e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="a-hero-body">Testo descrittivo</Label>
+                <Textarea
+                  id="a-hero-body"
+                  rows={4}
+                  value={texts.hero.body}
+                  onChange={(e) => updateHeroText("body", e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="a-hero-alt">Alt-text SEO</Label>
+                <Input
+                  id="a-hero-alt"
+                  value={texts.hero.alt}
+                  onChange={(e) => updateHeroText("alt", e.target.value)}
+                />
+              </div>
+            </div>
           )}
         </article>
 
@@ -615,11 +670,39 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
             <canvas id="aplus-proof" width={970} height={300} className="h-auto w-full max-w-2xl" />
           </div>
           {texts && (
-            <pre className="whitespace-pre-wrap rounded-md border border-border bg-surface p-3 text-xs">
-              {`${texts.proof.title}\n\nTITOLO A+:\n${texts.proof.heading}\n\nTESTO DESCRITTIVO:\n${texts.proof.body}\n\nALT-TEXT SEO:\n${texts.proof.alt}`}
-            </pre>
+            <div className="space-y-3 rounded-md border border-border bg-surface p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {texts.proof.title} — testi modificabili
+              </p>
+              <div className="space-y-1.5">
+                <Label htmlFor="a-proof-heading">Titolo A+</Label>
+                <Input
+                  id="a-proof-heading"
+                  value={texts.proof.heading}
+                  onChange={(e) => updateProofText("heading", e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="a-proof-body">Testo descrittivo</Label>
+                <Textarea
+                  id="a-proof-body"
+                  rows={4}
+                  value={texts.proof.body}
+                  onChange={(e) => updateProofText("body", e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="a-proof-alt">Alt-text SEO</Label>
+                <Input
+                  id="a-proof-alt"
+                  value={texts.proof.alt}
+                  onChange={(e) => updateProofText("alt", e.target.value)}
+                />
+              </div>
+            </div>
           )}
         </article>
+
 
         <article className="panel space-y-3 p-6">
           <h4 className="text-sm font-semibold">Modulo 3: Value Highlights (970×300 px)</h4>
@@ -731,10 +814,14 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
             </div>
           )}
           {texts && (
-
-            <pre className="whitespace-pre-wrap rounded-md border border-border bg-surface p-3 text-xs">
-              {`TITOLO SEZIONE:\n${texts.value.title}\n\nPUNTI CHIAVE:\n1. ${texts.value.text1}\n2. ${texts.value.text2}\n3. ${texts.value.text3}\n\nALT-TEXT SEO:\n${texts.value.alt}`}
-            </pre>
+            <div className="space-y-1.5 rounded-md border border-border bg-surface p-4">
+              <Label htmlFor="a-value-alt">Alt-text SEO</Label>
+              <Input
+                id="a-value-alt"
+                value={texts.value.alt}
+                onChange={(e) => updateValueText("alt", e.target.value)}
+              />
+            </div>
           )}
         </article>
 
@@ -752,11 +839,25 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
             </div>
           </div>
           {texts && (
-            <pre className="whitespace-pre-wrap rounded-md border border-border bg-surface p-3 text-xs">
-              {`TESTI COLONNE A+ (${lang.toUpperCase()} - Target: ${age}):\n\n${texts.grid.items
-                .map((g, i) => `• SLOT ${i + 1} (Pag. ${texts.grid.pages[i]}):\n${g.title}\n${g.desc}`)
-                .join("\n\n")}`}
-            </pre>
+            <div className="grid gap-3 rounded-md border border-border bg-surface p-4 sm:grid-cols-3">
+              {texts.grid.items.map((item, i) => (
+                <div key={`grid-${i}`} className="space-y-1.5">
+                  <Label htmlFor={`a-grid-title-${i}`}>
+                    Slot {i + 1} (Pag. {texts.grid.pages[i]})
+                  </Label>
+                  <Input
+                    id={`a-grid-title-${i}`}
+                    value={item.title}
+                    onChange={(e) => updateGridItem(i, "title", e.target.value)}
+                  />
+                  <Textarea
+                    rows={3}
+                    value={item.desc}
+                    onChange={(e) => updateGridItem(i, "desc", e.target.value)}
+                  />
+                </div>
+              ))}
+            </div>
           )}
         </article>
 
@@ -766,11 +867,28 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
             <canvas id="aplus-comp" width={150} height={300} className="h-auto w-full" />
           </div>
           {texts && (
-            <pre className="whitespace-pre-wrap rounded-md border border-border bg-surface p-3 text-xs">
-              {`ISTRUZIONI MODULO COMPARATIVO:\n${texts.comp.instructions}\n\nALT-TEXT SEO:\n${title} — ${texts.comp.alt}`}
-            </pre>
+            <div className="space-y-3 rounded-md border border-border bg-surface p-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="a-comp-instructions">Istruzioni modulo comparativo</Label>
+                <Textarea
+                  id="a-comp-instructions"
+                  rows={4}
+                  value={texts.comp.instructions}
+                  onChange={(e) => updateCompText("instructions", e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="a-comp-alt">Alt-text SEO</Label>
+                <Input
+                  id="a-comp-alt"
+                  value={texts.comp.alt}
+                  onChange={(e) => updateCompText("alt", e.target.value)}
+                />
+              </div>
+            </div>
           )}
         </article>
+
 
         {!texts && (
           <div className="panel p-10 text-center text-sm text-muted-foreground">

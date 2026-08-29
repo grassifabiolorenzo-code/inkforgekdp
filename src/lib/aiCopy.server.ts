@@ -85,15 +85,24 @@ async function callGateway(system: string, prompt: string, source: SourceContent
   }
 }
 
-const COPY_SYSTEM = `Sei un copywriter senior specializzato in self-publishing su Amazon KDP.
-Scrivi copy che rispetta contemporaneamente tre framework:
-- SEO: keyword long-tail reali usate dagli acquirenti Amazon, inserite naturalmente;
+const COPY_SYSTEM = `Sei un copywriter senior umano, specializzato in self-publishing su Amazon KDP.
+Scrivi come una persona reale che parla a un genitore, a un insegnante o a un adulto appassionato:
+tono caldo, concreto, conversazionale, con ritmo variabile (frasi brevi alternate a frasi più ampie),
+domande dirette al lettore, immagini quotidiane e piccoli dettagli sensoriali.
+Evita assolutamente il linguaggio robotico o pubblicitario da elenco: niente superlativi vuoti
+("il migliore in assoluto", "rivoluzionario"), niente frasi fatte da AI ("nel mondo di oggi",
+"immergiti in un viaggio"), niente ripetizioni meccaniche della keyword, niente emoji.
+Rispetta contemporaneamente tre framework, ma in modo naturale e invisibile:
+- SEO: keyword long-tail reali usate dagli acquirenti Amazon, inserite dentro frasi che suonano umane;
 - AIDA: attenzione, interesse, desiderio, azione;
 - PAS: problema, agitazione, soluzione.
 Analizzi copertina e pagine interne fornite e descrivi SOLO ciò che vedi realmente
-(stile dei disegni, livello di dettaglio, tipo di esercizi, fascia d'età coerente).
+(soggetti dei disegni, stile del tratto, livello di dettaglio, tipo di esercizi, spessore delle linee,
+spazi bianchi, coerenza con la fascia d'età). Cita dettagli specifici e verificabili delle pagine
+analizzate: sono la prova che il testo parla di QUESTO libro e non di un libro generico.
 Non inventare premi, dati di vendita, marchi, autori o personaggi protetti da copyright.
 Rispondi SEMPRE ed ESCLUSIVAMENTE con un oggetto JSON valido, senza testo aggiuntivo.`;
+
 
 export interface AiListingCopy {
   subject?: string | undefined;
@@ -125,16 +134,19 @@ Dati forniti dall'autore:
 - pubblico: ${input.audience} (${input.ageDetails})
 - pagine interne rilevate: ${input.interiorPages || "n/d"}
 
-Analizza copertina e pagine interne allegate, poi produci JSON con questa forma esatta:
+Analizza copertina e pagine interne allegate. La descrizione deve essere LUNGA e ARTICOLATA
+(1600-2400 caratteri complessivi), scritta con voce umana e riferimenti espliciti a ciò che si vede
+davvero nelle pagine analizzate. Produci JSON con questa forma esatta:
 {
   "subject": "soggetto reale dedotto dai contenuti (max 6 parole)",
   "title": "titolo max 60 caratteri, contiene la keyword principale",
   "subtitle": "sottotitolo SEO 100-180 caratteri con keyword secondarie",
-  "description": "descrizione 5-6 paragrafi separati da \\n\\n: par.1-2 struttura PAS (problema + agitazione), par.3-4 soluzione e benefici concreti visti nelle pagine, par.5 desiderio, par.6 call to action. Nessun HTML.",
+  "description": "descrizione lunga di 8-9 paragrafi separati da \\n\\n, 1600-2400 caratteri totali. Struttura: par.1 gancio umano che descrive una scena quotidiana del lettore; par.2 il problema reale; par.3 agitazione (cosa succede se non si risolve, delusioni con libri simili); par.4 presentazione del libro con i dettagli concreti visti nelle pagine; par.5 elenco discorsivo di 3-4 benefici legati a quei contenuti reali; par.6 dettagli tecnici utili (numero di pagine, stampa su un solo lato se visibile, spessore dei tratti, spazi per colorare); par.7 desiderio e piccola proiezione emotiva; par.8 rassicurazione (per chi è adatto, come usarlo); par.9 call to action calda e diretta. Nessun HTML, nessun elenco puntato, nessuna emoji, nessuna ripetizione meccanica della keyword.",
   "keywords": ["7 keyword long-tail diverse, 3-6 parole ciascuna, minuscole"],
   "categories": ["3 categorie BISAC Amazon in formato 'Ramo > Sotto > Sotto'"],
-  "insight": "1-2 frasi su cosa mostrano realmente le pagine analizzate"
+  "insight": "2-3 frasi che riassumono cosa mostrano realmente le pagine analizzate"
 }`;
+
 
   const json = await callGateway(COPY_SYSTEM, prompt, {
     interiorText: input.interiorText,
@@ -186,7 +198,11 @@ Contesto:
 - target d'età: ${input.age}
 
 Analizza la copertina e le pagine interne allegate. I testi devono descrivere i contenuti
-reali visti nelle immagini, con impronta SEO + AIDA + PAS e frasi brevi adatte ai banner A+.
+reali visti nelle immagini (soggetti, tratto, esercizi, spazi bianchi), con voce umana e naturale,
+impronta SEO + AIDA + PAS e frasi brevi adatte ai banner A+. Ogni modulo deve dire qualcosa di
+diverso e specifico di QUESTO libro: nessuna frase generica riutilizzabile per un altro titolo,
+nessun superlativo vuoto, nessuna emoji.
+
 
 Rispondi con JSON di questa forma esatta:
 {
