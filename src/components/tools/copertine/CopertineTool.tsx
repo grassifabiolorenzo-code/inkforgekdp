@@ -255,7 +255,10 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
       setShowGuides(wasGuidesVisible);
       setExporting(false);
     }
-  }
+  } finally {
+      chargeGuard.current = false;
+    }
+  
 
   return (
     <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
@@ -640,7 +643,4 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
       </div>
     </div>
   );
-    } finally {
-      chargeGuard.current = false;
-    }
   }

@@ -198,7 +198,10 @@ export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
     } finally {
       setDownloading(false);
     }
-  }
+  } finally {
+      chargeGuard.current = false;
+    }
+  
 
   function resetAll() {
     setPhase("upload");
@@ -448,9 +451,6 @@ export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
       </AlertDialog>
     </div>
   );
-    } finally {
-      chargeGuard.current = false;
-    }
   }
 
 // Etichette categoria mantenute per eventuali usi futuri (report, tooltip, ecc.).

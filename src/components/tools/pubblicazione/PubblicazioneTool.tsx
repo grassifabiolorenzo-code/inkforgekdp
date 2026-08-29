@@ -145,7 +145,10 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
     } finally {
       setGenerating(false);
     }
-  }
+  } finally {
+      chargeGuard.current = false;
+    }
+  
 
   function copyToClipboard(text: string, label: string) {
     void navigator.clipboard.writeText(text);
@@ -402,7 +405,4 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
       </div>
     </div>
   );
-    } finally {
-      chargeGuard.current = false;
-    }
   }

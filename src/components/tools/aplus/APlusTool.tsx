@@ -137,7 +137,10 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
     } finally {
       setGenerating(false);
     }
-  }
+  } finally {
+      chargeGuard.current = false;
+    }
+  
 
   async function handleExportZip() {
     if (!texts || !canvasesReady) {
@@ -454,7 +457,4 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
       </div>
     </div>
   );
-    } finally {
-      chargeGuard.current = false;
-    }
   }
