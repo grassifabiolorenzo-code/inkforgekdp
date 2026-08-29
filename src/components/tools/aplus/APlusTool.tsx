@@ -186,13 +186,84 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
       const intImg3 = await renderPdfPage(interiorFile, page3, false);
 
       const variationIndex = nextCopyVariationIndex();
-      const generatedTexts = generateModulesText({
+      let generatedTexts = generateModulesText({
         lang,
         niche,
         age,
         pages: [page1, page2, page3],
         variationIndex,
       });
+
+      let usedAi = false;
+      if (useAi) {
+        try {
+          setStatus("Analisi AI di copertina e pagine interne...");
+          const cover = await extractCoverContent(coverFile);
+          const interior = await extractPdfContent(interiorFile, {
+            maxImages: 3,
+            maxTextPages: 6,
+            pageIndexes: [page1, page2, page3],
+          });
+
+          setStatus("Scrittura testi A+ (SEO + AIDA + PAS)...");
+          const response = await generateAplusCopy({
+            data: {
+              lang,
+              niche,
+              age,
+              title,
+              interiorText: interior.text || undefined,
+              interiorImages: interior.images,
+              coverImages: cover.images,
+            },
+          });
+
+          if (response.ok) {
+            const copy = response.copy;
+            generatedTexts = {
+              ...generatedTexts,
+              hero: {
+                ...generatedTexts.hero,
+                heading: copy.hero.heading || generatedTexts.hero.heading,
+                body: copy.hero.body || generatedTexts.hero.body,
+                alt: copy.hero.alt || generatedTexts.hero.alt,
+              },
+              proof: {
+                ...generatedTexts.proof,
+                heading: copy.proof.heading || generatedTexts.proof.heading,
+                body: copy.proof.body || generatedTexts.proof.body,
+                alt: copy.proof.alt || generatedTexts.proof.alt,
+              },
+              value: {
+                title: copy.value.title || generatedTexts.value.title,
+                text1: copy.value.text1 || generatedTexts.value.text1,
+                text2: copy.value.text2 || generatedTexts.value.text2,
+                text3: copy.value.text3 || generatedTexts.value.text3,
+                alt: copy.value.alt || generatedTexts.value.alt,
+              },
+              grid: {
+                ...generatedTexts.grid,
+                items: generatedTexts.grid.items.map((item, i) => ({
+                  title: copy.grid[i]?.title || item.title,
+                  desc: copy.grid[i]?.desc || item.desc,
+                })),
+              },
+              comp: {
+                ...generatedTexts.comp,
+                instructions: copy.comp || generatedTexts.comp.instructions,
+              },
+            };
+            usedAi = true;
+          } else {
+            toast.warning(`AI non disponibile: ${response.error}. Usati i testi del motore interno.`);
+          }
+        } catch (aiError) {
+          console.error(aiError);
+          toast.warning("Analisi AI non riuscita: usati i testi del motore interno.");
+        }
+        setStatus(`Rendering A+1 in corso per il mercato [${lang.toUpperCase()}]...`);
+      }
+
 
       const heroCanvas = document.getElementById("aplus-hero") as HTMLCanvasElement | null;
       const proofCanvas = document.getElementById("aplus-proof") as HTMLCanvasElement | null;
