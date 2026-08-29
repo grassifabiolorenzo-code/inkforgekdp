@@ -19,6 +19,9 @@ import {
   type Listing,
 } from "@/components/tools/pubblicazione/listingLogic";
 import { analyzeInteriorPdf, type InteriorAnalysisResult } from "@/components/tools/pubblicazione/pdfAnalysis";
+import { extractCoverContent, extractPdfContent } from "@/components/tools/pdfContent";
+import { generateListingCopy } from "@/lib/aiCopy.functions";
+import { Switch } from "@/components/ui/switch";
 
 /**
  * TOOL 2 — Pubblicazione (Amazon KDP International Listing Suite).
@@ -63,6 +66,11 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
 
   const [generating, setGenerating] = useState(false);
   const [listing, setListing] = useState<Listing | null>(null);
+
+  const [useAi, setUseAi] = useState(true);
+  const [aiInsight, setAiInsight] = useState<string | null>(null);
+  const [aiUsed, setAiUsed] = useState(false);
+  const [aiStep, setAiStep] = useState<string | null>(null);
 
   function handleAudienceChange(value: Audience) {
     setAudience(value);
@@ -126,7 +134,7 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
     const operationId = newOperationId("pubblicazione-gen");
 
     try {
-      const result = generateListing({
+      let result = generateListing({
         locale: outputLocale,
         subject,
         bookType,
@@ -138,11 +146,64 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
         interiorPages: interiorAnalysis.totalPages,
       });
 
+      let insight: string | null = null;
+      let usedAi = false;
+
+      if (useAi && (coverFile || interiorFile)) {
+        try {
+          setAiStep("Analisi AI di copertina e pagine interne...");
+          const cover = coverFile ? await extractCoverContent(coverFile) : null;
+          const interior = interiorFile
+            ? await extractPdfContent(interiorFile, { maxImages: 3, maxTextPages: 6 })
+            : null;
+
+          setAiStep("Scrittura testi SEO + AIDA + PAS...");
+          const response = await generateListingCopy({
+            data: {
+              locale: outputLocale,
+              subject,
+              bookType,
+              audience,
+              ageDetails,
+              interiorPages: interior?.totalPages ?? interiorAnalysis.totalPages,
+              interiorText: interior?.text || undefined,
+              interiorImages: interior?.images,
+              coverImages: cover?.images,
+            },
+          });
+
+          if (response.ok) {
+            const copy = response.copy;
+            result = {
+              ...result,
+              title: copy.title || result.title,
+              subtitle: copy.subtitle || result.subtitle,
+              description: copy.description || result.description,
+              keywords: copy.keywords.length >= 3 ? copy.keywords.slice(0, 7) : result.keywords,
+              categories:
+                copy.categories && copy.categories.length === 3 ? copy.categories : result.categories,
+            };
+            insight = copy.insight ?? null;
+            usedAi = true;
+          } else {
+            toast.warning(`AI non disponibile: ${response.error}. Usati i testi del motore interno.`);
+          }
+        } catch (aiError) {
+          console.error(aiError);
+          toast.warning("Analisi AI non riuscita: usati i testi del motore interno.");
+        } finally {
+          setAiStep(null);
+        }
+      }
+
       // Generazione completata → consumo del credito.
       const charge = await runtime.charge(operationId, "Generazione listing KDP completata");
       if (!charge.ok) return;
       setListing(result);
+      setAiInsight(insight);
+      setAiUsed(usedAi);
       toast.success(charge.duplicate ? "Generazione completata" : "Generazione completata — 1 credito");
+
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Generazione non riuscita");
     } finally {
@@ -269,6 +330,18 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
           )}
         </div>
 
+        <div className="flex items-start justify-between gap-3 rounded-md border border-border bg-surface p-3">
+          <div className="space-y-0.5">
+            <Label htmlFor="p-use-ai" className="text-sm">
+              AI sui contenuti reali (gratuita)
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              Analizza copertina e pagine interne per testi inerenti, con impronta SEO + AIDA + PAS.
+            </p>
+          </div>
+          <Switch id="p-use-ai" checked={useAi} onCheckedChange={setUseAi} />
+        </div>
+
         <Button
           onClick={handleGenerate}
           disabled={generating || runtime.charging}
@@ -281,10 +354,12 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
           )}
           Genera listing PAS &amp; AIDA (1 credito)
         </Button>
+        {aiStep && <p className="text-xs italic text-accent">{aiStep}</p>}
         <p className="text-xs text-muted-foreground">
           Ogni generazione completata consuma 1 credito. Le generazioni non riuscite non vengono
           addebitate.
         </p>
+
       </div>
 
       <div className="space-y-4">
@@ -311,11 +386,23 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
               </div>
             </div>
 
+            {(aiUsed || aiInsight) && (
+              <div className="panel space-y-1 border-l-4 border-l-accent p-5">
+                <h4 className="text-sm font-semibold">
+                  ✨ Testi generati dall&apos;AI sui contenuti reali
+                </h4>
+                <p className="text-xs text-muted-foreground">
+                  {aiInsight ?? "Copertina e pagine interne analizzate: copy SEO + AIDA + PAS."}
+                </p>
+              </div>
+            )}
+
             {listing.interiorPages > 0 && (
               <p className="text-xs text-muted-foreground">
                 Pagine interne analizzate: <strong>{listing.interiorPages}</strong>
               </p>
             )}
+
 
             <article className="panel space-y-4 p-6">
               <div className="flex items-start justify-between gap-3">

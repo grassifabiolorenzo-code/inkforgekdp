@@ -18,6 +18,8 @@ import { generateModulesText, nextCopyVariationIndex } from "@/components/tools/
 import type { AgeId, GeneratedModulesText, LangId, NicheId } from "@/components/tools/aplus/types";
 import type { ValueModuleStyle } from "@/components/tools/aplus/canvasRenderers";
 import { exportModulesAsZip, type ModuleCanvases } from "@/components/tools/aplus/zipExport";
+import { extractCoverContent, extractPdfContent } from "@/components/tools/pdfContent";
+import { generateAplusCopy } from "@/lib/aiCopy.functions";
 
 
 /**
@@ -55,6 +57,8 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
   const [status, setStatus] = useState("In attesa dei file sorgente...");
   const [texts, setTexts] = useState<GeneratedModulesText | null>(null);
   const [canvasesReady, setCanvasesReady] = useState(false);
+  const [useAi, setUseAi] = useState(true);
+  const [aiUsed, setAiUsed] = useState(false);
 
   // Modulo 3: stile tipografico personalizzabile del blocco "Value Highlights".
   const DEFAULT_VALUE_STYLE: ValueModuleStyle = {
@@ -182,13 +186,84 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
       const intImg3 = await renderPdfPage(interiorFile, page3, false);
 
       const variationIndex = nextCopyVariationIndex();
-      const generatedTexts = generateModulesText({
+      let generatedTexts = generateModulesText({
         lang,
         niche,
         age,
         pages: [page1, page2, page3],
         variationIndex,
       });
+
+      let usedAi = false;
+      if (useAi) {
+        try {
+          setStatus("Analisi AI di copertina e pagine interne...");
+          const cover = await extractCoverContent(coverFile);
+          const interior = await extractPdfContent(interiorFile, {
+            maxImages: 3,
+            maxTextPages: 6,
+            pageIndexes: [page1, page2, page3],
+          });
+
+          setStatus("Scrittura testi A+ (SEO + AIDA + PAS)...");
+          const response = await generateAplusCopy({
+            data: {
+              lang,
+              niche,
+              age,
+              title,
+              interiorText: interior.text || undefined,
+              interiorImages: interior.images,
+              coverImages: cover.images,
+            },
+          });
+
+          if (response.ok) {
+            const copy = response.copy;
+            generatedTexts = {
+              ...generatedTexts,
+              hero: {
+                ...generatedTexts.hero,
+                heading: copy.hero.heading || generatedTexts.hero.heading,
+                body: copy.hero.body || generatedTexts.hero.body,
+                alt: copy.hero.alt || generatedTexts.hero.alt,
+              },
+              proof: {
+                ...generatedTexts.proof,
+                heading: copy.proof.heading || generatedTexts.proof.heading,
+                body: copy.proof.body || generatedTexts.proof.body,
+                alt: copy.proof.alt || generatedTexts.proof.alt,
+              },
+              value: {
+                title: copy.value.title || generatedTexts.value.title,
+                text1: copy.value.text1 || generatedTexts.value.text1,
+                text2: copy.value.text2 || generatedTexts.value.text2,
+                text3: copy.value.text3 || generatedTexts.value.text3,
+                alt: copy.value.alt || generatedTexts.value.alt,
+              },
+              grid: {
+                ...generatedTexts.grid,
+                items: generatedTexts.grid.items.map((item, i) => ({
+                  title: copy.grid[i]?.title || item.title,
+                  desc: copy.grid[i]?.desc || item.desc,
+                })),
+              },
+              comp: {
+                ...generatedTexts.comp,
+                instructions: copy.comp || generatedTexts.comp.instructions,
+              },
+            };
+            usedAi = true;
+          } else {
+            toast.warning(`AI non disponibile: ${response.error}. Usati i testi del motore interno.`);
+          }
+        } catch (aiError) {
+          console.error(aiError);
+          toast.warning("Analisi AI non riuscita: usati i testi del motore interno.");
+        }
+        setStatus(`Rendering A+1 in corso per il mercato [${lang.toUpperCase()}]...`);
+      }
+
 
       const heroCanvas = document.getElementById("aplus-hero") as HTMLCanvasElement | null;
       const proofCanvas = document.getElementById("aplus-proof") as HTMLCanvasElement | null;
@@ -226,8 +301,13 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
       if (!result.ok) return;
 
       setTexts(generatedTexts);
+      setAiUsed(usedAi);
       setCanvasesReady(true);
-      setStatus(`Generazione A+1 completata per il mercato [${lang.toUpperCase()}]!`);
+      setStatus(
+        usedAi
+          ? `Generazione A+1 completata con testi AI sui contenuti reali [${lang.toUpperCase()}]!`
+          : `Generazione A+1 completata per il mercato [${lang.toUpperCase()}]!`,
+      );
       toast.success(result.duplicate ? "Generazione completata" : "Generazione completata — 1 credito");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Errore durante l'elaborazione dei file.";
@@ -460,6 +540,23 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
             />
           </div>
         </div>
+
+        <div className="flex items-start justify-between gap-3 rounded-md border border-border bg-surface p-3">
+          <div className="space-y-0.5">
+            <Label htmlFor="aplus-use-ai" className="text-sm">
+              AI sui contenuti reali (gratuita)
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              Legge copertina e pagine interne per testi inerenti, con impronta SEO + AIDA + PAS.
+            </p>
+          </div>
+          <Switch id="aplus-use-ai" checked={useAi} onCheckedChange={setUseAi} />
+        </div>
+        {aiUsed && (
+          <p className="text-xs text-accent">
+            ✨ Testi dell&apos;ultima generazione scritti dall&apos;AI sui contenuti analizzati.
+          </p>
+        )}
 
         <Button
           onClick={handleGenerate}
