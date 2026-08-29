@@ -145,11 +145,22 @@ function SubscriptionPage() {
           </div>
         )}
 
+        {billingStatus.data && !billingStatus.data.ready && (
+          <div className="flex items-start gap-3 rounded-lg border border-border bg-surface p-4 text-sm">
+            <Info className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+            <p className="text-muted-foreground">
+              I pagamenti sono in fase di attivazione: al momento non è possibile avviare o
+              modificare un abbonamento. Il resto della dashboard resta pienamente utilizzabile.
+            </p>
+          </div>
+        )}
+
         <PricingSection
           compact
           onSelect={handleSelect}
           currentPlan={state?.plan?.slug ?? null}
           loadingPlan={loadingPlan}
+          disabledPlans={unavailablePlans}
         />
       </div>
     </DashboardShell>
