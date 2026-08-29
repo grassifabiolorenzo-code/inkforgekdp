@@ -17,7 +17,7 @@ export function AiStyleControls({
   onToneChange: (tone: AiToneId) => void;
   creativity: number;
   onCreativityChange: (value: number) => void;
-  disabled?: boolean;
+  disabled?: boolean | undefined;
 }) {
   return (
     <div className="space-y-4 rounded-md border border-border bg-surface p-3">
@@ -25,7 +25,7 @@ export function AiStyleControls({
         <Label htmlFor={`${idPrefix}-tone`} className="text-xs">
           Tono di voce
         </Label>
-        <Select value={tone} onValueChange={(v) => onToneChange(v as AiToneId)} disabled={disabled}>
+        <Select value={tone} onValueChange={(v) => onToneChange(v as AiToneId)} disabled={disabled ?? false}>
           <SelectTrigger id={`${idPrefix}-tone`}>
             <SelectValue />
           </SelectTrigger>
@@ -52,7 +52,7 @@ export function AiStyleControls({
           max={10}
           step={1}
           value={[creativity]}
-          disabled={disabled}
+          disabled={disabled ?? false}
           onValueChange={(v) => onCreativityChange(v[0] ?? creativity)}
         />
         <p className="text-[11px] text-muted-foreground">
