@@ -386,11 +386,23 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
               </div>
             </div>
 
+            {(aiUsed || aiInsight) && (
+              <div className="panel space-y-1 border-l-4 border-l-accent p-5">
+                <h4 className="text-sm font-semibold">
+                  ✨ Testi generati dall&apos;AI sui contenuti reali
+                </h4>
+                <p className="text-xs text-muted-foreground">
+                  {aiInsight ?? "Copertina e pagine interne analizzate: copy SEO + AIDA + PAS."}
+                </p>
+              </div>
+            )}
+
             {listing.interiorPages > 0 && (
               <p className="text-xs text-muted-foreground">
                 Pagine interne analizzate: <strong>{listing.interiorPages}</strong>
               </p>
             )}
+
 
             <article className="panel space-y-4 p-6">
               <div className="flex items-start justify-between gap-3">
