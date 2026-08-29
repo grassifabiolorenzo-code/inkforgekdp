@@ -184,7 +184,7 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
             id="p-subject"
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            placeholder="Es. Bradipo Kawaii, Pattern Geometrici, T-Rex"
+            placeholder="Es. inserisci il soggetto del tuo libro"
           />
         </div>
 
