@@ -19,6 +19,9 @@ import {
   type Listing,
 } from "@/components/tools/pubblicazione/listingLogic";
 import { analyzeInteriorPdf, type InteriorAnalysisResult } from "@/components/tools/pubblicazione/pdfAnalysis";
+import { extractCoverContent, extractPdfContent } from "@/components/tools/pdfContent";
+import { generateListingCopy } from "@/lib/aiCopy.functions";
+import { Switch } from "@/components/ui/switch";
 
 /**
  * TOOL 2 — Pubblicazione (Amazon KDP International Listing Suite).
