@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ShieldCheck, Zap } from "lucide-react";
 
-import dashboardPreview from "@/assets/dashboard-preview.jpg";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -62,21 +61,6 @@ export function Hero() {
           </span>
         </div>
 
-        <div className="relative mx-auto mt-16 max-w-5xl">
-          <div className="panel glow-violet overflow-hidden p-2">
-            <img
-              src={dashboardPreview}
-              alt="Anteprima della dashboard OP+studioKdp con crediti e i quattro tool"
-              width={1600}
-              height={1008}
-              className="w-full rounded-lg"
-            />
-          </div>
-          <div
-            className="pointer-events-none absolute inset-x-8 -bottom-6 h-24 bg-gradient-brand opacity-20 blur-3xl"
-            aria-hidden
-          />
-        </div>
       </div>
     </section>
   );
