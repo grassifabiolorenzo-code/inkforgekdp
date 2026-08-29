@@ -541,6 +541,23 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
           </div>
         </div>
 
+        <div className="flex items-start justify-between gap-3 rounded-md border border-border bg-surface p-3">
+          <div className="space-y-0.5">
+            <Label htmlFor="aplus-use-ai" className="text-sm">
+              AI sui contenuti reali (gratuita)
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              Legge copertina e pagine interne per testi inerenti, con impronta SEO + AIDA + PAS.
+            </p>
+          </div>
+          <Switch id="aplus-use-ai" checked={useAi} onCheckedChange={setUseAi} />
+        </div>
+        {aiUsed && (
+          <p className="text-xs text-accent">
+            ✨ Testi dell&apos;ultima generazione scritti dall&apos;AI sui contenuti analizzati.
+          </p>
+        )}
+
         <Button
           onClick={handleGenerate}
           disabled={generating || runtime.charging}
