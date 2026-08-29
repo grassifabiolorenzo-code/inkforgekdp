@@ -480,13 +480,20 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
             onPointerDown={() => setSelectedId(null)}
           >
             {bgImage && (
-              <img
-                src={bgImage.src}
-                alt="Sfondo copertina"
-                className="pointer-events-none absolute left-0 top-0 z-0 h-auto"
-                style={{ width: bgImage.width, top: bgImage.top, left: bgImage.left, position: "absolute" }}
-              />
+              <DraggableBox
+                top={bgImage.top}
+                left={bgImage.left}
+                width={bgImage.width}
+                selected={selectedId === "bg"}
+                onSelect={() => setSelectedId("bg")}
+                onMove={(top, left) => setBgImage((b) => (b ? { ...b, top, left } : b))}
+                onResize={(width) => setBgImage((b) => (b ? { ...b, width } : b))}
+                className="z-0"
+              >
+                <img src={bgImage.src} alt="Sfondo copertina" className="pointer-events-none block h-auto w-full" />
+              </DraggableBox>
             )}
+
 
             {/* Livelli immagine */}
             {imageLayers.map((layer) => (
