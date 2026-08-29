@@ -253,6 +253,8 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
       await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 30)));
 
       const { default: html2canvas } = await import("html2canvas");
+      // Attendi il caricamento completo dei font web prima del rendering HD.
+      await document.fonts.ready;
       const node = canvasRef.current;
       if (!node) throw new Error("Canvas non disponibile");
 
