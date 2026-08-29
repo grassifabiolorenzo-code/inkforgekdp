@@ -67,6 +67,11 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
   const [generating, setGenerating] = useState(false);
   const [listing, setListing] = useState<Listing | null>(null);
 
+  const [useAi, setUseAi] = useState(true);
+  const [aiInsight, setAiInsight] = useState<string | null>(null);
+  const [aiUsed, setAiUsed] = useState(false);
+  const [aiStep, setAiStep] = useState<string | null>(null);
+
   function handleAudienceChange(value: Audience) {
     setAudience(value);
     setAgeDetails(defaultAgeDetails(value));
