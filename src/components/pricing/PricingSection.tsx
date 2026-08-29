@@ -11,11 +11,14 @@ export function PricingSection({
   currentPlan,
   loadingPlan,
   compact = false,
+  disabledPlans,
 }: {
   onSelect?: (slug: PlanSlug) => void;
   currentPlan?: string | null;
   loadingPlan?: string | null;
   compact?: boolean;
+  /** Piani il cui checkout è temporaneamente disabilitato (es. credenziali mancanti). */
+  disabledPlans?: string[];
 }) {
   return (
     <section id="pricing" className={cn("mx-auto max-w-6xl px-4", compact ? "py-8" : "py-20")}>
@@ -105,10 +108,14 @@ export function PricingSection({
                       plan.recommended && "bg-gradient-brand text-primary-foreground hover:opacity-90",
                     )}
                     variant={plan.recommended ? "default" : "outline"}
-                    disabled={loadingPlan === plan.slug}
+                    disabled={loadingPlan === plan.slug || disabledPlans?.includes(plan.slug)}
                     onClick={() => onSelect(plan.slug)}
                   >
-                    {loadingPlan === plan.slug ? "Apertura checkout…" : `Scegli ${plan.name}`}
+                    {loadingPlan === plan.slug
+                      ? "Apertura checkout…"
+                      : disabledPlans?.includes(plan.slug)
+                        ? "Non disponibile"
+                        : `Scegli ${plan.name}`}
                   </Button>
                 ) : (
                   <Button
