@@ -301,8 +301,13 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
       if (!result.ok) return;
 
       setTexts(generatedTexts);
+      setAiUsed(usedAi);
       setCanvasesReady(true);
-      setStatus(`Generazione A+1 completata per il mercato [${lang.toUpperCase()}]!`);
+      setStatus(
+        usedAi
+          ? `Generazione A+1 completata con testi AI sui contenuti reali [${lang.toUpperCase()}]!`
+          : `Generazione A+1 completata per il mercato [${lang.toUpperCase()}]!`,
+      );
       toast.success(result.duplicate ? "Generazione completata" : "Generazione completata — 1 credito");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Errore durante l'elaborazione dei file.";
