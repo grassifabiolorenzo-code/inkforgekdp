@@ -63,6 +63,7 @@ export function drawHero(
   bg: string,
   logoImg: HTMLCanvasElement | null,
   logoScale = 1,
+  logoOffset: { x: number; y: number } = { x: 0, y: 0 },
 ) {
   const ctx = canvas.getContext("2d")!;
   ctx.imageSmoothingEnabled = true;
@@ -83,8 +84,8 @@ export function drawHero(
     if (w > maxW) { w = maxW; h = w / ratio; }
     if (h > maxH) { h = maxH; w = h * ratio; }
 
-    const centerX = 485 - w / 2;
-    const centerY = 150 - h / 2;
+    const centerX = 485 + logoOffset.x - w / 2;
+    const centerY = 150 + logoOffset.y - h / 2;
 
     ctx.save();
     ctx.shadowColor = "rgba(0, 0, 0, 0.18)";
@@ -93,6 +94,7 @@ export function drawHero(
     ctx.restore();
   }
 }
+
 
 export function drawProof(canvas: HTMLCanvasElement, int1: ImgSource, int2: ImgSource, bg: string) {
   const ctx = canvas.getContext("2d")!;

@@ -1,5 +1,5 @@
 import { Download, Loader2, Ruler, Upload } from "lucide-react";
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -70,7 +70,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
   const [exporting, setExporting] = useState(false);
 
   const [title, setTitle] = useState<TextElementState>({
-    text: "CUTE T-REX",
+    text: "",
     font: "Inter",
     color: "#fbbf24",
     size: 42,
@@ -79,7 +79,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
     left: 20,
   });
   const [author, setAuthor] = useState<TextElementState>({
-    text: "Olimpia Pubblicazioni",
+    text: "",
     font: "Inter",
     color: "#fcd34d",
     size: 12,
@@ -88,7 +88,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
     left: 20,
   });
   const [spine, setSpine] = useState<TextElementState>({
-    text: "CUTE T-REX • Olimpia Pubblicazioni",
+    text: "",
     font: "Inter",
     color: "#ffffff",
     size: 10,
@@ -97,7 +97,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
     left: -60,
   });
   const [backBlurb, setBackBlurb] = useState<TextElementState>({
-    text: "A perfect first coloring book for little dinosaur lovers!",
+    text: "",
     font: "Inter",
     color: "#ffffff",
     size: 11,
@@ -105,20 +105,10 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
     top: 40,
     left: 20,
   });
-  const [subtitles, setSubtitles] = useState<SubtitleElementState[]>([
-    {
-      id: "sub_1",
-      text: "TODDLER COLORING BOOK",
-      font: "Inter",
-      color: "#ffffff",
-      size: 16,
-      fx: "fx-none",
-      top: 110,
-      left: 20,
-    },
-  ]);
+  const [subtitles, setSubtitles] = useState<SubtitleElementState[]>([]);
   const [bgImage, setBgImage] = useState<BackgroundImageState | null>(null);
   const [imageLayers, setImageLayers] = useState<ImageLayerState[]>([]);
+
 
   // --- Calcolo specifiche KDP ---
   const trimSize = KDP_TRIM_SIZES.find((t) => t.id === trim)!;
@@ -203,7 +193,37 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
     setImageLayers((prev) => prev.filter((l) => l.id !== id));
   }
 
+  // Zoom con rotella sullo sfondo, ancorato al puntatore.
+  const bgRef = useRef<BackgroundImageState | null>(null);
+  bgRef.current = bgImage;
+
+  useEffect(() => {
+    const el = canvasRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      const bg = bgRef.current;
+      if (!bg) return;
+      e.preventDefault();
+      const dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 100 : 1);
+      const factor = Math.exp(-dy * 0.0015);
+      const nextWidth = Math.min(6000, Math.max(60, bg.width * factor));
+      const k = nextWidth / bg.width;
+      const rect = el.getBoundingClientRect();
+      const px = e.clientX - rect.left;
+      const py = e.clientY - rect.top;
+      setBgImage({
+        ...bg,
+        width: Math.round(nextWidth),
+        left: Math.round(px - (px - bg.left) * k),
+        top: Math.round(py - (py - bg.top) * k),
+      });
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
+
   const chargeGuard = useRef(false);
+
 
   async function handleExport() {
     // Guardia sincrona: blocca doppio click/rientranza prima di qualsiasi await.
@@ -433,14 +453,34 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
                 <div className="space-y-2 border-t border-border pt-2">
                   <div className="flex items-center justify-between">
                     <Label className="text-[10px] text-muted-foreground">Larghezza (px)</Label>
-                    <span className="font-mono text-[10px] text-accent">{bgImage.width}px</span>
+                    <span className="font-mono text-[10px] text-accent">{Math.round(bgImage.width)}px</span>
                   </div>
                   <Slider
-                    min={200}
+                    min={60}
                     max={3000}
                     value={[bgImage.width]}
                     onValueChange={([w]) => setBgImage((b) => (b ? { ...b, width: w ?? b.width } : b))}
                   />
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <Label className="text-[10px] text-muted-foreground">Offset X</Label>
+                      <Input
+                        type="number"
+                        value={Math.round(bgImage.left)}
+                        onChange={(e) => setBgImage((b) => (b ? { ...b, left: Number(e.target.value) || 0 } : b))}
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[10px] text-muted-foreground">Offset Y</Label>
+                      <Input
+                        type="number"
+                        value={Math.round(bgImage.top)}
+                        onChange={(e) => setBgImage((b) => (b ? { ...b, top: Number(e.target.value) || 0 } : b))}
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                  </div>
                   <div className="flex gap-2">
                     <Button
                       size="sm"
@@ -454,8 +494,13 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
                       Rimuovi
                     </Button>
                   </div>
+                  <p className="text-[10px] text-muted-foreground">
+                    Trascina lo sfondo sul canvas per spostarlo, usa la rotella per zoomare e la maniglia in basso a destra
+                    per ridimensionarlo.
+                  </p>
                 </div>
               )}
+
             </div>
           </TabsContent>
         </Tabs>
@@ -490,13 +535,20 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
             onPointerDown={() => setSelectedId(null)}
           >
             {bgImage && (
-              <img
-                src={bgImage.src}
-                alt="Sfondo copertina"
-                className="pointer-events-none absolute left-0 top-0 z-0 h-auto"
-                style={{ width: bgImage.width, top: bgImage.top, left: bgImage.left, position: "absolute" }}
-              />
+              <DraggableBox
+                top={bgImage.top}
+                left={bgImage.left}
+                width={bgImage.width}
+                selected={selectedId === "bg"}
+                onSelect={() => setSelectedId("bg")}
+                onMove={(top, left) => setBgImage((b) => (b ? { ...b, top, left } : b))}
+                onResize={(width) => setBgImage((b) => (b ? { ...b, width } : b))}
+                className="z-0"
+              >
+                <img src={bgImage.src} alt="Sfondo copertina" className="pointer-events-none block h-auto w-full" />
+              </DraggableBox>
             )}
+
 
             {/* Livelli immagine */}
             {imageLayers.map((layer) => (

@@ -1,5 +1,5 @@
 import { Download, Loader2, Sparkles, Upload } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,7 @@ import { exportModulesAsZip, type ModuleCanvases } from "@/components/tools/aplu
  */
 
 export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
-  const [title, setTitle] = useState("Olimpia Pubblicazioni");
+  const [title, setTitle] = useState("");
   const [niche, setNiche] = useState<NicheId>("coloring");
   const [lang, setLang] = useState<LangId>("it");
   const [age, setAge] = useState<AgeId>("4-6");
@@ -32,6 +32,7 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
   const [interiorFile, setInteriorFile] = useState<File | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoScale, setLogoScale] = useState(100);
+  const [logoOffset, setLogoOffset] = useState({ x: 0, y: 0 });
 
   const [page1, setPage1] = useState(1);
   const [page2, setPage2] = useState(2);
@@ -46,7 +47,59 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
   const [texts, setTexts] = useState<GeneratedModulesText | null>(null);
   const [canvasesReady, setCanvasesReady] = useState(false);
 
+  // Sorgenti dell'ultimo rendering hero: permettono di riposizionare il logo senza rigenerare.
+  const heroSources = useRef<{
+    front: HTMLCanvasElement | HTMLImageElement;
+    back: HTMLCanvasElement | HTMLImageElement;
+    logo: HTMLCanvasElement | null;
+    drawHero: typeof import("@/components/tools/aplus/canvasRenderers")["drawHero"];
+  } | null>(null);
+  const logoDrag = useRef<{ startX: number; startY: number; x: number; y: number; ratio: number } | null>(null);
+
+  function redrawHero(offset: { x: number; y: number }, scalePercent: number) {
+    const src = heroSources.current;
+    const canvas = document.getElementById("aplus-hero") as HTMLCanvasElement | null;
+    if (!src || !canvas) return;
+    src.drawHero(canvas, src.front, src.back, bgColor, src.logo, scalePercent / 100, offset);
+  }
+
+  useEffect(() => {
+    if (canvasesReady) redrawHero(logoOffset, logoScale);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [logoOffset, logoScale, bgColor, canvasesReady]);
+
+  function handleHeroPointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
+    if (!canvasesReady || !heroSources.current?.logo) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    logoDrag.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      x: logoOffset.x,
+      y: logoOffset.y,
+      ratio: 970 / rect.width,
+    };
+  }
+
+  function handleHeroPointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
+    const drag = logoDrag.current;
+    if (!drag) return;
+    const x = Math.round(drag.x + (e.clientX - drag.startX) * drag.ratio);
+    const y = Math.round(drag.y + (e.clientY - drag.startY) * drag.ratio);
+    setLogoOffset({ x, y });
+  }
+
+  function handleHeroPointerUp(e: React.PointerEvent<HTMLCanvasElement>) {
+    logoDrag.current = null;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      // ignore
+    }
+  }
+
   const chargeGuard = useRef(false);
+
 
   async function handleGenerate() {
     // Guardia sincrona: blocca doppio click/rientranza prima di qualsiasi await.
@@ -114,7 +167,8 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
         throw new Error("Anteprima canvas non disponibile.");
       }
 
-      drawHero(heroCanvas, frontCoverImg, backCoverImg, bgColor, logoImg, logoScale / 100);
+      heroSources.current = { front: frontCoverImg, back: backCoverImg, logo: logoImg, drawHero };
+      drawHero(heroCanvas, frontCoverImg, backCoverImg, bgColor, logoImg, logoScale / 100, logoOffset);
       drawProof(proofCanvas, intImg1, intImg2, bgColor);
       drawValueModule(valueCanvas, bgColor, accentColor, generatedTexts.value);
       drawGridSquare(grid1Canvas, intImg1, bgColor);
@@ -326,6 +380,33 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
           />
         </div>
 
+        <div className="space-y-1.5">
+          <Label>Posizione Logo Modulo 1 (X: {logoOffset.x}px — Y: {logoOffset.y}px)</Label>
+          <Slider
+            min={-420}
+            max={420}
+            step={2}
+            value={[logoOffset.x]}
+            onValueChange={(v) => setLogoOffset((o) => ({ ...o, x: v[0] ?? 0 }))}
+          />
+          <Slider
+            min={-130}
+            max={130}
+            step={2}
+            value={[logoOffset.y]}
+            onValueChange={(v) => setLogoOffset((o) => ({ ...o, y: v[0] ?? 0 }))}
+          />
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] text-muted-foreground">
+              Puoi anche trascinare il logo direttamente sull'anteprima del Modulo 1.
+            </p>
+            <Button size="sm" variant="ghost" onClick={() => setLogoOffset({ x: 0, y: 0 })}>
+              Centra
+            </Button>
+          </div>
+        </div>
+
+
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="a-bg">Sfondo Moduli</Label>
@@ -382,7 +463,16 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
         <article className="panel space-y-3 p-6">
           <h4 className="text-sm font-semibold">Modulo 1: Hero Banner Brand (970×300 px)</h4>
           <div className="overflow-x-auto rounded-md border border-border bg-surface p-2">
-            <canvas id="aplus-hero" width={970} height={300} className="h-auto w-full max-w-2xl" />
+            <canvas
+              id="aplus-hero"
+              width={970}
+              height={300}
+              className={`h-auto w-full max-w-2xl touch-none ${canvasesReady && logoFile ? "cursor-move" : ""}`}
+              onPointerDown={handleHeroPointerDown}
+              onPointerMove={handleHeroPointerMove}
+              onPointerUp={handleHeroPointerUp}
+              onPointerCancel={handleHeroPointerUp}
+            />
           </div>
           {texts && (
             <pre className="whitespace-pre-wrap rounded-md border border-border bg-surface p-3 text-xs">
