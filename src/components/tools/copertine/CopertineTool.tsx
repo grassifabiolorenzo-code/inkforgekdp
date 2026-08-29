@@ -70,7 +70,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
   const [exporting, setExporting] = useState(false);
 
   const [title, setTitle] = useState<TextElementState>({
-    text: "CUTE T-REX",
+    text: "",
     font: "Inter",
     color: "#fbbf24",
     size: 42,
@@ -79,7 +79,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
     left: 20,
   });
   const [author, setAuthor] = useState<TextElementState>({
-    text: "Olimpia Pubblicazioni",
+    text: "",
     font: "Inter",
     color: "#fcd34d",
     size: 12,
@@ -88,7 +88,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
     left: 20,
   });
   const [spine, setSpine] = useState<TextElementState>({
-    text: "CUTE T-REX • Olimpia Pubblicazioni",
+    text: "",
     font: "Inter",
     color: "#ffffff",
     size: 10,
@@ -97,7 +97,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
     left: -60,
   });
   const [backBlurb, setBackBlurb] = useState<TextElementState>({
-    text: "A perfect first coloring book for little dinosaur lovers!",
+    text: "",
     font: "Inter",
     color: "#ffffff",
     size: 11,
@@ -105,20 +105,10 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
     top: 40,
     left: 20,
   });
-  const [subtitles, setSubtitles] = useState<SubtitleElementState[]>([
-    {
-      id: "sub_1",
-      text: "TODDLER COLORING BOOK",
-      font: "Inter",
-      color: "#ffffff",
-      size: 16,
-      fx: "fx-none",
-      top: 110,
-      left: 20,
-    },
-  ]);
+  const [subtitles, setSubtitles] = useState<SubtitleElementState[]>([]);
   const [bgImage, setBgImage] = useState<BackgroundImageState | null>(null);
   const [imageLayers, setImageLayers] = useState<ImageLayerState[]>([]);
+
 
   // --- Calcolo specifiche KDP ---
   const trimSize = KDP_TRIM_SIZES.find((t) => t.id === trim)!;
