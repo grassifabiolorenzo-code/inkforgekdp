@@ -405,42 +405,65 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
 
 
             <article className="panel space-y-4 p-6">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs tracking-wide uppercase text-muted-foreground">Titolo</p>
-                  <h3 className="font-semibold">{listing.title}</h3>
+              <p className="text-xs text-muted-foreground">
+                Tutti i testi sono modificabili: le modifiche vengono usate sia dai pulsanti Copia sia
+                dall&apos;esportazione .txt.
+              </p>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between gap-3">
+                  <Label htmlFor="p-out-title" className="text-xs tracking-wide uppercase text-muted-foreground">
+                    Titolo ({listing.title.length} caratteri)
+                  </Label>
+                  <Button variant="ghost" size="sm" onClick={() => copyToClipboard(listing.title, "Titolo")}>
+                    <Copy className="size-4" />
+                  </Button>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => copyToClipboard(listing.title, "Titolo")}>
-                  <Copy className="size-4" />
-                </Button>
+                <Input
+                  id="p-out-title"
+                  value={listing.title}
+                  onChange={(e) => updateListing({ title: e.target.value })}
+                />
               </div>
 
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs tracking-wide uppercase text-muted-foreground">Sottotitolo</p>
-                  <p className="text-sm text-accent">{listing.subtitle}</p>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between gap-3">
+                  <Label htmlFor="p-out-subtitle" className="text-xs tracking-wide uppercase text-muted-foreground">
+                    Sottotitolo ({listing.subtitle.length} caratteri)
+                  </Label>
+                  <Button variant="ghost" size="sm" onClick={() => copyToClipboard(listing.subtitle, "Sottotitolo")}>
+                    <Copy className="size-4" />
+                  </Button>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => copyToClipboard(listing.subtitle, "Sottotitolo")}>
-                  <Copy className="size-4" />
-                </Button>
+                <Textarea
+                  id="p-out-subtitle"
+                  rows={3}
+                  value={listing.subtitle}
+                  onChange={(e) => updateListing({ subtitle: e.target.value })}
+                />
               </div>
 
-              <div className="flex items-start justify-between gap-3">
-                <p className="text-xs tracking-wide uppercase text-muted-foreground">
-                  Descrizione A+/HTML (PAS + AIDA)
-                </p>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => copyToClipboard(listing.description, "Descrizione")}
-                >
-                  <Copy className="size-4" />
-                </Button>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between gap-3">
+                  <Label htmlFor="p-out-desc" className="text-xs tracking-wide uppercase text-muted-foreground">
+                    Descrizione (PAS + AIDA — {listing.description.length} caratteri)
+                  </Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyToClipboard(listing.description, "Descrizione")}
+                  >
+                    <Copy className="size-4" />
+                  </Button>
+                </div>
+                <Textarea
+                  id="p-out-desc"
+                  rows={18}
+                  className="font-mono text-xs leading-relaxed"
+                  value={listing.description}
+                  onChange={(e) => updateListing({ description: e.target.value })}
+                />
               </div>
-              <div
-                className="rounded-md border border-border bg-surface p-3 font-mono text-xs whitespace-pre-wrap"
-                dangerouslySetInnerHTML={{ __html: listing.description.replace(/\n/g, "<br>") }}
-              />
 
               <div>
                 <p className="text-xs tracking-wide uppercase text-muted-foreground">
@@ -448,17 +471,21 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
                 </p>
                 <div className="mt-2 space-y-1.5">
                   {listing.keywords.map((kw, index) => (
-                    <div
-                      key={kw}
-                      className="flex items-center justify-between gap-2 rounded-md border border-border bg-surface px-3 py-2 text-xs"
-                    >
-                      <span>
-                        <strong>Box {index + 1}:</strong> {kw}
-                      </span>
+                    <div key={`kw-${index}`} className="flex items-center gap-2">
+                      <span className="w-16 shrink-0 text-[11px] text-muted-foreground">Box {index + 1}</span>
+                      <Input
+                        value={kw}
+                        className="h-9 text-xs"
+                        onChange={(e) =>
+                          updateListing({
+                            keywords: listing.keywords.map((k, i) => (i === index ? e.target.value : k)),
+                          })
+                        }
+                      />
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-6 px-2 text-[11px]"
+                        className="h-8 px-2 text-[11px]"
                         onClick={() => copyToClipboard(kw, `Keyword Box ${index + 1}`)}
                       >
                         Copia
@@ -468,24 +495,33 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
                 </div>
               </div>
 
-              <div className="flex items-start justify-between gap-3">
-                <div>
+              <div>
+                <div className="flex items-center justify-between gap-3">
                   <p className="text-xs tracking-wide uppercase text-muted-foreground">
                     3 Categorie ad alto traffico (BISAC)
                   </p>
-                  <ul className="mt-1 list-disc space-y-0.5 pl-4 text-sm">
-                    {listing.categories.map((cat) => (
-                      <li key={cat}>{cat}</li>
-                    ))}
-                  </ul>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyToClipboard(listing.categories.join("\n"), "Categorie")}
+                  >
+                    <Copy className="size-4" />
+                  </Button>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => copyToClipboard(listing.categories.join("\n"), "Categorie")}
-                >
-                  <Copy className="size-4" />
-                </Button>
+                <div className="mt-2 space-y-1.5">
+                  {listing.categories.map((cat, index) => (
+                    <Input
+                      key={`cat-${index}`}
+                      value={cat}
+                      className="h-9 text-xs"
+                      onChange={(e) =>
+                        updateListing({
+                          categories: listing.categories.map((c, i) => (i === index ? e.target.value : c)),
+                        })
+                      }
+                    />
+                  ))}
+                </div>
               </div>
 
               <Button variant="outline" className="w-full" onClick={downloadListing}>
@@ -493,6 +529,7 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
                 Esporta listing (.txt)
               </Button>
             </article>
+
           </>
         )}
       </div>
