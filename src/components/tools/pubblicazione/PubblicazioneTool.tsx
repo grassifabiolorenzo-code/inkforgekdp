@@ -214,10 +214,16 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
     }
   }
 
+  /** I testi generati restano modificabili: ogni modifica aggiorna copia ed export. */
+  function updateListing(patch: Partial<Listing>) {
+    setListing((prev) => (prev ? { ...prev, ...patch } : prev));
+  }
+
   function copyToClipboard(text: string, label: string) {
     void navigator.clipboard.writeText(text);
     toast.success(`${label} copiato negli appunti`);
   }
+
 
   function downloadListing() {
     if (!listing) return;
