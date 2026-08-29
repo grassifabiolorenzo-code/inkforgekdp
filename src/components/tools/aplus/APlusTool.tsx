@@ -598,7 +598,7 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
                 <div className="space-y-1.5">
                   <Label>Badge dei punti</Label>
                   <Select
-                    value={valueStyle.numbered ? "numbers" : valueStyle.marker === "" ? "none" : valueStyle.marker}
+                    value={valueStyle.numbered ? "numbers" : valueStyle.marker ? valueStyle.marker : "none"}
                     onValueChange={(v) =>
                       setValueStyle((s) => ({
                         ...s,
