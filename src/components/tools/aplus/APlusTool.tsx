@@ -167,7 +167,8 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
         throw new Error("Anteprima canvas non disponibile.");
       }
 
-      drawHero(heroCanvas, frontCoverImg, backCoverImg, bgColor, logoImg, logoScale / 100);
+      heroSources.current = { front: frontCoverImg, back: backCoverImg, logo: logoImg, drawHero };
+      drawHero(heroCanvas, frontCoverImg, backCoverImg, bgColor, logoImg, logoScale / 100, logoOffset);
       drawProof(proofCanvas, intImg1, intImg2, bgColor);
       drawValueModule(valueCanvas, bgColor, accentColor, generatedTexts.value);
       drawGridSquare(grid1Canvas, intImg1, bgColor);
