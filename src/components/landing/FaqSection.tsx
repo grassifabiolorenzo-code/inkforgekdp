@@ -8,7 +8,7 @@ import {
 export const FAQ_ITEMS = [
   {
     q: "Cosa include l'abbonamento?",
-    a: "Ogni piano include l'accesso completo a tutti e 4 i tool: Copertine, Pubblicazione, A+ KDPstudio e Triage. La differenza tra i piani riguarda esclusivamente il numero di utilizzi mensili.",
+    a: "Tutti i piani includono Copertine, Pubblicazione e Triage. A+ KDPstudio è riservato ai piani Pro e Business. La differenza tra i piani riguarda quindi i tool inclusi e il numero di utilizzi mensili (50 con Starter, 300 con Pro, illimitati con Business).",
   },
   {
     q: "Come funziona il consumo dei crediti?",
