@@ -10,7 +10,8 @@ import { Slider } from "@/components/ui/slider";
 import type { ToolRuntime } from "@/components/tools/ToolPageShell";
 import { newOperationId } from "@/hooks/useAccount";
 
-import { AGES, LANGUAGES, NICHES } from "@/components/tools/aplus/constants";
+import { AGES, NICHES } from "@/components/tools/aplus/constants";
+import { OutputLanguageSelect, useOutputLanguage } from "@/components/tools/OutputLanguageSelect";
 import { generateModulesText, nextCopyVariationIndex } from "@/components/tools/aplus/copyEngine";
 import type { AgeId, GeneratedModulesText, LangId, NicheId } from "@/components/tools/aplus/types";
 import { exportModulesAsZip, type ModuleCanvases } from "@/components/tools/aplus/zipExport";
@@ -22,10 +23,14 @@ import { exportModulesAsZip, type ModuleCanvases } from "@/components/tools/aplu
  * 1 credito per ogni generazione completata con successo.
  */
 
+/** Mercati con database copy A+ completo. */
+const APLUS_OUTPUT_LOCALES = ["it", "en", "de", "fr", "es"] as const;
+
 export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
   const [title, setTitle] = useState("");
   const [niche, setNiche] = useState<NicheId>("coloring");
-  const [lang, setLang] = useState<LangId>("it");
+  // La lingua dei contenuti A+ segue il selettore globale (5 mercati supportati).
+  const lang = useOutputLanguage(APLUS_OUTPUT_LOCALES) as LangId;
   const [age, setAge] = useState<AgeId>("4-6");
 
   const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -266,21 +271,7 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-1.5">
-            <Label>Lingua Marketplace</Label>
-            <Select value={lang} onValueChange={(v) => setLang(v as LangId)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {LANGUAGES.map((l) => (
-                  <SelectItem key={l.id} value={l.id}>
-                    {l.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <OutputLanguageSelect id="aplus-output-lang" supported={APLUS_OUTPUT_LOCALES} />
         </div>
 
         <div className="space-y-1.5">
