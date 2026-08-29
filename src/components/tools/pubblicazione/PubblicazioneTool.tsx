@@ -23,6 +23,9 @@ import { extractCoverContent, extractPdfContent } from "@/components/tools/pdfCo
 import { generateListingCopy } from "@/lib/aiCopy.functions";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { AiStyleControls } from "@/components/tools/ai/AiStyleControls";
+import { DEFAULT_CREATIVITY, DEFAULT_TONE, type AiToneId } from "@/components/tools/ai/aiStyle";
+import { SeoPanel } from "@/components/tools/pubblicazione/SeoPanel";
 
 
 /**
@@ -73,6 +76,8 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
   const [aiInsight, setAiInsight] = useState<string | null>(null);
   const [aiUsed, setAiUsed] = useState(false);
   const [aiStep, setAiStep] = useState<string | null>(null);
+  const [tone, setTone] = useState<AiToneId>(DEFAULT_TONE);
+  const [creativity, setCreativity] = useState(DEFAULT_CREATIVITY);
 
   function handleAudienceChange(value: Audience) {
     setAudience(value);
@@ -168,6 +173,8 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
               audience,
               ageDetails,
               interiorPages: interior?.totalPages ?? interiorAnalysis.totalPages,
+              tone,
+              creativity,
               interiorText: interior?.text || undefined,
               interiorImages: interior?.images,
               coverImages: cover?.images,
@@ -219,6 +226,19 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
   /** I testi generati restano modificabili: ogni modifica aggiorna copia ed export. */
   function updateListing(patch: Partial<Listing>) {
     setListing((prev) => (prev ? { ...prev, ...patch } : prev));
+  }
+
+  /** Applica un suggerimento keyword nel primo box libero (o sostituisce l'ultimo). */
+  function applySuggestedKeyword(keyword: string) {
+    setListing((prev) => {
+      if (!prev) return prev;
+      const keywords = [...prev.keywords];
+      while (keywords.length < 7) keywords.push("");
+      const index = keywords.findIndex((k) => !k.trim());
+      keywords[index === -1 ? 6 : index] = keyword;
+      return { ...prev, keywords };
+    });
+    toast.success(`Keyword "${keyword}" inserita nei box backend`);
   }
 
   function copyToClipboard(text: string, label: string) {
@@ -350,6 +370,15 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
           <Switch id="p-use-ai" checked={useAi} onCheckedChange={setUseAi} />
         </div>
 
+        <AiStyleControls
+          idPrefix="p-ai"
+          tone={tone}
+          onToneChange={setTone}
+          creativity={creativity}
+          onCreativityChange={setCreativity}
+          disabled={!useAi}
+        />
+
         <Button
           onClick={handleGenerate}
           disabled={generating || runtime.charging}
@@ -411,6 +440,8 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
               </p>
             )}
 
+
+            <SeoPanel listing={listing} subject={subject} onApplyKeyword={applySuggestedKeyword} />
 
             <article className="panel space-y-4 p-6">
               <p className="text-xs text-muted-foreground">
