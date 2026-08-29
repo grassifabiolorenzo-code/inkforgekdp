@@ -20,8 +20,8 @@ export function ComparisonTable() {
   ];
 
   const renderValue = (value: string) => {
-    if (value === "check") return <Check className="mx-auto size-4 text-accent" />;
-    if (value === "dash") return <Minus className="mx-auto size-4 text-muted-foreground" />;
+    if (value === "check") return <Check className="mx-auto size-4 text-success" />;
+    if (value === "dash") return <Minus className="mx-auto size-4 text-muted-foreground/50" />;
     return <span className="font-medium">{value}</span>;
   };
 

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Check, Sparkles } from "lucide-react";
+import { Check, Sparkles, X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,8 @@ export function PricingSection({
             Scegli il tuo <span className="text-gradient">piano mensile</span>
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Tutti i piani includono tutti e 4 i tool. Nessun vincolo: cancelli quando vuoi.
+            A+ KDPstudio è riservato ai piani Pro e Business. Nessun vincolo: cancelli quando
+            vuoi.
           </p>
         </div>
       )}
@@ -90,8 +91,16 @@ export function PricingSection({
               <ul className="space-y-2.5 text-sm">
                 {plan.features.map((f) => (
                   <li key={f} className="flex items-start gap-2">
-                    <Check className="mt-0.5 size-4 shrink-0 text-accent" />
+                    <Check className="mt-0.5 size-4 shrink-0 text-success" />
                     <span className="text-muted-foreground">{f}</span>
+                  </li>
+                ))}
+                {plan.excludedFeatures?.map((f) => (
+                  <li key={f} className="flex items-start gap-2 opacity-60">
+                    <X className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                    <span className="text-muted-foreground line-through decoration-muted-foreground/50">
+                      {f}
+                    </span>
                   </li>
                 ))}
               </ul>
