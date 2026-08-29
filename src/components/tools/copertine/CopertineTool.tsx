@@ -651,6 +651,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
                 width={frontWidthPx - 40}
                 selected={selectedId === "back"}
                 onSelect={() => setSelectedId("back")}
+                className="z-20"
                 onMove={(top, left) => setBackBlurb((v) => ({ ...v, top, left }))}
               >
                 <p
@@ -669,6 +670,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
                 left={spine.left}
                 selected={selectedId === "spine"}
                 onSelect={() => setSelectedId("spine")}
+                className="z-20"
                 onMove={(top, left) => setSpine((v) => ({ ...v, top, left }))}
               >
                 <p
@@ -694,6 +696,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
                 width={frontWidthPx - 40}
                 selected={selectedId === "title"}
                 onSelect={() => setSelectedId("title")}
+                className="z-20"
                 onMove={(top, left) => setTitle((v) => ({ ...v, top, left }))}
               >
                 <h1
@@ -712,6 +715,8 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
                   width={frontWidthPx - 40}
                   selected={selectedId === s.id}
                   onSelect={() => setSelectedId(s.id)}
+                  className="z-20"
+                className="z-20"
                   onMove={(top, left) => updateSubtitle(s.id, { ...s, top, left })}
                 >
                   <p
@@ -729,6 +734,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
                 width={frontWidthPx - 40}
                 selected={selectedId === "author"}
                 onSelect={() => setSelectedId("author")}
+                className="z-20"
                 onMove={(top, left) => setAuthor((v) => ({ ...v, top, left }))}
               >
                 <p
