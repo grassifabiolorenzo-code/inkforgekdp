@@ -631,9 +631,36 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
             />
           </div>
           {texts && (
-            <pre className="whitespace-pre-wrap rounded-md border border-border bg-surface p-3 text-xs">
-              {`${texts.hero.title}\n\nTITOLO A+:\n${texts.hero.heading}\n\nTESTO DESCRITTIVO:\n${texts.hero.body}\n\nALT-TEXT SEO:\n${texts.hero.alt}`}
-            </pre>
+            <div className="space-y-3 rounded-md border border-border bg-surface p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {texts.hero.title} — testi modificabili
+              </p>
+              <div className="space-y-1.5">
+                <Label htmlFor="a-hero-heading">Titolo A+</Label>
+                <Input
+                  id="a-hero-heading"
+                  value={texts.hero.heading}
+                  onChange={(e) => updateHeroText("heading", e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="a-hero-body">Testo descrittivo</Label>
+                <Textarea
+                  id="a-hero-body"
+                  rows={4}
+                  value={texts.hero.body}
+                  onChange={(e) => updateHeroText("body", e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="a-hero-alt">Alt-text SEO</Label>
+                <Input
+                  id="a-hero-alt"
+                  value={texts.hero.alt}
+                  onChange={(e) => updateHeroText("alt", e.target.value)}
+                />
+              </div>
+            </div>
           )}
         </article>
 
@@ -643,11 +670,39 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
             <canvas id="aplus-proof" width={970} height={300} className="h-auto w-full max-w-2xl" />
           </div>
           {texts && (
-            <pre className="whitespace-pre-wrap rounded-md border border-border bg-surface p-3 text-xs">
-              {`${texts.proof.title}\n\nTITOLO A+:\n${texts.proof.heading}\n\nTESTO DESCRITTIVO:\n${texts.proof.body}\n\nALT-TEXT SEO:\n${texts.proof.alt}`}
-            </pre>
+            <div className="space-y-3 rounded-md border border-border bg-surface p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {texts.proof.title} — testi modificabili
+              </p>
+              <div className="space-y-1.5">
+                <Label htmlFor="a-proof-heading">Titolo A+</Label>
+                <Input
+                  id="a-proof-heading"
+                  value={texts.proof.heading}
+                  onChange={(e) => updateProofText("heading", e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="a-proof-body">Testo descrittivo</Label>
+                <Textarea
+                  id="a-proof-body"
+                  rows={4}
+                  value={texts.proof.body}
+                  onChange={(e) => updateProofText("body", e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="a-proof-alt">Alt-text SEO</Label>
+                <Input
+                  id="a-proof-alt"
+                  value={texts.proof.alt}
+                  onChange={(e) => updateProofText("alt", e.target.value)}
+                />
+              </div>
+            </div>
           )}
         </article>
+
 
         <article className="panel space-y-3 p-6">
           <h4 className="text-sm font-semibold">Modulo 3: Value Highlights (970×300 px)</h4>
