@@ -380,6 +380,33 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
           />
         </div>
 
+        <div className="space-y-1.5">
+          <Label>Posizione Logo Modulo 1 (X: {logoOffset.x}px — Y: {logoOffset.y}px)</Label>
+          <Slider
+            min={-420}
+            max={420}
+            step={2}
+            value={[logoOffset.x]}
+            onValueChange={(v) => setLogoOffset((o) => ({ ...o, x: v[0] ?? 0 }))}
+          />
+          <Slider
+            min={-130}
+            max={130}
+            step={2}
+            value={[logoOffset.y]}
+            onValueChange={(v) => setLogoOffset((o) => ({ ...o, y: v[0] ?? 0 }))}
+          />
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] text-muted-foreground">
+              Puoi anche trascinare il logo direttamente sull'anteprima del Modulo 1.
+            </p>
+            <Button size="sm" variant="ghost" onClick={() => setLogoOffset({ x: 0, y: 0 })}>
+              Centra
+            </Button>
+          </div>
+        </div>
+
+
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="a-bg">Sfondo Moduli</Label>
