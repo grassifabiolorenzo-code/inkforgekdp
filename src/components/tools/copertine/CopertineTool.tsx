@@ -204,6 +204,10 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
   }
 
   async function handleExport() {
+    // Guardia sincrona: blocca doppio click/rientranza prima di qualsiasi await.
+    if (chargeGuard.current) return;
+    chargeGuard.current = true;
+    try {
     if (!runtime.canOperate) {
       runtime.blockOperation();
       return;

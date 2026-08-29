@@ -1,5 +1,5 @@
 import { Copy, Download, ImageIcon, Loader2, Upload, Wand2 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -106,6 +106,10 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
   }
 
   async function handleGenerate() {
+    // Guardia sincrona: blocca doppio click/rientranza prima di qualsiasi await.
+    if (chargeGuard.current) return;
+    chargeGuard.current = true;
+    try {
     if (!runtime.canOperate) {
       runtime.blockOperation();
       return;

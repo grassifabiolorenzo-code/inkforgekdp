@@ -159,6 +159,10 @@ export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
   }
 
   async function handleDownload() {
+    // Guardia sincrona: blocca doppio click/rientranza prima di qualsiasi await.
+    if (chargeGuard.current) return;
+    chargeGuard.current = true;
+    try {
     if (!runtime.canOperate) {
       runtime.blockOperation();
       return;
