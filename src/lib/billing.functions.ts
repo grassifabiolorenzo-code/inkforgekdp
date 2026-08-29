@@ -17,15 +17,29 @@ export const createCheckout = createServerFn({ method: "POST" })
     const { createCheckoutUrl } = await import("./lemon-squeezy.server");
     const claims = context.claims as { email?: string; user_metadata?: { name?: string } };
 
-    const url = await createCheckoutUrl({
-      planSlug: data.planSlug,
-      email: claims.email ?? null,
-      name: claims.user_metadata?.name ?? null,
-      userId: context.userId,
-      redirectUrl: data.redirectUrl,
-    });
+    try {
+      const url = await createCheckoutUrl({
+        planSlug: data.planSlug,
+        email: claims.email ?? null,
+        name: claims.user_metadata?.name ?? null,
+        userId: context.userId,
+        redirectUrl: data.redirectUrl,
+      });
 
-    return { url };
+      if (!url) {
+        return {
+          url: null as string | null,
+          error: "Pagamenti non ancora configurati. Riprova più tardi." as string | null,
+        };
+      }
+      return { url: url as string | null, error: null as string | null };
+    } catch (err) {
+      console.error("[billing] checkout failed", err);
+      return {
+        url: null as string | null,
+        error: "Checkout non disponibile al momento." as string | null,
+      };
+    }
   });
 
 export const getManageSubscriptionUrl = createServerFn({ method: "POST" })

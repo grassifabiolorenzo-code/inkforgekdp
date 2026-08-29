@@ -69,14 +69,10 @@ export async function createCheckoutUrl(opts: {
   userId: string;
   name?: string | null;
   redirectUrl: string;
-}): Promise<string> {
+}): Promise<string | null> {
   const { storeId, variants } = readLemonConfig();
   const variantId = variants[opts.planSlug];
-  if (!storeId || !variantId) {
-    throw new Error(
-      "Lemon Squeezy non è ancora configurato: manca lo Store ID o il Variant ID del piano.",
-    );
-  }
+  if (!storeId || !variantId) return null;
 
   const body = await lemonFetch("/checkouts", {
     method: "POST",

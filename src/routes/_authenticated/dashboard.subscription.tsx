@@ -58,7 +58,7 @@ function SubscriptionPage() {
         data: { planSlug: slug, redirectUrl: `${window.location.origin}/dashboard/subscription` },
       });
       if (result.url) window.location.href = result.url;
-      else toast.error("Checkout non disponibile al momento.");
+      else toast.error(result.error ?? "Checkout non disponibile al momento.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Checkout non riuscito");
     } finally {
