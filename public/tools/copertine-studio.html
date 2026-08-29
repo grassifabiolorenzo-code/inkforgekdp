@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it" class="h-full bg-slate-950 text-slate-100 selection:bg-amber-500 selection:text-slate-950">
+<html lang="it" class="h-full bg-slate-950 text-slate-100 selection:bg-violet-500 selection:text-slate-950">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,9 +20,20 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        ::-webkit-scrollbar-track { background: #171226; }
+        ::-webkit-scrollbar-thumb { background: #3a3358; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4c4375; }
+
+        /* OP+studioKdp brand homogenization: superfici scure violacee + accento viola/verde */
+        body.bg-slate-950 { background-color: #171226 !important; }
+        .bg-slate-900, .bg-slate-900\/90 { background-color: rgba(30, 25, 51, 0.95) !important; }
+        .bg-slate-950\/80 { background-color: rgba(23, 18, 38, 0.85) !important; }
+        .bg-slate-800 { background-color: #2a2344 !important; }
+        .hover\:bg-slate-700:hover { background-color: #352c56 !important; }
+        .bg-slate-800\/50 { background-color: rgba(42, 35, 68, 0.5) !important; }
+        .bg-slate-950\/50 { background-color: rgba(23, 18, 38, 0.6) !important; }
+        .border-slate-800 { border-color: #2e2848 !important; }
+        .border-slate-700 { border-color: #3a3358 !important; }
 
         .draggable-element { 
             user-select: none; 
@@ -33,8 +44,8 @@
             overflow: visible !important;
             min-width: 120px;
         }
-        .draggable-element:hover { outline: 1px dashed rgba(251, 191, 36, 0.8); outline-offset: 3px; }
-        .element-selected { outline: 2px solid #fbbf24 !important; outline-offset: 4px; z-index: 50; }
+        .draggable-element:hover { outline: 1px dashed rgba(167, 139, 250, 0.8); outline-offset: 3px; }
+        .element-selected { outline: 2px solid #a78bfa !important; outline-offset: 4px; z-index: 50; }
 
         .render-text {
             box-sizing: border-box;
@@ -65,7 +76,7 @@
         /* IMAGE LAYERS ENGINE */
         .image-layer { position: absolute; box-sizing: border-box; cursor: move; user-select: none; touch-action: none; }
         .image-layer img { display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
-        .image-layer.image-layer-selected { outline: 2px solid #fbbf24; outline-offset: 3px; }
+        .image-layer.image-layer-selected { outline: 2px solid #a78bfa; outline-offset: 3px; }
         #imageLayersStage { position: absolute; inset: 0; z-index: 15; pointer-events: none; overflow: hidden; }
         #imageLayersStage .image-layer { pointer-events: auto; }
     </style>
@@ -76,13 +87,13 @@
     <!-- Header App -->
     <header class="h-14 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-5 shrink-0 z-30">
         <div class="flex items-center gap-3">
-            <div class="bg-amber-500/10 border border-amber-500/30 p-2 rounded-lg text-amber-400">
+            <div class="bg-violet-500/10 border border-violet-500/30 p-2 rounded-lg text-violet-400">
                 <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
             </div>
             <div>
                 <h1 class="text-sm font-bold tracking-wide text-white flex items-center gap-2">
                     COPERTINE Studio
-                    <span class="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded font-mono">KDP Pro</span>
+                    <span class="text-[10px] bg-violet-500/20 text-violet-300 border border-violet-500/30 px-2 py-0.5 rounded font-mono">KDP Pro</span>
                 </h1>
                 <p class="text-[11px] text-slate-400">OP+studioKdp • Studio Copertine Multi-Formato KDP</p>
             </div>
@@ -90,9 +101,9 @@
 
         <div class="flex items-center gap-2">
             <button id="toggleGuidesBtn" class="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-medium transition flex items-center gap-1.5">
-                <i class="fa-solid fa-ruler-combined text-amber-400"></i> Guide KDP & Bleed
+                <i class="fa-solid fa-ruler-combined text-violet-400"></i> Guide KDP & Bleed
             </button>
-            <button id="exportBtn" class="px-4 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-bold transition shadow-lg shadow-amber-500/20 flex items-center gap-2">
+            <button id="exportBtn" class="px-4 py-1.5 rounded-lg bg-gradient-to-r from-violet-600 to-emerald-500 hover:from-violet-500 hover:to-emerald-400 text-white text-xs font-bold transition shadow-lg shadow-violet-500/30 flex items-center gap-2">
                 <i class="fa-solid fa-file-export"></i> Esporta Stampa HD (300 DPI)
             </button>
         </div>
@@ -106,12 +117,12 @@
             
             <!-- Navigation Tabs -->
             <div class="flex border-b border-slate-800 bg-slate-950/80 text-xs font-semibold overflow-x-auto scrollbar-none">
-                <button class="tab-btn flex-1 py-3 px-2 text-center border-b-2 border-amber-400 text-amber-400 transition whitespace-nowrap" data-tab="tab-kdp">📐 KDP Spec</button>
+                <button class="tab-btn flex-1 py-3 px-2 text-center border-b-2 border-violet-400 text-violet-400 transition whitespace-nowrap" data-tab="tab-kdp">📐 KDP Spec</button>
                 <button class="tab-btn flex-1 py-3 px-2 text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition whitespace-nowrap" data-tab="tab-front">1. Fronte</button>
                 <button class="tab-btn flex-1 py-3 px-2 text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition whitespace-nowrap" data-tab="tab-spine">2. Dorso</button>
                 <button class="tab-btn flex-1 py-3 px-2 text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition whitespace-nowrap" data-tab="tab-back">3. Retro</button>
                 <button class="tab-btn flex-1 py-3 px-2 text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition whitespace-nowrap" data-tab="tab-bg">⚙️ Sfondo</button>
-                <button class="tab-btn flex-1 py-3 px-2 text-center border-b-2 border-transparent text-amber-300 hover:text-amber-200 transition whitespace-nowrap bg-amber-500/10" data-tab="tab-fonts"><i class="fa-solid fa-font"></i> Fonts</button>
+                <button class="tab-btn flex-1 py-3 px-2 text-center border-b-2 border-transparent text-violet-300 hover:text-violet-200 transition whitespace-nowrap bg-violet-500/10" data-tab="tab-fonts"><i class="fa-solid fa-font"></i> Fonts</button>
             </div>
 
             <!-- Tab Contents -->
@@ -119,8 +130,8 @@
 
                 <!-- TAB 0: KDP SPECIFICHE -->
                 <div id="tab-kdp" class="tab-content space-y-4">
-                    <div class="bg-amber-500/10 p-3.5 rounded-xl border border-amber-500/30 space-y-3">
-                        <h2 class="text-xs font-bold uppercase text-amber-400 tracking-wider flex items-center gap-1.5">
+                    <div class="bg-violet-500/10 p-3.5 rounded-xl border border-violet-500/30 space-y-3">
+                        <h2 class="text-xs font-bold uppercase text-violet-400 tracking-wider flex items-center gap-1.5">
                             <i class="fa-solid fa-calculator"></i> Calcolatore Copertina KDP
                         </h2>
                         <div class="space-y-2">
@@ -149,7 +160,7 @@
                             </div>
                         </div>
                         <div class="p-2 bg-slate-950/60 rounded text-[10px] font-mono text-slate-300 space-y-1 border border-slate-800">
-                            <div>Dorso Calcolato: <span id="calculatedSpinePx" class="text-amber-400 font-bold">74px</span> (<span id="calculatedSpineIn">0.2477"</span>)</div>
+                            <div>Dorso Calcolato: <span id="calculatedSpinePx" class="text-violet-400 font-bold">74px</span> (<span id="calculatedSpineIn">0.2477"</span>)</div>
                             <div>Dimensioni Telaio 300 DPI: <span id="calculatedCanvasPx" class="text-slate-200">5250 x 3375 px</span></div>
                         </div>
                     </div>
@@ -159,8 +170,8 @@
                 <div id="tab-front" class="tab-content space-y-4 hidden">
                     <!-- CONTROLLO TITOLO -->
                     <div class="bg-slate-800/50 p-3.5 rounded-xl border border-slate-700/60 space-y-3">
-                        <h2 class="text-xs font-bold uppercase text-amber-400 tracking-wider">Titolo Principale</h2>
-                        <input type="text" id="titleInput" value="" placeholder="Titolo del libro" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-400">
+                        <h2 class="text-xs font-bold uppercase text-violet-400 tracking-wider">Titolo Principale</h2>
+                        <input type="text" id="titleInput" value="" placeholder="Titolo del libro" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-white focus:outline-none focus:border-violet-400">
                         <div class="grid grid-cols-3 gap-2">
                             <div>
                                 <label class="block text-[10px] text-slate-400 mb-0.5">Font</label>
@@ -168,11 +179,11 @@
                             </div>
                             <div>
                                 <label class="block text-[10px] text-slate-400 mb-0.5">Colore Base</label>
-                                <input type="color" id="titleColorInput" value="#fbbf24" class="w-full h-7 rounded border border-slate-700 bg-transparent cursor-pointer">
+                                <input type="color" id="titleColorInput" value="#a78bfa" class="w-full h-7 rounded border border-slate-700 bg-transparent cursor-pointer">
                             </div>
                             <div>
                                 <label class="block text-[10px] text-slate-400 mb-0.5">Dimensione</label>
-                                <input type="range" id="titleSizeInput" min="16" max="90" value="42" class="w-full accent-amber-400">
+                                <input type="range" id="titleSizeInput" min="16" max="90" value="42" class="w-full accent-violet-400">
                             </div>
                         </div>
                         <div>
@@ -189,8 +200,8 @@
                     <!-- GESTIONE SOTTOTITOLI MULTIPLI -->
                     <div class="bg-slate-800/50 p-3.5 rounded-xl border border-slate-700/60 space-y-3">
                         <div class="flex items-center justify-between">
-                            <h2 class="text-xs font-bold uppercase text-amber-400 tracking-wider">Sottotitoli Dinamici</h2>
-                            <button id="addSubtitleBtn" class="px-2.5 py-1 rounded bg-amber-500 hover:bg-amber-400 text-slate-950 text-[11px] font-bold transition flex items-center gap-1">
+                            <h2 class="text-xs font-bold uppercase text-violet-400 tracking-wider">Sottotitoli Dinamici</h2>
+                            <button id="addSubtitleBtn" class="px-2.5 py-1 rounded bg-violet-500 hover:bg-violet-400 text-slate-950 text-[11px] font-bold transition flex items-center gap-1">
                                 <i class="fa-solid fa-plus"></i> Aggiungi Sottotitolo
                             </button>
                         </div>
@@ -199,8 +210,8 @@
 
                     <!-- CONTROLLO AUTORE -->
                     <div class="bg-slate-800/50 p-3.5 rounded-xl border border-slate-700/60 space-y-3">
-                        <h2 class="text-xs font-bold uppercase text-amber-400 tracking-wider">Autore / Brand</h2>
-                        <input type="text" id="authorInput" value="" placeholder="Autore / Brand" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-400">
+                        <h2 class="text-xs font-bold uppercase text-violet-400 tracking-wider">Autore / Brand</h2>
+                        <input type="text" id="authorInput" value="" placeholder="Autore / Brand" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-white focus:outline-none focus:border-violet-400">
                         <div class="grid grid-cols-3 gap-2">
                             <div>
                                 <label class="block text-[10px] text-slate-400 mb-0.5">Font</label>
@@ -212,7 +223,7 @@
                             </div>
                             <div>
                                 <label class="block text-[10px] text-slate-400 mb-0.5">Dimensione</label>
-                                <input type="range" id="authorSizeInput" min="8" max="42" value="12" class="w-full accent-amber-400">
+                                <input type="range" id="authorSizeInput" min="8" max="42" value="12" class="w-full accent-violet-400">
                             </div>
                         </div>
                         <div>
@@ -227,14 +238,14 @@
                     </div>
 
                     <!-- LIVELLI IMMAGINI -->
-                    <div class="bg-slate-800/50 p-3.5 rounded-xl border border-amber-500/20 space-y-3">
+                    <div class="bg-slate-800/50 p-3.5 rounded-xl border border-violet-500/20 space-y-3">
                         <div class="flex items-center justify-between">
-                            <h2 class="text-xs font-bold uppercase text-amber-400 tracking-wider"><i class="fa-solid fa-images"></i> Livelli Immagine</h2>
-                            <span id="imageLayerCount" class="text-[10px] text-amber-300 font-mono">0 elementi</span>
+                            <h2 class="text-xs font-bold uppercase text-violet-400 tracking-wider"><i class="fa-solid fa-images"></i> Livelli Immagine</h2>
+                            <span id="imageLayerCount" class="text-[10px] text-violet-300 font-mono">0 elementi</span>
                         </div>
                         <label class="block cursor-pointer">
-                            <div class="border-2 border-dashed border-slate-700 hover:border-amber-400 rounded-xl p-3 text-center bg-slate-900/60 transition">
-                                <i class="fa-solid fa-plus text-lg text-amber-400 mb-1"></i>
+                            <div class="border-2 border-dashed border-slate-700 hover:border-violet-400 rounded-xl p-3 text-center bg-slate-900/60 transition">
+                                <i class="fa-solid fa-plus text-lg text-violet-400 mb-1"></i>
                                 <span class="block text-xs font-semibold text-slate-200">Carica Immagini (PNG/JPG)</span>
                             </div>
                             <input type="file" id="imageFilesInput" accept="image/*" multiple class="hidden">
@@ -246,7 +257,7 @@
                 <!-- TAB 2: DORSO -->
                 <div id="tab-spine" class="tab-content space-y-4 hidden">
                     <div class="bg-slate-800/50 p-3.5 rounded-xl border border-slate-700/60 space-y-3">
-                        <h2 class="text-xs font-bold uppercase text-amber-400 tracking-wider">Testo Dorso</h2>
+                        <h2 class="text-xs font-bold uppercase text-violet-400 tracking-wider">Testo Dorso</h2>
                         <input type="text" id="spineTextInput" value="" placeholder="Testo del dorso" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-white focus:outline-none">
                         <div class="grid grid-cols-3 gap-2">
                             <div>
@@ -259,7 +270,7 @@
                             </div>
                             <div>
                                 <label class="block text-[10px] text-slate-400 mb-0.5">Dimensione</label>
-                                <input type="range" id="spineSizeInput" min="6" max="24" value="10" class="w-full accent-amber-400">
+                                <input type="range" id="spineSizeInput" min="6" max="24" value="10" class="w-full accent-violet-400">
                             </div>
                         </div>
                         <div>
@@ -277,7 +288,7 @@
                 <!-- TAB 3: RETRO -->
                 <div id="tab-back" class="tab-content space-y-4 hidden">
                     <div class="bg-slate-800/50 p-3.5 rounded-xl border border-slate-700/60 space-y-3">
-                        <h2 class="text-xs font-bold uppercase text-amber-400 tracking-wider">Sinossi</h2>
+                        <h2 class="text-xs font-bold uppercase text-violet-400 tracking-wider">Sinossi</h2>
                         <textarea id="backBlurbInput" rows="4" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-white focus:outline-none"></textarea>
                         <div class="grid grid-cols-3 gap-2">
                             <div>
@@ -290,7 +301,7 @@
                             </div>
                             <div>
                                 <label class="block text-[10px] text-slate-400 mb-0.5">Dimensione</label>
-                                <input type="range" id="backBlurbSizeInput" min="8" max="32" value="11" class="w-full accent-amber-400">
+                                <input type="range" id="backBlurbSizeInput" min="8" max="32" value="11" class="w-full accent-violet-400">
                             </div>
                         </div>
                         <div>
@@ -308,9 +319,9 @@
                 <!-- TAB 4: SFONDO -->
                 <div id="tab-bg" class="tab-content space-y-4 hidden">
                     <div class="bg-slate-800/50 p-3.5 rounded-xl border border-slate-700/60 space-y-3">
-                        <h2 class="text-xs font-bold uppercase text-amber-400 tracking-wider">Sfondo Copertina</h2>
+                        <h2 class="text-xs font-bold uppercase text-violet-400 tracking-wider">Sfondo Copertina</h2>
                         <label class="block cursor-pointer">
-                            <div class="border-2 border-dashed border-slate-700 hover:border-amber-400 rounded-xl p-4 text-center bg-slate-900 transition">
+                            <div class="border-2 border-dashed border-slate-700 hover:border-violet-400 rounded-xl p-4 text-center bg-slate-900 transition">
                                 <i class="fa-solid fa-cloud-arrow-up text-xl text-slate-400 mb-1"></i>
                                 <span class="block text-xs font-semibold text-slate-300">Carica Sfondo Wrap-Around</span>
                             </div>
@@ -321,16 +332,16 @@
                             <div>
                                 <div class="flex justify-between items-center mb-1">
                                     <label class="text-[10px] text-slate-400">Dimensione / Larghezza (px)</label>
-                                    <span id="bgWidthVal" class="text-[10px] font-mono text-amber-400">900px</span>
+                                    <span id="bgWidthVal" class="text-[10px] font-mono text-violet-400">900px</span>
                                 </div>
-                                <input type="range" id="bgWidthInput" min="200" max="3000" value="900" class="w-full accent-amber-400">
+                                <input type="range" id="bgWidthInput" min="200" max="3000" value="900" class="w-full accent-violet-400">
                             </div>
                             <div class="flex gap-2">
                                 <button id="bgFitBtn" class="flex-1 py-1.5 px-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-[11px] text-slate-200 font-semibold transition flex items-center justify-center gap-1">
-                                    <i class="fa-solid fa-expand text-amber-400"></i> Adatta Canvas
+                                    <i class="fa-solid fa-expand text-violet-400"></i> Adatta Canvas
                                 </button>
                                 <button id="bgResetBtn" class="flex-1 py-1.5 px-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-[11px] text-slate-200 font-semibold transition flex items-center justify-center gap-1">
-                                    <i class="fa-solid fa-rotate-left text-amber-400"></i> Centra
+                                    <i class="fa-solid fa-rotate-left text-violet-400"></i> Centra
                                 </button>
                             </div>
                         </div>
@@ -341,10 +352,10 @@
                 <div id="tab-fonts" class="tab-content space-y-4 hidden">
                     <div class="bg-slate-800/50 p-3.5 rounded-xl border border-slate-700/60 space-y-3">
                         <div class="flex items-center justify-between">
-                            <h2 class="text-xs font-bold uppercase text-amber-400 tracking-wider">Libreria Fonts (Google Fonts)</h2>
+                            <h2 class="text-xs font-bold uppercase text-violet-400 tracking-wider">Libreria Fonts (Google Fonts)</h2>
                             <span class="text-[10px] text-slate-400 font-mono" id="fontCountDisplay">0 Font</span>
                         </div>
-                        <input type="text" id="fontSearchInput" placeholder="Cerca font per nome..." class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-400">
+                        <input type="text" id="fontSearchInput" placeholder="Cerca font per nome..." class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-white focus:outline-none focus:border-violet-400">
                         <div id="fontPreviewList" class="space-y-2 max-h-[380px] overflow-y-auto pr-1"></div>
                     </div>
                 </div>
@@ -385,7 +396,7 @@
                         <!-- Barcode Safe Zone (Obbligatoria KDP) -->
                         <div class="absolute bottom-[20px] left-[20px] w-[120px] h-[70px] bg-slate-900/90 border border-slate-700 flex flex-col items-center justify-center text-center p-1">
                             <i class="fa-solid fa-barcode text-2xl text-slate-400"></i>
-                            <span class="text-[7px] text-amber-400 font-mono uppercase font-bold mt-0.5">Riserva Barcode KDP</span>
+                            <span class="text-[7px] text-violet-400 font-mono uppercase font-bold mt-0.5">Riserva Barcode KDP</span>
                         </div>
                     </div>
 
@@ -415,7 +426,7 @@
 
                         <!-- AUTORE -->
                         <div id="dragAuthor" class="draggable-element pointer-events-auto absolute left-[20px] top-[500px] w-[calc(100%-40px)] text-center z-10">
-                            <p id="renderAuthor" class="render-text text-xs font-bold uppercase tracking-widest text-amber-300"></p>
+                            <p id="renderAuthor" class="render-text text-xs font-bold uppercase tracking-widest text-violet-300"></p>
                         </div>
                     </div>
 
@@ -577,7 +588,7 @@
                 item.className = 'bg-slate-900 border border-slate-700 p-2.5 rounded-lg space-y-2 text-xs';
                 item.innerHTML = `
                     <div class="flex items-center justify-between">
-                        <span class="font-bold text-amber-400">Sottotitolo #${index + 1}</span>
+                        <span class="font-bold text-violet-400">Sottotitolo #${index + 1}</span>
                         <button onclick="removeSubtitle('${sub.id}')" class="text-rose-400 hover:text-rose-300 text-xs px-1">
                             <i class="fa-solid fa-trash"></i>
                         </button>
@@ -596,7 +607,7 @@
                         </div>
                         <div>
                             <label class="block text-[9px] text-slate-400">Dim (px)</label>
-                            <input type="range" min="10" max="60" value="${sub.size}" oninput="updateSubtitle('${sub.id}', 'size', this.value)" class="w-full accent-amber-400">
+                            <input type="range" min="10" max="60" value="${sub.size}" oninput="updateSubtitle('${sub.id}', 'size', this.value)" class="w-full accent-violet-400">
                         </div>
                     </div>
                     <div>
@@ -722,7 +733,7 @@
                         <span class="truncate text-slate-300 font-mono text-[11px]">${layer.name || 'Immagine ' + (idx + 1)}</span>
                     </div>
                     <div class="flex items-center gap-2 shrink-0">
-                        <input type="range" min="50" max="600" value="${layer.width}" oninput="updateImageLayerWidth('${layer.id}', this.value)" class="w-16 accent-amber-400">
+                        <input type="range" min="50" max="600" value="${layer.width}" oninput="updateImageLayerWidth('${layer.id}', this.value)" class="w-16 accent-violet-400">
                         <button onclick="removeImageLayer('${layer.id}')" class="text-rose-400 hover:text-rose-300 text-xs p-1">
                             <i class="fa-solid fa-trash"></i>
                         </button>
@@ -916,7 +927,7 @@
 
                 filtered.forEach(font => {
                     const card = document.createElement('div');
-                    card.className = 'p-2.5 bg-slate-900 border border-slate-800 rounded-lg hover:border-amber-500/50 transition cursor-pointer flex items-center justify-between';
+                    card.className = 'p-2.5 bg-slate-900 border border-slate-800 rounded-lg hover:border-violet-500/50 transition cursor-pointer flex items-center justify-between';
                     card.onclick = () => loadGoogleFont(font);
 
                     card.innerHTML = `
@@ -924,7 +935,7 @@
                             <div class="text-[11px] font-mono text-slate-400">${font}</div>
                             <div class="text-sm text-slate-100 truncate" style="font-family: '${font}', sans-serif;">Anteprima Testo</div>
                         </div>
-                        <i class="fa-solid fa-download text-xs text-slate-500 hover:text-amber-400"></i>
+                        <i class="fa-solid fa-download text-xs text-slate-500 hover:text-violet-400"></i>
                     `;
                     fontPreviewList.appendChild(card);
                     loadGoogleFont(font);
@@ -1052,11 +1063,11 @@
                     const targetTab = btn.getAttribute('data-tab');
 
                     document.querySelectorAll('.tab-btn').forEach(b => {
-                        b.classList.remove('border-amber-400', 'text-amber-400');
+                        b.classList.remove('border-violet-400', 'text-violet-400');
                         b.classList.add('border-transparent', 'text-slate-400');
                     });
                     btn.classList.remove('border-transparent', 'text-slate-400');
-                    btn.classList.add('border-amber-400', 'text-amber-400');
+                    btn.classList.add('border-violet-400', 'text-violet-400');
 
                     document.querySelectorAll('.tab-content').forEach(content => {
                         content.classList.add('hidden');
