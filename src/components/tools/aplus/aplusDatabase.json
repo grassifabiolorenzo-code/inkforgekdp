@@ -1,0 +1,832 @@
+{
+  "it": {
+    "music": {
+      "hero": {
+        "headline": "PORTA LA TUA MUSICA IN PRIMO PIANO",
+        "body": "Uno spartito pensato per mettere la lettura al centro: una struttura ordinata, spazio utile per annotazioni e un’impostazione che accompagna lo studio senza distrazioni.",
+        "alt": "Anteprima della copertina e del retro del libro di spartiti musicali, con presentazione del design editoriale."
+      },
+      "proof": {
+        "headline": "GUARDA GLI INTERNI, PRIMA DI SCEGLIERE",
+        "body": "L’anteprima rende visibili pentagrammi, spazi e margini: puoi valutare concretamente come è organizzata la pagina e immaginare il tuo prossimo momento di studio.",
+        "alt": "Pagine interne del libro di spartiti musicali, mostrate per valutare layout e organizzazione dei contenuti."
+      },
+      "value": {
+        "title": "STRUTTURA PER STUDIO E LETTURA MUSICALE",
+        "text1": "Lettura ordinata",
+        "text2": "Spazio per annotazioni",
+        "text3": "Layout musicale chiaro",
+        "alt": "Valori chiave dello spartito musicale."
+      },
+      "grid": [
+        {
+          "title": "LEGGIBILITÀ PERFETTA",
+          "desc": "Linee guida ad alta precisione per un tracciamento visivo rapido sul leggio."
+        },
+        {
+          "title": "SPAZIO ANNOTAZIONI",
+          "desc": "Margini laterali e verticali maggiorati per inserire appunti e sigle."
+        },
+        {
+          "title": "FORMATO PROFESSIONALE",
+          "desc": "Dimensioni di impaginazione standard adatte a ogni livello di studio."
+        }
+      ],
+      "comp": "Header 150x300 px per la tabella comparativa Amazon della serie musicale."
+    },
+    "planner": {
+      "hero": {
+        "headline": "FAI SPAZIO A CIÒ CHE CONTA DAVVERO",
+        "body": "Un planner che porta sulla pagina priorità, impegni, obiettivi e abitudini. Una struttura chiara per fermarti, scegliere cosa viene prima e trasformare le intenzioni in passi concreti.",
+        "alt": "Anteprima della copertina e del retro del planner, con presentazione del design editoriale."
+      },
+      "proof": {
+        "headline": "DALLE PRIORITÀ ALLE AZIONI, PAGINA DOPO PAGINA",
+        "body": "Guarda gli interni e valuta direttamente come sono organizzate le sezioni. La pianificazione su carta crea uno spazio semplice per mettere ordine e mantenere visibili le attività che contano.",
+        "alt": "Pagine interne del planner organizzativo, mostrate per valutare layout e organizzazione dei contenuti."
+      },
+      "value": {
+        "title": "UNA STRUTTURA PER FARE ORDINE",
+        "text1": "Priorità visibili",
+        "text2": "Pianificazione quotidiana",
+        "text3": "Monitoraggio abitudini",
+        "alt": "Punti di forza del planner di produttività."
+      },
+      "grid": [
+        {
+          "title": "GESTIONE PRIORITÀ",
+          "desc": "Struttura dedicata alla selezione immediata dei task a più alto valore."
+        },
+        {
+          "title": "DESIGN ESSENZIALE",
+          "desc": "Visual pulito progettato per eliminare lo stress visivo durante la pianificazione."
+        },
+        {
+          "title": "CONSISTENZA QUOTIDIANA",
+          "desc": "Moduli integrati per tracciare le routine e monitorare i progressi costanti."
+        }
+      ],
+      "comp": "Header per la tabella comparativa Amazon del catalogo planner e agende."
+    },
+    "coloring": {
+      "ageDynamic": {
+        "2-4": {
+          "heroTitle": "UN PRIMO MONDO DA COLORARE, TUTTO DA SCOPRIRE",
+          "heroBody": "Disegni ampi, forme riconoscibili e contorni ben visibili pensati per bambini dai 2 ai 4 anni: un’attività creativa semplice da vivere con curiosità e con il proprio ritmo.",
+          "proofTitle": "FORME CHIARE, SPAZI DA ESPLORARE",
+          "proofBody": "L’anteprima mostra soggetti leggibili e spazi generosi per esplorare il colore. Un momento creativo da accompagnare secondo le esigenze del bambino."
+        },
+        "4-6": {
+          "heroTitle": "UN MONDO DI COLORI DOVE LASCIARE VOLARE LA FANTASIA",
+          "heroBody": "Illustrazioni pensate per bambini dai 4 ai 6 anni, con soggetti coinvolgenti e una struttura facile da seguire. Ogni pagina invita a scegliere colori e aggiungere un tocco personale.",
+          "proofTitle": "PAGINE ORDINATE PER UN GIOCO CREATIVO",
+          "proofBody": "L’anteprima mostra come sono distribuiti disegni e spazi. Se il libro è stampato su un solo lato, questo dettaglio può essere valorizzato nella scelta del volume."
+        },
+        "6-8": {
+          "heroTitle": "AVVENTURE DA COLORARE PER PICCOLI CREATIVI",
+          "heroBody": "Disegni pensati per la fascia 6-8 anni, con soggetti e dettagli che invitano a esplorare colori e combinazioni.",
+          "proofTitle": "DETTAGLI DA ESPLORARE, SPAZI DA PERSONALIZZARE",
+          "proofBody": "Le pagine interne mostrano stile, livello di dettaglio e organizzazione delle tavole, così ogni illustrazione può diventare una piccola sfida creativa."
+        },
+        "8-10": {
+          "heroTitle": "IL PIACERE DI CREARE, UNA PAGINA ALLA VOLTA",
+          "heroBody": "Un libro da colorare per bambini dagli 8 ai 10 anni che cercano soggetti coinvolgenti e spazio per esprimere il proprio stile.",
+          "proofTitle": "COMPOSIZIONI CURATE PER CHI AMA I DETTAGLI",
+          "proofBody": "L’anteprima permette di valutare concretamente stile, dettagli e distribuzione degli spazi prima di scegliere."
+        },
+        "kids": {
+          "heroTitle": "UN INVITO A COLORARE, CREARE E IMMAGINARE",
+          "heroBody": "Una raccolta per bambini e ragazzi che amano trasformare le pagine con i propri colori: un’attività creativa semplice e personale.",
+          "proofTitle": "SCOPRI LE PAGINE PRIMA DI SCEGLIERE",
+          "proofBody": "L’anteprima mette in evidenza struttura e stile delle pagine, aiutando a valutare se complessità e formato sono adatti al pubblico."
+        },
+        "adults": {
+          "heroTitle": "UN PICCOLO SPAZIO SOLO PER TE",
+          "heroBody": "Pattern, geometrie o illustrazioni dettagliate possono trasformare una pausa in un momento creativo. Colora al tuo ritmo, senza inseguire la perfezione.",
+          "proofTitle": "DETTAGLI DA VIVERE CON IL TUO RITMO",
+          "proofBody": "L’anteprima mostra concretamente stile e livello di dettaglio. Se le pagine sono a un solo lato, questo dato può aiutare nella scelta dei materiali."
+        }
+      },
+      "value": {
+        "title": "SPECIFICHE TECNICHE DELLA COLLANA",
+        "text1": "Pagine monofacciali",
+        "text2": "Contorni ben definiti",
+        "text3": "Formato carta standard",
+        "alt": "Caratteristiche principali del libro da colorare."
+      },
+      "grid": [
+        {
+          "title": "CONTORNI PULITI",
+          "desc": "Linee marcate studiate perimetralmente per guidare il tratto e facilitare la colorazione."
+        },
+        {
+          "title": "PAGINE SINGLE-SIDED",
+          "desc": "Ogni disegno è stampato singolarmente per consentire di utilizzare qualsiasi tipo di strumento."
+        },
+        {
+          "title": "LAYOUT FUNZIONALE",
+          "desc": "Struttura bilanciata per offrire un passatempo piacevole e ordinato."
+        }
+      ],
+      "comp": "Header grafico ottimizzato per comparare i volumi di libri da colorare."
+    },
+    "generic": {
+      "hero": {
+        "headline": "LA CURA EDITORIALE SI VEDE, PAGINA DOPO PAGINA",
+        "body": "Un progetto editoriale presentato con una gerarchia visiva chiara e una struttura pensata per accompagnare la scoperta del contenuto. Copertina e interni lavorano insieme per raccontare il volume.",
+        "alt": "Anteprima della copertina e del retro del libro, con presentazione del design editoriale."
+      },
+      "proof": {
+        "headline": "NON FERMARTI alla COPERTINA: GUARDA GLI INTERNI",
+        "body": "Le pagine interne mostrano concretamente impaginazione, spazi e organizzazione dei contenuti, così il lettore può farsi un’idea più precisa dell’esperienza offerta dal libro.",
+        "alt": "Pagine interne del libro, mostrate per valutare layout e organizzazione dei contenuti."
+      },
+      "value": {
+        "title": "UNA STRUTTURA CHE ACCOMPAGNA IL LETTORE",
+        "text1": "Gerarchia visiva chiara",
+        "text2": "Layout equilibrato",
+        "text3": "Consultazione naturale",
+        "alt": "Punti chiave di qualità dell'opera."
+      },
+      "grid": [
+        {
+          "title": "FINITURA CURATA",
+          "desc": "Finitura visiva curata nei minimi dettagli fin dal primo impatto."
+        },
+        {
+          "title": "MASSIMO COMFORT",
+          "desc": "Proporzioni di stampa ed elementi grafici dimensionati per una consultazione agevole."
+        },
+        {
+          "title": "STRUTTURA FUNZIONALE",
+          "desc": "Impaginazione concepita per resistere all'uso frequente."
+        }
+      ],
+      "comp": "Header standard per inserire la copertina nella griglia comparativa KDP."
+    }
+  },
+  "en": {
+    "music": {
+      "hero": {
+        "headline": "PUT YOUR MUSIC FRONT AND CENTER",
+        "body": "A sheet music layout designed to keep reading at the heart of the page, with organized spacing and useful room for notes, dynamics, and practice markings.",
+        "alt": "Front and back cover preview of a sheet music book, showing its editorial presentation."
+      },
+      "proof": {
+        "headline": "SEE THE INTERIOR BEFORE YOU CHOOSE",
+        "body": "The preview shows staff lines, spacing, and margins so shoppers can judge the real page structure and picture their next practice session.",
+        "alt": "Interior pages of the sheet music book, shown to evaluate layout and content organization."
+      },
+      "value": {
+        "title": "STRUCTURE FOR PRACTICE AND MUSICAL READING",
+        "text1": "Clear page structure",
+        "text2": "Room for annotations",
+        "text3": "Music-focused layout",
+        "alt": "Key advantages of the music notebook."
+      },
+      "grid": [
+        {
+          "title": "PERFECT READABILITY",
+          "desc": "Precision staff lines for rapid visual tracking on stage or stand."
+        },
+        {
+          "title": "ANNOTATION SPACE",
+          "desc": "Generous margins designed for chords, tabs, and teacher feedback."
+        },
+        {
+          "title": "PRO FORMAT",
+          "desc": "Standard professional layout suitable for students and masters alike."
+        }
+      ],
+      "comp": "150x300 px comparison header for Amazon sheet music series."
+    },
+    "planner": {
+      "hero": {
+        "headline": "MAKE ROOM FOR WHAT MATTERS",
+        "body": "A planner that brings priorities, appointments, goals, and habits onto the page. A clear structure for choosing what comes first and turning intentions into practical next steps.",
+        "alt": "Front and back cover preview of a planner, showing its editorial presentation."
+      },
+      "proof": {
+        "headline": "FROM PRIORITIES TO ACTION, ONE PAGE AT A TIME",
+        "body": "See the interior structure before choosing. Planning on paper creates a simple space to organize the day and keep important tasks visible.",
+        "alt": "Interior pages of the planner, shown to evaluate layout and content organization."
+      },
+      "value": {
+        "title": "A STRUCTURE THAT MAKES ROOM FOR WHAT MATTERS",
+        "text1": "Visible priorities",
+        "text2": "Daily planning",
+        "text3": "Habit tracking",
+        "alt": "Key strengths of the productivity planner."
+      },
+      "grid": [
+        {
+          "title": "PRIORITY CONTROL",
+          "desc": "Dedicated spaces to instantly identify high-impact daily tasks."
+        },
+        {
+          "title": "MINIMALIST DESIGN",
+          "desc": "Clutter-free visuals designed to reduce stress during planning."
+        },
+        {
+          "title": "DAILY CONSISTENCY",
+          "desc": "Built-in routine trackers to help you build lasting productive habits."
+        }
+      ],
+      "comp": "Comparison table header image for Amazon planner collection."
+    },
+    "coloring": {
+      "ageDynamic": {
+        "2-4": {
+          "heroTitle": "A FIRST WORLD TO COLOR AND DISCOVER",
+          "heroBody": "Large shapes, recognizable forms, and clear outlines designed for ages 2 to 4—a simple creative activity to enjoy with curiosity and at the child’s own pace.",
+          "proofTitle": "CLEAR SHAPES, OPEN SPACES TO EXPLORE",
+          "proofBody": "The preview shows readable subjects and generous spaces for exploring color at a comfortable pace."
+        },
+        "4-6": {
+          "heroTitle": "A COLORFUL WORLD FOR IMAGINATION TO GROW",
+          "heroBody": "Engaging illustrations for ages 4 to 6, with approachable subjects and a clear page structure. Each page invites children to choose colors and add a personal touch.",
+          "proofTitle": "CLEAN PAGES FOR CREATIVE PLAY",
+          "proofBody": "The preview shows how artwork and page space are arranged. If the book is single-sided, that practical detail can help shoppers choose."
+        },
+        "6-8": {
+          "heroTitle": "CREATIVE ADVENTURES FOR YOUNG ARTISTS",
+          "heroBody": "Drawings for ages 6 to 8 with subjects and details that invite experimentation with colors and combinations.",
+          "proofTitle": "DETAILS TO EXPLORE, SPACE TO PERSONALIZE",
+          "proofBody": "The interior preview shows style, detail level, and page structure so each illustration can become a small creative challenge."
+        },
+        "8-10": {
+          "heroTitle": "MAKE IT YOUR OWN, ONE PAGE AT A TIME",
+          "heroBody": "A coloring book for ages 8 to 10 who enjoy engaging subjects and room for personal style.",
+          "proofTitle": "CAREFULLY COMPOSED PAGES FOR MORE DETAIL",
+          "proofBody": "The preview lets shoppers judge the actual style, detail level, and use of space before choosing."
+        },
+        "kids": {
+          "heroTitle": "AN INVITATION TO COLOR, CREATE, AND IMAGINE",
+          "heroBody": "A collection for kids and young readers who enjoy transforming pages with their own colors—a simple, personal creative activity.",
+          "proofTitle": "SEE THE PAGES BEFORE YOU CHOOSE",
+          "proofBody": "The preview highlights page structure and illustration style, helping families assess complexity and format."
+        },
+        "adults": {
+          "heroTitle": "A SMALL SPACE THAT IS JUST FOR YOU",
+          "heroBody": "Patterns, geometry, or detailed illustrations can turn a break into a creative moment. Color at your own pace without chasing perfection.",
+          "proofTitle": "DETAILS TO ENJOY AT YOUR OWN PACE",
+          "proofBody": "The preview shows the actual style and detail level. If pages are single-sided, that detail can also inform material choices."
+        }
+      },
+      "value": {
+        "title": "SERIES TECHNICAL SPECIFICATIONS",
+        "text1": "Single-sided pages",
+        "text2": "Defined outlines",
+        "text3": "Standard paper format",
+        "alt": "Key benefits of the coloring book."
+      },
+      "grid": [
+        {
+          "title": "CLEAN CONTOURS",
+          "desc": "Bold, clean borders engineered to guide strokes and assist neat coloring."
+        },
+        {
+          "title": "TRUE SINGLE-SIDED",
+          "desc": "Every design is printed on its own page allowing flexible use of mediums."
+        },
+        {
+          "title": "FUNCTIONAL LAYOUT",
+          "desc": "Balanced structure providing an enjoyable, organized pastime."
+        }
+      ],
+      "comp": "Comparison module header for Amazon coloring book series."
+    },
+    "generic": {
+      "hero": {
+        "headline": "EDITORIAL CARE YOU CAN SEE, PAGE AFTER PAGE",
+        "body": "A clear visual structure designed to guide readers through the book and make its organization easier to understand. Cover and interior work together to present the project consistently.",
+        "alt": "Front and back cover preview of a book, showing its editorial presentation."
+      },
+      "proof": {
+        "headline": "DON’T STOP AT THE COVER—SEE THE INSIDE",
+        "body": "Interior pages give shoppers a concrete view of layout, spacing, and content organization, helping them form a more accurate picture of the book.",
+        "alt": "Interior pages of the book, shown to evaluate layout and content organization."
+      },
+      "value": {
+        "title": "A STRUCTURE DESIGNED FOR THE READER",
+        "text1": "Clear visual hierarchy",
+        "text2": "Balanced layout",
+        "text3": "Natural navigation",
+        "alt": "Core quality features of the book."
+      },
+      "grid": [
+        {
+          "title": "POLISHED FINISH",
+          "desc": "Polished interior aesthetics designed to impress from page one."
+        },
+        {
+          "title": "MAXIMUM COMFORT",
+          "desc": "Proportional typography and layout scaled for easy reading."
+        },
+        {
+          "title": "BUILT TO LAST",
+          "desc": "Sturdy formatting designed to endure frequent consultation."
+        }
+      ],
+      "comp": "Standard comparison header for KDP book series."
+    }
+  },
+  "de": {
+    "music": {
+      "hero": {
+        "headline": "IHRE MUSIK KLAR IM MITTELPUNKT",
+        "body": "Eine übersichtliche Notengestaltung, die das Lesen in den Mittelpunkt stellt und Platz für Notizen, Dynamik und Übungshinweise lässt.",
+        "alt": "Vorder- und Rückseite des Notenbuchs mit mittigem Logo."
+      },
+      "proof": {
+        "headline": "SEHEN SIE DIE INNENSEITEN VOR DER AUSWAHL",
+        "body": "Die Vorschau zeigt Notenzeilen, Abstände und Ränder und vermittelt einen konkreten Eindruck vom tatsächlichen Seitenaufbau.",
+        "alt": "Panoramablick auf die Innenseiten des Notenbuchs."
+      },
+      "value": {
+        "title": "KLAR STRUKTURIERT FÜR MUSIKALISCHE PRAXIS",
+        "text1": "Klare Seitenstruktur",
+        "text2": "Platz für Notizen",
+        "text3": "Musikfokussiertes Layout",
+        "alt": "Hauptvorteile des Notenbuchs."
+      },
+      "grid": [
+        {
+          "title": "HOHE LESBARKEIT",
+          "desc": "Präzise Notenliniensysteme für schnelles Erfassen beim Spielen."
+        },
+        {
+          "title": "PLATZ FÜR NOTIZEN",
+          "desc": "Breite Ränder für Akkorde, Fingersätze und Korrekturen."
+        },
+        {
+          "title": "PROFI-FORMAT",
+          "desc": "Standardisiertes Format für Anfänger und professionelle Musiker."
+        }
+      ],
+      "comp": "Vergleichstabellen-Header für Amazon Notenbuch-Serien."
+    },
+    "planner": {
+      "hero": {
+        "headline": "SCHAFFEN SIE PLATZ FÜR DAS, WAS ZÄHLT",
+        "body": "Ein Planner für Prioritäten, Termine, Ziele und Gewohnheiten. Die klare Struktur hilft dabei, Wichtiges sichtbar zu machen und nächste Schritte auf der Seite festzuhalten.",
+        "alt": "Planer Vorder- und Rückseite mit zentralem Logo."
+      },
+      "proof": {
+        "headline": "VON PRIORITÄTEN ZU KONKRETEN SCHRITTEN",
+        "body": "Die Innenansicht zeigt die tatsächliche Struktur der Planung. So lässt sich besser einschätzen, wie Aufgaben und Tagesabläufe im Buch organisiert sind.",
+        "alt": "Detaillierte Vorschau der Innenseiten des Organizers."
+      },
+      "value": {
+        "title": "EINE STRUKTUR FÜR DAS WESENTLICHE",
+        "text1": "Sichtbare Prioritäten",
+        "text2": "Tagesplanung",
+        "text3": "Gewohnheiten im Blick",
+        "alt": "Stärken des Produktivitätsplaners."
+      },
+      "grid": [
+        {
+          "title": "PRIORITÄTEN-FOKUS",
+          "desc": "Gezielte Abschnitte zur sofortigen Identifikation wichtiger Aufgaben."
+        },
+        {
+          "title": "KLARES DESIGN",
+          "desc": "Minimalistische Gestaltung zur Reduzierung von Ablenkung."
+        },
+        {
+          "title": "TÄGLICHE ROUTINE",
+          "desc": "Integrierte Module zum nachhaltigen Aufbau von Alltagsgewohnheiten."
+        }
+      ],
+      "comp": "Vergleichs-Header für die Amazon Planer-Kollektion."
+    },
+    "coloring": {
+      "ageDynamic": {
+        "2-4": {
+          "heroTitle": "GROSSE UND EINFACHE MOTIVE FÜR KLEINKINDER",
+          "heroBody": "Breite Formen, dicke Linien und klare Konturen speziell für Kinder von 2 bis 4 Jahren zur Förderung der Motorik.",
+          "proofTitle": "BREITE RÄUME UND DICKE LINIEN",
+          "proofBody": "Markierte Striche helfen Kleinkindern, Formen zu erkennen und innerhalb der Grenzen zu malen."
+        },
+        "4-6": {
+          "heroTitle": "EINE WELT VOLL SPASS UND KREATIVITÄT",
+          "heroBody": "Sympathische Illustrationen für Kinder von 4 bis 6 Jahren, ideal zur spielerischen Förderung der Fantasie.",
+          "proofTitle": "SAUBERE UND ÜBERSICHTLICHE SEITEN",
+          "proofBody": "Einseitiger Druck verhindert das Durchdrücken von Farben für ein reibungsloses Malerlebnis."
+        },
+        "6-8": {
+          "heroTitle": "KREATIVE ABENTEUER FÜR JUNGE KÜNSTLER",
+          "heroBody": "Detaillierte Zeichnungen für Kinder von 6 bis 8 Jahren zur Verfeinerung von Präzision und Kreativität.",
+          "proofTitle": "SORGFÄLTIGE DETAILS UND PRAKTISCHES FORMAT",
+          "proofBody": "Seiten zur Begleitung der künstlerischen Entwicklung mit motivierenden Aufgaben."
+        },
+        "8-10": {
+          "heroTitle": "SPANNENDE MOTIVE FÜR ÄLTERE KINDER",
+          "heroBody": "Moderne Themen für die Altersgruppe 8-10 Jahre zur Entfaltung der eigenen Zeichenleidenschaft.",
+          "proofTitle": "MODERNES DESIGN UND AUSGEWOGENE KOMPOSITION",
+          "proofBody": "Sorgfältig illustrierte Tafeln für unterhaltsame und erfüllende kreative Stunden."
+        },
+        "kids": {
+          "heroTitle": "MALBÜCHER UND AKTIVITÄTEN FÜR KINDER",
+          "heroBody": "Unterhaltsame Zeichenkollektionen für die Freizeit und zur Unterstützung der Hand-Auge-Koordination.",
+          "proofTitle": "KLARES UND FUNKTIONALES LAYOUT",
+          "proofBody": "Sauberes Layout für ein angenehmes und unkompliziertes Nutzungserlebnis."
+        },
+        "adults": {
+          "heroTitle": "ENTSPANNUNG UND KREATIVITÄT FÜR ERWACHSENE",
+          "heroBody": "Anti-Stress-Muster und detailreiche Illustrationen zum Abschalten vom Alltag und zur Entlastung des Geistes.",
+          "proofTitle": "EINSEITIGE SEITEN FÜR SAUBERE ERGEBNISSE",
+          "proofBody": "Jedes Motiv ist einzeln gedruckt, um die Verwendung von Stiften ohne Rückseitenbeschädigung zu ermöglichen."
+        }
+      },
+      "value": {
+        "title": "TECHNISCHE DATEN DER REIHE",
+        "text1": "Einseitige Seiten",
+        "text2": "Klare Konturen",
+        "text3": "Standard-Papierformat",
+        "alt": "Vorschau der Seiten eines Malbuchs mit Illustrationen und klarer Seitenstruktur."
+      },
+      "grid": [
+        {
+          "title": "SAUBERE KONTUREN",
+          "desc": "Deutliche Linienführung zur optimalen Unterstützung beim Ausmalen."
+        },
+        {
+          "title": "ECHTE EINSEITIGKEIT",
+          "desc": "Jedes Motiv bedruckt eine eigene Seite für maximale Flexibilität."
+        },
+        {
+          "title": "FUNKTIONALES LAYOUT",
+          "desc": "Ausgewogene Struktur für ein entspanntes und übersichtliches Vergnügen."
+        }
+      ],
+      "comp": "Header-Grafik für den Vergleich von Malbüchern im Amazon-Shop."
+    },
+    "generic": {
+      "hero": {
+        "headline": "EDITORIALE SORGFALT, DIE MAN SEITE FÜR SEITE SIEHT",
+        "body": "Eine klare visuelle Struktur führt durch das Buch und macht Aufbau und Gestaltung leichter erfassbar. Cover und Innenseiten bilden dabei ein stimmiges Gesamtbild.",
+        "alt": "Vorder- und Rückseite des Buches mit Logo."
+      },
+      "proof": {
+        "headline": "NICHT NUR DAS COVER: SCHAUEN SIE INS INNERE",
+        "body": "Die Innenseiten zeigen konkret Layout, Abstände und Inhaltsstruktur und geben so einen realistischeren Eindruck vom Buch.",
+        "alt": "Zweiseitige Vorschau der Innenseiten zur Qualitätsprüfung."
+      },
+      "value": {
+        "title": "EINE STRUKTUR FÜR KLARE ORIENTIERUNG",
+        "text1": "Klare visuelle Hierarchie",
+        "text2": "Ausgewogenes Layout",
+        "text3": "Übersichtliche Navigation",
+        "alt": "Qualitätsmerkmale des Buches."
+      },
+      "grid": [
+        {
+          "title": "SAUBERE AUSFÜHRUNG",
+          "desc": "Ansprechende Innengestaltung, die ab der ersten Seite überzeugt."
+        },
+        {
+          "title": "HOHER KOMFORT",
+          "desc": "Perfekt abgestimmte Typografie für entspanntes Lesen."
+        },
+        {
+          "title": "ROBUST & DAUERHAFT",
+          "desc": "Stabil formatiert für die tägliche Nutzung."
+        }
+      ],
+      "comp": "Standard-Vergleichsheader für KDP Buchreihen."
+    }
+  },
+  "fr": {
+    "music": {
+      "hero": {
+        "headline": "PLACEZ VOTRE MUSIQUE AU PREMIER PLAN",
+        "body": "Une mise en page pensée pour garder la lecture au centre, avec des espaces organisés et une place utile pour les annotations, nuances et indications de travail.",
+        "alt": "Couverture recto e verso avec logo central sur banner A+."
+      },
+      "proof": {
+        "headline": "DÉCOUVREZ L’INTÉRIEUR AVANT DE CHOISIR",
+        "body": "L’aperçu montre les portées, espaces et marges pour évaluer concrètement la structure réelle des pages.",
+        "alt": "Aperçu panoramique des pages intérieures de la partition."
+      },
+      "value": {
+        "title": "UNE STRUCTURE POUR LA PRATIQUE MUSICALE",
+        "text1": "Lecture claire",
+        "text2": "Espace d’annotation",
+        "text3": "Mise en page musicale",
+        "alt": "Atouts principaux du cahier de musique."
+      },
+      "grid": [
+        {
+          "title": "LISIBILITÉ PARFAITE",
+          "desc": "Lignes de portée précises pour un suivi visuel rapide en jeu."
+        },
+        {
+          "title": "ESPACE D'ANNOTATION",
+          "desc": "Marges généreuses adaptées aux accords, notes et corrections."
+        },
+        {
+          "title": "FORMAT PRO",
+          "desc": "Mise en page standard adaptée aux étudiants comme aux professionnels."
+        }
+      ],
+      "comp": "En-tête de comparaison 150x300 px pour séries de partitions Amazon."
+    },
+    "planner": {
+      "hero": {
+        "headline": "FAITES DE LA PLACE À CE QUI COMPTE",
+        "body": "Un planner qui réunit priorités, rendez-vous, objectifs et habitudes. Une structure claire pour choisir l’essentiel et transformer les intentions en prochaines étapes.",
+        "alt": "Couvertures recto/verso de l'agenda avec logo centré."
+      },
+      "proof": {
+        "headline": "DES PRIORITÉS AUX ACTIONS, PAGE APRÈS PAGE",
+        "body": "L’aperçu intérieur permet de voir concrètement comment les sections sont organisées et d’évaluer la structure avant de choisir.",
+        "alt": "Aperçu détaillé des pages d'organisation de l'agenda."
+      },
+      "value": {
+        "title": "UNE STRUCTURE POUR CE QUI COMPTE",
+        "text1": "Priorités visibles",
+        "text2": "Planification quotidienne",
+        "text3": "Suivi des habitudes",
+        "alt": "Points forts du planner de productivité."
+      },
+      "grid": [
+        {
+          "title": "GESTION DES PRIORITÉS",
+          "desc": "Structure dédiée à la sélection immédiate des tâches prioritaires."
+        },
+        {
+          "title": "DESIGN ÉPURÉ",
+          "desc": "Visuel clair conçu pour éliminer le stress visuel lors de la planification."
+        },
+        {
+          "title": "RÉGULARITÉ QUOTIDIENNE",
+          "desc": "Modules intégrés pour instaurer des routines efficaces au quotidien."
+        }
+      ],
+      "comp": "En-tête pour le tableau comparatif d'agendas sur Amazon."
+    },
+    "coloring": {
+      "ageDynamic": {
+        "2-4": {
+          "heroTitle": "GRANDS DESSINS SIMPLES POUR LES TOUT-PETITS",
+          "heroBody": "Formes amples, traits épais et contours bien définis conçus spécialement pour les enfants de 2 à 4 ans.",
+          "proofTitle": "ESPACES LARGES ET LIGNES ÉPAISSES",
+          "proofBody": "Tracés marqués pour aider les tout-petits à identifier les formes et colorier sans frustration."
+        },
+        "4-6": {
+          "heroTitle": "UN MONDE DE JEU ET DE CRÉATIVITÉ",
+          "heroBody": "Illustrations amicales et ludiques adaptées aux enfants de 4 à 6 ans pour stimuler l'imagination.",
+          "proofTitle": "PAGES PROPRES ET BIEN ESPACÉES",
+          "proofBody": "Mise en page recto seul évitant que les couleurs ne traversent pour une expérience fluide."
+        },
+        "6-8": {
+          "heroTitle": "AVENTURES CRÉATIVES POUR JEUNES ARTISTES",
+          "heroBody": "Dessins détaillés pour les enfants de 6 à 8 ans afin d'affiner la précision et la dextérité.",
+          "proofTitle": "DÉTAILS SOIGNÉS ET FORMAT PRATIQUE",
+          "proofBody": "Pages conçues pour accompagner l'enfant dans sa progression artistique avec plaisir."
+        },
+        "8-10": {
+          "heroTitle": "MOTIFS STIMULANTS POUR GRANDS ENFANTS",
+          "heroBody": "Thèmes modernes et styles recherchés pour les 8-10 ans, favorisant l'expression créative.",
+          "proofTitle": "STYLE MODERNE ET COMPOSITION ÉQUILIBRÉE",
+          "proofBody": "Planches illustrées avec soin pour des heures de loisir créatif épanouissant."
+        },
+        "kids": {
+          "heroTitle": "LIVRES DE COLORIAGE ET ACTIVITÉS ENFANTS",
+          "heroBody": "Collections de dessins divertissants pour le temps libre et le développement de la coordination.",
+          "proofTitle": "MISE EN PAGE CLAIRE ET FONCTIONNELLE",
+          "proofBody": "Layout épuré garantissant une utilisation agréable tout au long de la journée."
+        },
+        "adults": {
+          "heroTitle": "DÉTENTE ET CRÉATIVITÉ POUR ADULTES",
+          "heroBody": "Motifs anti-stress et illustrations détaillées pour déconnecter du quotidien et apaiser l'esprit.",
+          "proofTitle": "PAGES RECTO SEUL POUR UN RÉSULTAT IMPECCABLE",
+          "proofBody": "Chaque illustration est imprimée individuellement pour permettre l'usage de feutres sans souci."
+        }
+      },
+      "value": {
+        "title": "CARACTÉRISTIQUES TECHNIQUES DE LA SÉRIE",
+        "text1": "Pages recto seul",
+        "text2": "Contours bien définis",
+        "text3": "Format de papier standard",
+        "alt": "Aperçu des pages d’un livre de coloriage avec illustrations et structure claire."
+      },
+      "grid": [
+        {
+          "title": "CONTOURS PROPRES",
+          "desc": "Lignes nettes conçues pour guider le tracé et faciliter le coloriage."
+        },
+        {
+          "title": "VRAIS RECTO SEUL",
+          "desc": "Chaque dessin est sur sa propre page pour un usage flexible."
+        },
+        {
+          "title": "LAYOUT FONCTIONNEL",
+          "desc": "Structure équilibrée offrant un passe-temps agréable et ordonné."
+        }
+      ],
+      "comp": "En-tête optimisé pour comparer les livres de coloriage sur Amazon."
+    },
+    "generic": {
+      "hero": {
+        "headline": "LE SOIN ÉDITORIAL SE VOIT, PAGE APRÈS PAGE",
+        "body": "Une structure visuelle claire pour guider la découverte du livre et rendre son organisation plus facile à comprendre. Couverture et intérieur racontent le même projet.",
+        "alt": "Couvertures recto e verso accompagnées du logo."
+      },
+      "proof": {
+        "headline": "NE VOUS ARRÊTEZ PAS À LA COUVERTURE",
+        "body": "Les pages intérieures montrent concrètement la mise en page, les espaces et l’organisation du contenu pour une vision plus précise du livre.",
+        "alt": "Aperçu panoramique sur deux pages de l'intérieur du livre."
+      },
+      "value": {
+        "title": "UNE STRUCTURE POUR MIEUX SE REPÉRER",
+        "text1": "Hiérarchie visuelle",
+        "text2": "Mise en page équilibrée",
+        "text3": "Navigation naturelle",
+        "alt": "Éléments de qualité du livre."
+      },
+      "grid": [
+        {
+          "title": "FINITION SOIGNÉE",
+          "desc": "Esthétique soignée dès la première page pour séduire le lecteur."
+        },
+        {
+          "title": "CONFORT DE LECTURE",
+          "desc": "Typographie et proportions ajustées pour une lecture aisée."
+        },
+        {
+          "title": "ROBUSTE ET DURABLE",
+          "desc": "Conception solide adaptée à une utilisation régulière."
+        }
+      ],
+      "comp": "En-tête standard de comparaison pour catalogue KDP."
+    }
+  },
+  "es": {
+    "music": {
+      "hero": {
+        "headline": "PON TU MÚSICA EN PRIMER PLANO",
+        "body": "Una estructura de partituras pensada para mantener la lectura en el centro, con espacios organizados y lugar útil para notas, dinámicas e indicaciones de estudio.",
+        "alt": "Portada y contraportada con logo central superior."
+      },
+      "proof": {
+        "headline": "MIRA EL INTERIOR ANTES DE ELEGIR",
+        "body": "La vista previa muestra pentagramas, espacios y márgenes para valorar de forma concreta la estructura real de las páginas.",
+        "alt": "Vista panorámica de las páginas interiores del cuaderno de música."
+      },
+      "value": {
+        "title": "UNA ESTRUCTURA PARA LA PRÁCTICA MUSICAL",
+        "text1": "Lectura clara",
+        "text2": "Espacio para notas",
+        "text3": "Diseño musical",
+        "alt": "Ventajas clave del cuaderno de música."
+      },
+      "grid": [
+        {
+          "title": "LEGIBILIDAD PERFECTA",
+          "desc": "Líneas de pentagrama de alta precisión para un seguimiento rápido."
+        },
+        {
+          "title": "ESPACIO NOTAS",
+          "desc": "Márgenes generosos ideados para acordes, notas y comentarios."
+        },
+        {
+          "title": "FORMATO PRO",
+          "desc": "Dimensiones estándar adecuadas para estudiantes y profesionales."
+        }
+      ],
+      "comp": "Cabecera de 150x300 px para tabla comparativa de música en Amazon."
+    },
+    "planner": {
+      "hero": {
+        "headline": "HAZ ESPACIO PARA LO QUE DE VERDAD IMPORTA",
+        "body": "Un planner que reúne prioridades, citas, objetivos y hábitos. Una estructura clara para decidir qué va primero y convertir las intenciones en próximos pasos.",
+        "alt": "Portada y contraportada del planner con logo de marca."
+      },
+      "proof": {
+        "headline": "DE LAS PRIORIDADES A LA ACCIÓN, PÁGINA A PÁGINA",
+        "body": "La vista interior permite comprobar cómo están organizadas las secciones y valorar la estructura antes de elegir.",
+        "alt": "Vista detallada de las páginas interiores del organizador."
+      },
+      "value": {
+        "title": "UNA ESTRUCTURA PARA LO QUE IMPORTA",
+        "text1": "Prioridades visibles",
+        "text2": "Planificación diaria",
+        "text3": "Seguimiento de hábitos",
+        "alt": "Puntos fuertes del planner de productividad."
+      },
+      "grid": [
+        {
+          "title": "CONTROL DE PRIORIDADES",
+          "desc": "Espacio dedicado a identificar al instante las tareas de mayor valor."
+        },
+        {
+          "title": "DISEÑO LIMPIO",
+          "desc": "Estilo minimalista para reducir la carga visual al planificar."
+        },
+        {
+          "title": "CONSTANCIA DIARIA",
+          "desc": "Módulos integrados para afianzar rutinas y monitorear progresos."
+        }
+      ],
+      "comp": "Cabecera para la tabla comparativa de agendas en Amazon."
+    },
+    "coloring": {
+      "ageDynamic": {
+        "2-4": {
+          "heroTitle": "DIBUJOS GRANDES Y SENCILLOS PARA LOS MÁS PEQUEÑOS",
+          "heroBody": "Formas amplias, líneas gruesas y contornos definidos pensados especialmente para niños de 2 a 4 años.",
+          "proofTitle": "ESPACIOS AMPLIOS Y TRAZOS GRUESOS",
+          "proofBody": "Trazos marcados para ayudar a los más pequeños a reconocer formas y colorear con facilidad dentro de los límites."
+        },
+        "4-6": {
+          "heroTitle": "UN MUNDO DE DIVERSIÓN Y JUEGO CREATIVO",
+          "heroBody": "Ilustraciones simpáticas y accesibles ideales para niños de 4 a 6 años, fomentando la imaginación.",
+          "proofTitle": "PÁGINAS LIMPIAS Y BIEN DISTRIBUIDAS",
+          "proofBody": "Diseño a una sola cara que evita traspasos de tinta para una experiencia fluida y ordenada."
+        },
+        "6-8": {
+          "heroTitle": "AVENTURAS CREATIVAS PARA JÓVENES ARTISTAS",
+          "heroBody": "Dibujos detallados para niños de 6 a 8 años pensados para perfeccionar la destreza y pasar horas de entretenimiento.",
+          "proofTitle": "DETALLES CUIDADOS Y FORMATO PRÁCTICO",
+          "proofBody": "Páginas diseñadas para acompañar el crecimiento artístico de los niños de forma estimulante."
+        },
+        "8-10": {
+          "heroTitle": "DISEÑOS ATRACTIVOS PARA NIÑOS MÁS GRANDES",
+          "heroBody": "Temáticas modernas y estilos seleccionados para la franja de 8 a 10 años, cultivando el amor por el dibujo.",
+          "proofTitle": "ESTILO MODERNO Y COMPOSICIÓN EQUILIBRADA",
+          "proofBody": "Láminas ilustradas con esmero para proporcionar horas de ocio creativo satisfactorio."
+        },
+        "kids": {
+          "heroTitle": "LIBROS PARA COLOREAR Y ACTIVIDADES INFANTILES",
+          "heroBody": "Colecciones de dibujos entretenidos ideales para el tiempo libre y el desarrollo psicomotor.",
+          "proofTitle": "MAQUETACIÓN CLARA Y FUNCIONAL",
+          "proofBody": "Diseño limpio enfocado en ofrecer una experiencia de uso cómoda y agradable todo el día."
+        },
+        "adults": {
+          "heroTitle": "RELAJACIÓN Y CREATIVIDAD PARA ADULTOS",
+          "heroBody": "Patrones antiestrés y diseños detallados para desconectar de la rutina diaria y calmar la mente.",
+          "proofTitle": "PÁGINAS A UNA CARA PARA UN ACABADO IMPECABLE",
+          "proofBody": "Cada ilustración se imprime de forma individual para permitir el uso de rotuladores sin dañar el reverso."
+        }
+      },
+      "value": {
+        "title": "ESPECIFICACIONES TÉCNICAS DE LA COLECCIÓN",
+        "text1": "Páginas a una cara",
+        "text2": "Contornos definidos",
+        "text3": "Formato de papel estándar",
+        "alt": "Vista previa de páginas de un libro para colorear con ilustraciones y estructura clara."
+      },
+      "grid": [
+        {
+          "title": "CONTORNOS LIMPIOS",
+          "desc": "Líneas definidas diseñadas para guiar el trazo y facilitar el coloreado."
+        },
+        {
+          "title": "UNA SOLA CARA",
+          "desc": "Cada dibujo ocupa su propia página para total libertad de materiales."
+        },
+        {
+          "title": "DISEÑO FUNCIONAL",
+          "desc": "Estructura equilibrada que ofrece un pasatiempo ameno y ordenado."
+        }
+      ],
+      "comp": "Cabecera optimizada para comparar libros para colorear en Amazon."
+    },
+    "generic": {
+      "hero": {
+        "headline": "EL CUIDADO EDITORIAL SE VÉ, PÁGINA A PÁGINA",
+        "body": "Una estructura visual clara que guía al lector y facilita entender cómo está organizado el libro. Portada e interior presentan el proyecto de forma coherente.",
+        "alt": "Portada y contraportada de libro con el logo de la editorial."
+      },
+      "proof": {
+        "headline": "NO TE QUEDES SOLO CON LA PORTADA",
+        "body": "Las páginas interiores muestran de forma concreta la maquetación, los espacios y la organización del contenido.",
+        "alt": "Vista panorámica de dos páginas del interior del libro."
+      },
+      "value": {
+        "title": "UNA ESTRUCTURA PARA ORIENTARSE MEJOR",
+        "text1": "Jerarquía visual",
+        "text2": "Diseño equilibrado",
+        "text3": "Navegación natural",
+        "alt": "Detalles de calidad de la obra."
+      },
+      "grid": [
+        {
+          "title": "ACABADO CUIDADO",
+          "desc": "Estética visual cuidada desde la primera página para causar impacto."
+        },
+        {
+          "title": "MÁXIMO CONFORT",
+          "desc": "Tipografía y márgenes adaptados para una lectura descansada."
+        },
+        {
+          "title": "ESTRUCTURA RESISTENTE",
+          "desc": "Formato sólido pensado para un uso continuado."
+        }
+      ],
+      "comp": "Cabecera estándar de comparación para catálogo KDP."
+    }
+  }
+}
