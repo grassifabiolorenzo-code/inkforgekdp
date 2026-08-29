@@ -716,7 +716,6 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
                   selected={selectedId === s.id}
                   onSelect={() => setSelectedId(s.id)}
                   className="z-20"
-                className="z-20"
                   onMove={(top, left) => updateSubtitle(s.id, { ...s, top, left })}
                 >
                   <p
