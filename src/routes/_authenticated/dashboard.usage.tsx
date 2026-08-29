@@ -6,6 +6,7 @@ import { EmptyState, LoadingState } from "@/components/dashboard/StateBanners";
 import { ToolIcon } from "@/components/tools/ToolIcon";
 import { TOOLS } from "@/config/tools";
 import { useAccount, useUsageBreakdown } from "@/hooks/useAccount";
+import { useI18n, useToolCopy } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/dashboard/usage")({
   head: () => ({
@@ -21,20 +22,22 @@ export const Route = createFileRoute("/_authenticated/dashboard/usage")({
 function UsagePage() {
   const account = useAccount();
   const usage = useUsageBreakdown();
+  const { t } = useI18n();
+  const copyOf = useToolCopy();
   const state = account.data?.credits;
 
   return (
-    <DashboardShell title="Utilizzo" description="Come stai consumando i tuoi crediti">
+    <DashboardShell title={t("dash.usage")} description="Come stai consumando i tuoi crediti">
       <div className="mx-auto max-w-4xl space-y-8">
         {state && <CreditsCard state={state} />}
 
         <div className="panel p-6">
-          <h2 className="font-semibold">Per tool</h2>
+          <h2 className="font-semibold">{t("dash.tools")}</h2>
           <div className="mt-4 space-y-3">
             {TOOLS.map((tool) => (
               <div key={tool.id} className="flex items-center gap-3">
                 <ToolIcon tool={tool} size="sm" />
-                <span className="flex-1 text-sm">{tool.name}</span>
+                <span className="flex-1 text-sm">{copyOf(tool.id).name}</span>
                 <span className="text-sm font-semibold">
                   {usage.data?.perTool[tool.id] ?? 0}
                 </span>

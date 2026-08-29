@@ -2,11 +2,13 @@ import { Check, Minus } from "lucide-react";
 
 import { PLANS } from "@/config/plans";
 import { TOOLS } from "@/config/tools";
+import { useToolCopy } from "@/lib/i18n";
 
 export function ComparisonTable() {
+  const copyOf = useToolCopy();
   const rows = [
     ...TOOLS.map((tool) => ({
-      label: tool.name,
+      label: copyOf(tool.id).name,
       values: PLANS.map((p) => (p.allowedTools.includes(tool.id) ? "check" : "dash") as string),
     })),
     {

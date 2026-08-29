@@ -1,4 +1,4 @@
-import { Download, Loader2, Ruler, Upload } from "lucide-react";
+import { Download, FileDown, Loader2, Lock, LockOpen, Ruler, Upload } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -8,7 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { OutputLanguageSelect } from "@/components/tools/OutputLanguageSelect";
 import { newOperationId } from "@/hooks/useAccount";
+import { useI18n } from "@/lib/i18n";
 import type { ToolRuntime } from "@/components/tools/ToolPageShell";
 
 import { DraggableBox } from "./DraggableBox";
@@ -16,6 +18,7 @@ import { TextFieldEditor } from "./TextFieldEditor";
 import {
   EXPORT_DPI,
   ensureFontsLoaded,
+  EXPORT_FILE_NAME,
   KDP_BLEED_IN,
   KDP_PAPER_LABELS,
   KDP_PAPER_THICKNESS,
@@ -69,6 +72,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
   const [showGuides, setShowGuides] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
+  const { outputLocale } = useI18n();
 
   const [title, setTitle] = useState<TextElementState>({
     text: "",
@@ -108,6 +112,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
   });
   const [subtitles, setSubtitles] = useState<SubtitleElementState[]>([]);
   const [bgImage, setBgImage] = useState<BackgroundImageState | null>(null);
+  const [bgLocked, setBgLocked] = useState(false);
   const [imageLayers, setImageLayers] = useState<ImageLayerState[]>([]);
 
 
@@ -197,6 +202,8 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
   // Zoom con rotella sullo sfondo, ancorato al puntatore.
   const bgRef = useRef<BackgroundImageState | null>(null);
   bgRef.current = bgImage;
+  const bgLockedRef = useRef(false);
+  bgLockedRef.current = bgLocked;
 
   // Carica tutti i font del database (Google Fonts) una sola volta al mount.
   useEffect(() => {
@@ -208,7 +215,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
     if (!el) return;
     const onWheel = (e: WheelEvent) => {
       const bg = bgRef.current;
-      if (!bg) return;
+      if (!bg || bgLockedRef.current) return;
       e.preventDefault();
       const dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 100 : 1);
       const factor = Math.exp(-dy * 0.0015);
@@ -231,7 +238,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
   const chargeGuard = useRef(false);
 
 
-  async function handleExport() {
+  async function handleExport(format: "png" | "pdf" = "png") {
     // Guardia sincrona: blocca doppio click/rientranza prima di qualsiasi await.
     if (chargeGuard.current) return;
     chargeGuard.current = true;
@@ -243,7 +250,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
     if (!(await runtime.ensureAccess())) return;
 
     setExporting(true);
-    const operationId = newOperationId("copertine-export");
+    const operationId = newOperationId(`copertine-export-${format}`);
     const wasGuidesVisible = showGuides;
     setSelectedId(null);
     setShowGuides(false);
@@ -264,15 +271,30 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
         backgroundColor: null,
       });
 
-      const blob: Blob | null = await new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/png"));
-      if (!blob) throw new Error("Esportazione non riuscita");
+      const baseName = `${EXPORT_FILE_NAME[outputLocale] ?? "kdp-cover"}-${trim}-${Date.now()}`;
 
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `copertina-kdp-${trim}-${Date.now()}.png`;
-      link.click();
-      URL.revokeObjectURL(url);
+      if (format === "pdf") {
+        // PDF alle misure fisiche esatte del wrap-around (bleed incluso), immagine a 300 DPI.
+        const { jsPDF } = await import("jspdf");
+        const pdf = new jsPDF({
+          orientation: totalWidthIn >= totalHeightIn ? "landscape" : "portrait",
+          unit: "in",
+          format: [totalWidthIn, totalHeightIn],
+          compress: true,
+        });
+        pdf.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", 0, 0, totalWidthIn, totalHeightIn);
+        pdf.save(`${baseName}.pdf`);
+      } else {
+        const blob: Blob | null = await new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/png"));
+        if (!blob) throw new Error("Esportazione non riuscita");
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${baseName}.png`;
+        link.click();
+        URL.revokeObjectURL(url);
+      }
 
       const result = await runtime.charge(operationId, "Esportazione copertina KDP completata");
       if (!result.ok) return;
@@ -422,6 +444,10 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
                   onChange={handleImageLayersUpload}
                 />
               </label>
+              <p className="text-[10px] text-muted-foreground">
+                Trascina ogni immagine sul canvas per posizionarla e usa la maniglia in basso a destra (o lo
+                slider) per ridimensionarla.
+              </p>
               {imageLayers.map((layer) => (
                 <div key={layer.id} className="flex items-center gap-2 rounded border border-border p-2 text-xs">
                   <img src={layer.src} alt={layer.name} className="size-8 rounded object-cover" />
@@ -464,6 +490,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
                     <span className="font-mono text-[10px] text-accent">{Math.round(bgImage.width)}px</span>
                   </div>
                   <Slider
+                    disabled={bgLocked}
                     min={60}
                     max={3000}
                     value={[bgImage.width]}
@@ -489,11 +516,21 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
                       />
                     </div>
                   </div>
+                  <Button
+                    size="sm"
+                    variant={bgLocked ? "default" : "outline"}
+                    className="w-full"
+                    onClick={() => setBgLocked((v) => !v)}
+                  >
+                    {bgLocked ? <Lock className="mr-1.5 size-3.5" /> : <LockOpen className="mr-1.5 size-3.5" />}
+                    {bgLocked ? "Sfondo bloccato — clicca per sbloccare" : "Blocca sfondo (posizione e zoom)"}
+                  </Button>
                   <div className="flex gap-2">
                     <Button
                       size="sm"
                       variant="secondary"
                       className="flex-1"
+                      disabled={bgLocked}
                       onClick={() => setBgImage((b) => (b ? { ...b, width: previewW, top: 0, left: 0 } : b))}
                     >
                       Adatta Canvas
@@ -513,6 +550,8 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
           </TabsContent>
         </Tabs>
 
+        <OutputLanguageSelect className="rounded-xl border border-border bg-surface/60 p-3.5" />
+
         <p className="text-xs text-muted-foreground">
           Modifiche e anteprima non consumano crediti. Il credito viene scalato solo a esportazione completata.
         </p>
@@ -528,6 +567,15 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
             <div className="flex items-center gap-2">
               <Button size="sm" variant="outline" onClick={() => setShowGuides((v) => !v)}>
                 <Ruler className="mr-1.5 size-3.5 text-accent" /> Guide KDP & Bleed
+              </Button>
+              <Button
+                size="sm"
+                variant={bgLocked ? "default" : "outline"}
+                disabled={!bgImage}
+                onClick={() => setBgLocked((v) => !v)}
+                title={bgLocked ? "Sblocca sfondo" : "Blocca sfondo"}
+              >
+                {bgLocked ? <Lock className="size-3.5" /> : <LockOpen className="size-3.5" />}
               </Button>
             </div>
           </div>
@@ -551,6 +599,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
                 onSelect={() => setSelectedId("bg")}
                 onMove={(top, left) => setBgImage((b) => (b ? { ...b, top, left } : b))}
                 onResize={(width) => setBgImage((b) => (b ? { ...b, width } : b))}
+                locked={bgLocked}
                 className="z-0"
               >
                 <img src={bgImage.src} alt="Sfondo copertina" className="pointer-events-none block h-auto w-full" />
@@ -568,6 +617,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
                 selected={selectedId === layer.id}
                 onSelect={() => setSelectedId(layer.id)}
                 onMove={(top, left) => updateImageLayer(layer.id, { top, left })}
+                onResize={(width) => updateImageLayer(layer.id, { width })}
                 className="z-10"
               >
                 <img src={layer.src} alt={layer.name} className="pointer-events-none block w-full" />
@@ -601,6 +651,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
                 width={frontWidthPx - 40}
                 selected={selectedId === "back"}
                 onSelect={() => setSelectedId("back")}
+                className="z-20"
                 onMove={(top, left) => setBackBlurb((v) => ({ ...v, top, left }))}
               >
                 <p
@@ -619,6 +670,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
                 left={spine.left}
                 selected={selectedId === "spine"}
                 onSelect={() => setSelectedId("spine")}
+                className="z-20"
                 onMove={(top, left) => setSpine((v) => ({ ...v, top, left }))}
               >
                 <p
@@ -644,6 +696,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
                 width={frontWidthPx - 40}
                 selected={selectedId === "title"}
                 onSelect={() => setSelectedId("title")}
+                className="z-20"
                 onMove={(top, left) => setTitle((v) => ({ ...v, top, left }))}
               >
                 <h1
@@ -662,6 +715,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
                   width={frontWidthPx - 40}
                   selected={selectedId === s.id}
                   onSelect={() => setSelectedId(s.id)}
+                  className="z-20"
                   onMove={(top, left) => updateSubtitle(s.id, { ...s, top, left })}
                 >
                   <p
@@ -679,6 +733,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
                 width={frontWidthPx - 40}
                 selected={selectedId === "author"}
                 onSelect={() => setSelectedId("author")}
+                className="z-20"
                 onMove={(top, left) => setAuthor((v) => ({ ...v, top, left }))}
               >
                 <p
@@ -692,14 +747,25 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
           </div>
         </div>
 
-        <Button
-          onClick={handleExport}
-          disabled={exporting || runtime.charging}
-          className="bg-gradient-brand w-full text-primary-foreground hover:opacity-90"
-        >
-          {exporting || runtime.charging ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Download className="mr-2 size-4" />}
-          Esporta Stampa HD 300 DPI (1 credito)
-        </Button>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <Button
+            onClick={() => void handleExport("png")}
+            disabled={exporting || runtime.charging}
+            className="bg-gradient-brand w-full text-primary-foreground hover:opacity-90"
+          >
+            {exporting || runtime.charging ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Download className="mr-2 size-4" />}
+            Esporta PNG HD 300 DPI (1 credito)
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => void handleExport("pdf")}
+            disabled={exporting || runtime.charging}
+            className="w-full"
+          >
+            {exporting || runtime.charging ? <Loader2 className="mr-2 size-4 animate-spin" /> : <FileDown className="mr-2 size-4" />}
+            Esporta PDF copertina ({totalWidthIn.toFixed(3)}" x {totalHeightIn.toFixed(3)}") — 1 credito
+          </Button>
+        </div>
       </div>
     </div>
   );

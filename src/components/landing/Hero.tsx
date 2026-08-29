@@ -1,22 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, ShieldCheck, Zap } from "lucide-react";
+import { ArrowRight, Languages, ShieldCheck } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
-/**
- * Testi placeholder facilmente modificabili.
- */
-export const HERO_COPY = {
-  eyebrow: "Suite professionale per editori KDP",
-  headline: "Pubblica su KDP più velocemente, con qualità da studio editoriale",
-  subheadline:
-    "OP+studioKdp riunisce copertine, listing, contenuti A+ e triage immagini in un'unica piattaforma. Un solo abbonamento, quattro strumenti, zero software da installare.",
-  primaryCta: "Inizia ora",
-  secondaryCta: "Scopri i piani",
-};
+import { useI18n } from "@/lib/i18n";
 
 export function Hero() {
+  const { t } = useI18n();
+
   return (
     <section className="relative overflow-hidden">
       <div className="hero-aura aura-violet -top-32 left-[10%] size-[28rem]" aria-hidden />
@@ -24,16 +15,15 @@ export function Hero() {
 
       <div className="relative mx-auto max-w-6xl px-4 pt-20 pb-16 text-center">
         <Badge variant="outline" className="border-border bg-gradient-brand-soft text-foreground">
-          {HERO_COPY.eyebrow}
+          {t("hero.eyebrow")}
         </Badge>
 
         <h1 className="mx-auto mt-6 max-w-3xl text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
-          {HERO_COPY.headline.split(", ")[0]},{" "}
-          <span className="text-gradient">{HERO_COPY.headline.split(", ")[1]}</span>
+          {t("hero.headline1")} <span className="text-gradient">{t("hero.headline2")}</span>
         </h1>
 
         <p className="mx-auto mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg">
-          {HERO_COPY.subheadline}
+          {t("hero.sub")}
         </p>
 
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -43,24 +33,23 @@ export function Hero() {
             className="bg-gradient-brand w-full text-primary-foreground transition-opacity hover:opacity-90 sm:w-auto"
           >
             <Link to="/auth" search={{ mode: "signup" }}>
-              {HERO_COPY.primaryCta}
+              {t("hero.cta1")}
               <ArrowRight className="ml-1 size-4" />
             </Link>
           </Button>
           <Button size="lg" variant="outline" asChild className="w-full sm:w-auto">
-            <Link to="/pricing">{HERO_COPY.secondaryCta}</Link>
+            <Link to="/pricing">{t("hero.cta2")}</Link>
           </Button>
         </div>
 
         <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
           <span className="inline-flex items-center gap-1.5">
-            <Zap className="size-3.5 text-accent" /> Tutti e 4 i tool in ogni piano
+            <Languages className="size-3.5 text-accent" /> {t("hero.badge1")}
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <ShieldCheck className="size-3.5 text-accent" /> Cancelli quando vuoi
+            <ShieldCheck className="size-3.5 text-accent" /> {t("hero.badge2")}
           </span>
         </div>
-
       </div>
     </section>
   );

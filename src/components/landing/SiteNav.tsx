@@ -2,19 +2,23 @@ import { Link } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
 import { useState } from "react";
 
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Logo } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/useAuth";
+import { useI18n } from "@/lib/i18n";
+import type { MessageKey } from "@/lib/i18n/messages";
 
-const links = [
-  { to: "/", label: "Home" },
-  { to: "/pricing", label: "Prezzi" },
-  { to: "/faq", label: "FAQ" },
-] as const;
+const links: { to: string; key: MessageKey }[] = [
+  { to: "/", key: "nav.home" },
+  { to: "/pricing", key: "nav.pricing" },
+  { to: "/faq", key: "nav.faq" },
+];
 
 export function SiteNav() {
   const { user } = useAuth();
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
 
   return (
@@ -33,73 +37,77 @@ export function SiteNav() {
               activeProps={{ className: "text-foreground" }}
               activeOptions={{ exact: l.to === "/" }}
             >
-              {l.label}
+              {t(l.key)}
             </Link>
           ))}
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
+          <LanguageSwitcher variant="full" />
           {user ? (
             <Button asChild>
-              <Link to="/dashboard">Dashboard</Link>
+              <Link to="/dashboard">{t("nav.dashboard")}</Link>
             </Button>
           ) : (
             <>
               <Button variant="ghost" asChild>
-                <Link to="/auth">Accedi</Link>
+                <Link to="/auth">{t("nav.login")}</Link>
               </Button>
               <Button asChild className="bg-gradient-brand text-primary-foreground hover:opacity-90">
                 <Link to="/auth" search={{ mode: "signup" }}>
-                  Inizia ora
+                  {t("nav.signup")}
                 </Link>
               </Button>
             </>
           )}
         </div>
 
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger asChild className="md:hidden">
-            <Button variant="ghost" size="icon" aria-label="Apri menu">
-              <Menu className="size-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="w-72 bg-sidebar">
-            <div className="mt-8 flex flex-col gap-1">
-              {links.map((l) => (
-                <Link
-                  key={l.to}
-                  to={l.to}
-                  onClick={() => setOpen(false)}
-                  className="rounded-md px-3 py-2.5 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground"
-                >
-                  {l.label}
-                </Link>
-              ))}
-              <div className="mt-4 flex flex-col gap-2">
-                {user ? (
-                  <Button asChild onClick={() => setOpen(false)}>
-                    <Link to="/dashboard">Dashboard</Link>
-                  </Button>
-                ) : (
-                  <>
-                    <Button variant="outline" asChild onClick={() => setOpen(false)}>
-                      <Link to="/auth">Accedi</Link>
+        <div className="flex items-center gap-1 md:hidden">
+          <LanguageSwitcher />
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label={t("nav.menu")}>
+                <Menu className="size-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-72 bg-sidebar">
+              <div className="mt-8 flex flex-col gap-1">
+                {links.map((l) => (
+                  <Link
+                    key={l.to}
+                    to={l.to}
+                    onClick={() => setOpen(false)}
+                    className="rounded-md px-3 py-2.5 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground"
+                  >
+                    {t(l.key)}
+                  </Link>
+                ))}
+                <div className="mt-4 flex flex-col gap-2">
+                  {user ? (
+                    <Button asChild onClick={() => setOpen(false)}>
+                      <Link to="/dashboard">{t("nav.dashboard")}</Link>
                     </Button>
-                    <Button
-                      asChild
-                      onClick={() => setOpen(false)}
-                      className="bg-gradient-brand text-primary-foreground"
-                    >
-                      <Link to="/auth" search={{ mode: "signup" }}>
-                        Inizia ora
-                      </Link>
-                    </Button>
-                  </>
-                )}
+                  ) : (
+                    <>
+                      <Button variant="outline" asChild onClick={() => setOpen(false)}>
+                        <Link to="/auth">{t("nav.login")}</Link>
+                      </Button>
+                      <Button
+                        asChild
+                        onClick={() => setOpen(false)}
+                        className="bg-gradient-brand text-primary-foreground"
+                      >
+                        <Link to="/auth" search={{ mode: "signup" }}>
+                          {t("nav.signup")}
+                        </Link>
+                      </Button>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
-          </SheetContent>
-        </Sheet>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
     </header>
   );

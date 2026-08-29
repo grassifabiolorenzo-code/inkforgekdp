@@ -4,10 +4,23 @@
  * (PAS & AIDA + long-tail SEO + audit di conformità e potenziale di vendita).
  */
 
+import {
+  EN_EXPORT_LABELS,
+  fillTemplate,
+  LISTING_PACKS,
+  pickTitleTemplates,
+  type ListingLocale,
+  type LocalePack,
+} from "./listingLocales";
+
 export type BookType = "coloring" | "activity" | "notebook" | "exercise";
 export type Audience = "toddlers" | "teens" | "adults";
 
+export type ListingLanguage = "en" | ListingLocale;
+
 export interface GenerateInput {
+  /** Lingua dei contenuti generati (mercato Amazon di destinazione). */
+  locale?: ListingLanguage;
   subject: string;
   bookType: BookType;
   audience: Audience;
@@ -29,6 +42,7 @@ export interface Listing {
   salesScore: number;
   salesText: string;
   interiorPages: number;
+  locale: ListingLanguage;
 }
 
 export function defaultAgeDetails(audience: Audience): string {
@@ -56,6 +70,9 @@ export function generateListing(input: GenerateInput): Listing {
     bookType.length +
     audience.length;
   const rand = makeRand(seed);
+
+  const locale: ListingLanguage = input.locale ?? "en";
+  const pack: LocalePack | undefined = locale === "en" ? undefined : LISTING_PACKS[locale];
 
   let title = "";
   let subtitle = "";
@@ -201,15 +218,32 @@ export function generateListing(input: GenerateInput): Listing {
     ];
   }
 
+  if (pack) {
+    const audienceCopy = pack.audiences[audience];
+    const vars = {
+      subject,
+      who: audienceCopy.who,
+      benefit: audienceCopy.benefit,
+      age: ageDetails,
+    };
+    const templates = pickTitleTemplates(pack, bookType);
+    title = fillTemplate(templates[rand(0, templates.length - 1)] ?? templates[0]!, vars);
+    subtitle = fillTemplate(bookType === "coloring" ? pack.subtitle.coloring : pack.subtitle.activity, vars);
+    description = pack.description.map((paragraph) => fillTemplate(paragraph, vars)).join("\n\n");
+    keywords = audienceCopy.keywords;
+  }
+
   let complianceScore = 75;
   if (hasCover) complianceScore += 12;
   if (hasInterior && interiorScanned) complianceScore += 13;
   if (complianceScore > 100) complianceScore = 100;
 
-  let complianceText = `File strutturati correttamente. `;
-  complianceText += hasCover && hasInterior
-    ? `Copertina e interno verificati: pronti per il caricamento su KDP.`
-    : `Carica cover e PDF interno per completare l'audit tecnico.`;
+  const complianceCopy = pack?.compliance ?? {
+    base: "Files correctly structured. ",
+    ok: "Cover and interior verified: ready for KDP upload.",
+    todo: "Upload the cover and the interior PDF to complete the technical audit.",
+  };
+  const complianceText = complianceCopy.base + (hasCover && hasInterior ? complianceCopy.ok : complianceCopy.todo);
 
   let salesScore = 78;
   if (subject.length > 4) salesScore += 8;
@@ -217,7 +251,9 @@ export function generateListing(input: GenerateInput): Listing {
   if (categories.length === 3) salesScore += 7;
   if (salesScore > 98) salesScore = 98;
 
-  const salesText = `Confrontato con i bestseller della nicchia "${subject}", questo listing sfrutta keyword a bassa concorrenza e categorie mirate. Ottimo potenziale di posizionamento organico (A9) se abbinato a sponsorizzate iniziali.`;
+  const salesText = pack
+    ? fillTemplate(pack.sales, { subject })
+    : `Compared with the bestsellers in the "${subject}" niche, this listing uses low-competition keywords and targeted categories. Strong organic (A9) ranking potential when paired with initial sponsored ads.`;
 
   return {
     title,
@@ -230,26 +266,28 @@ export function generateListing(input: GenerateInput): Listing {
     salesScore,
     salesText,
     interiorPages,
+    locale,
   };
 }
 
 export function formatListingForExport(listing: Listing): string {
+  const labels = listing.locale === "en" ? EN_EXPORT_LABELS : LISTING_PACKS[listing.locale].exportLabels;
   return [
-    `TITOLO: ${listing.title}`,
-    `SOTTOTITOLO: ${listing.subtitle}`,
+    `${labels.title}: ${listing.title}`,
+    `${labels.subtitle}: ${listing.subtitle}`,
     "",
-    "DESCRIZIONE (A+/HTML, PAS+AIDA):",
+    labels.description,
     listing.description,
     "",
-    "KEYWORD BACKEND (7 campi):",
-    ...listing.keywords.map((k, i) => `Box ${i + 1}: ${k}`),
+    labels.keywords,
+    ...listing.keywords.map((k, i) => `${labels.box} ${i + 1}: ${k}`),
     "",
-    "CATEGORIE (BISAC):",
+    labels.categories,
     ...listing.categories.map((c) => `- ${c}`),
     "",
-    `Audit qualità & conformità: ${listing.complianceScore} / 100 — ${listing.complianceText}`,
-    `Potenziale di vendita: ${listing.salesScore} / 100 — ${listing.salesText}`,
-    listing.interiorPages > 0 ? `Pagine interno analizzate: ${listing.interiorPages}` : "",
+    `${labels.compliance}: ${listing.complianceScore} / 100 — ${listing.complianceText}`,
+    `${labels.sales}: ${listing.salesScore} / 100 — ${listing.salesText}`,
+    listing.interiorPages > 0 ? `${labels.pages}: ${listing.interiorPages}` : "",
   ]
     .filter(Boolean)
     .join("\n");

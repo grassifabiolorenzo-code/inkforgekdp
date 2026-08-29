@@ -121,3 +121,14 @@ export const PALETTES = [
 ];
 
 export const PREVIEW_MAX_WIDTH = 900;
+
+/** Prefisso del nome file di export, nella lingua di output selezionata. */
+export const EXPORT_FILE_NAME: Record<string, string> = {
+  it: "copertina-kdp",
+  en: "kdp-cover",
+  de: "kdp-buchcover",
+  fr: "couverture-kdp",
+  es: "portada-kdp",
+  nl: "kdp-omslag",
+  pt: "capa-kdp",
+};

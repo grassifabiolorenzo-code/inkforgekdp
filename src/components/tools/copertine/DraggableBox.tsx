@@ -13,6 +13,7 @@ export function DraggableBox({
   onSelect,
   onMove,
   onResize,
+  locked = false,
   className,
   style,
   children,
@@ -24,6 +25,8 @@ export function DraggableBox({
   onSelect: () => void;
   onMove: (top: number, left: number) => void;
   onResize?: (width: number) => void;
+  /** Se true l'elemento non è né trascinabile né ridimensionabile. */
+  locked?: boolean;
   className?: string;
   style?: React.CSSProperties;
   children: ReactNode;
@@ -32,6 +35,7 @@ export function DraggableBox({
   const resizeState = useRef<{ startX: number; width: number } | null>(null);
 
   function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    if (locked) return;
     const target = e.target as HTMLElement;
     if (["INPUT", "SELECT", "BUTTON", "TEXTAREA"].includes(target.tagName)) return;
     // Evita che il click bubbli fino al canvas, che deselezionerebbe subito l'elemento.
@@ -75,7 +79,7 @@ export function DraggableBox({
 
   return (
     <div
-      className={`absolute cursor-move touch-none select-none ${selected ? "outline outline-2 outline-offset-4 outline-accent" : "hover:outline hover:outline-1 hover:outline-dashed hover:outline-accent/60"} ${className ?? ""}`}
+      className={`absolute touch-none select-none ${locked ? "cursor-default" : "cursor-move"} ${selected ? "outline outline-2 outline-offset-4 outline-accent" : "hover:outline hover:outline-1 hover:outline-dashed hover:outline-accent/60"} ${className ?? ""}`}
       style={{ top, left, width, ...style }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
@@ -83,7 +87,7 @@ export function DraggableBox({
       onPointerCancel={handlePointerUp}
     >
       {children}
-      {onResize && selected && (
+      {onResize && selected && !locked && (
         <div
           role="presentation"
           onPointerDown={handleResizeDown}

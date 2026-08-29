@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { ToolConfig } from "@/config/tools";
 import { useAccount, useToolCredit } from "@/hooks/useAccount";
+import { useI18n, useToolCopy } from "@/lib/i18n";
 import { checkToolAccess, type ConsumeResult, type CreditState } from "@/lib/credits.functions";
 
 export interface ToolRuntime {
@@ -48,6 +49,8 @@ export function ToolPageShell({
 }) {
   const account = useAccount();
   const credit = useToolCredit(tool);
+  const { t } = useI18n();
+  const copy = useToolCopy()(tool.id);
   const verifyAccess = useServerFn(checkToolAccess);
 
   // Gating server-side: la decisione finale non arriva mai dal frontend.
@@ -76,13 +79,15 @@ export function ToolPageShell({
 
   return (
     <DashboardShell
-      title={tool.name}
-      description={`1 credito — ${tool.creditEvent.toLowerCase()}`}
+      title={copy.name}
+      description={t("dash.creditEvent", { event: copy.creditEvent.toLowerCase() })}
       actions={
         state ? (
           <Badge variant="outline" className="gap-1.5 border-border">
             <Coins className="size-3.5 text-accent" />
-            {state.unlimited ? "Illimitato" : `${Math.max(state.remaining, 0)} crediti`}
+            {state.unlimited
+              ? t("dash.unlimited")
+              : t("dash.credits", { n: Math.max(state.remaining, 0) })}
           </Badge>
         ) : null
       }
@@ -91,11 +96,11 @@ export function ToolPageShell({
         <div className="panel flex flex-wrap items-center gap-4 p-5">
           <ToolIcon tool={tool} size="lg" />
           <div className="min-w-0 flex-1">
-            <h2 className="font-semibold">{tool.name}</h2>
-            <p className="text-sm text-muted-foreground">{tool.description}</p>
+            <h2 className="font-semibold">{copy.name}</h2>
+            <p className="text-sm text-muted-foreground">{copy.description}</p>
           </div>
           <Button variant="ghost" size="sm" asChild>
-            <Link to="/dashboard">Torna alla dashboard</Link>
+            <Link to="/dashboard">{t("dash.back")}</Link>
           </Button>
         </div>
 
@@ -111,7 +116,7 @@ export function ToolPageShell({
 
         {state && !state.active && <InactiveSubscriptionState state={state} />}
 
-        {state?.active && !toolIncluded && <ToolNotInPlanState toolName={tool.name} />}
+        {state?.active && !toolIncluded && <ToolNotInPlanState toolName={copy.name} />}
 
         {state?.active &&
           toolIncluded &&
