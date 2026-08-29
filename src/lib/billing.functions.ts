@@ -5,6 +5,18 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 /** Server functions di billing: checkout, portale cliente, cancellazione. */
 
+/**
+ * Stato di configurazione dei pagamenti, letto lato server.
+ * Espone solo booleani (mai i valori) e serve alla dashboard per
+ * disabilitare i soli pulsanti di checkout quando mancano le credenziali.
+ */
+export const getBillingStatus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const { getBillingConfigStatus } = await import("./lemon-squeezy.server");
+    return getBillingConfigStatus();
+  });
+
 const checkoutInput = z.object({
   planSlug: z.enum(["starter", "pro", "business"]),
   redirectUrl: z.string().url(),
@@ -14,8 +26,17 @@ export const createCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => checkoutInput.parse(data))
   .handler(async ({ data, context }) => {
-    const { createCheckoutUrl } = await import("./lemon-squeezy.server");
+    const { createCheckoutUrl, getBillingConfigStatus } = await import("./lemon-squeezy.server");
     const claims = context.claims as { email?: string; user_metadata?: { name?: string } };
+
+    // Validazione preventiva: blocca solo il checkout, senza errori runtime.
+    const status = getBillingConfigStatus();
+    if (!status.apiKey || !status.storeId || !status.variants[data.planSlug]) {
+      return {
+        url: null as string | null,
+        error: "Pagamenti non ancora configurati. Riprova più tardi." as string | null,
+      };
+    }
 
     try {
       const url = await createCheckoutUrl({
@@ -106,7 +127,13 @@ export const changePlan = createServerFn({ method: "POST" })
       return { ok: false as const, reason: "no_subscription" as const };
     }
 
-    const { readLemonConfig, updateSubscriptionVariant } = await import("./lemon-squeezy.server");
+    const { getBillingConfigStatus, readLemonConfig, updateSubscriptionVariant } = await import(
+      "./lemon-squeezy.server"
+    );
+    const status = getBillingConfigStatus();
+    if (!status.apiKey || !status.storeId || !status.variants[data.planSlug]) {
+      return { ok: false as const, reason: "variant_not_configured" as const };
+    }
     const variantId = readLemonConfig().variants[data.planSlug];
     if (!variantId) {
       return { ok: false as const, reason: "variant_not_configured" as const };
