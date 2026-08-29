@@ -18,7 +18,9 @@ import { Label } from "@/components/ui/label";
 import type { ToolRuntime } from "@/components/tools/ToolPageShell";
 import { newOperationId } from "@/hooks/useAccount";
 
-import { buildTriageZip, type TriageResult } from "./triageZip";
+import { OutputLanguageSelect, useOutputLanguage } from "@/components/tools/OutputLanguageSelect";
+
+import { buildTriageZip, type TriageResult, type TriageZipLocale } from "./triageZip";
 
 /**
  * TOOL 4 — Triage foto (modulo indipendente).
@@ -46,6 +48,7 @@ const CATEGORY_LABEL: Record<Category, string> = {
 };
 
 export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
+  const outputLocale = useOutputLanguage() as TriageZipLocale;
   const [phase, setPhase] = useState<Phase>("upload");
   const [queue, setQueue] = useState<File[]>([]);
   const [batchSize, setBatchSize] = useState(40);
@@ -178,7 +181,7 @@ export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
 
     try {
       const result: TriageResult = { promosse, rimandate, bocciate };
-      const blob = await buildTriageZip(result, batchSize);
+      const blob = await buildTriageZip(result, batchSize, outputLocale);
 
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
