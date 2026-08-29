@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
+import { Info } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -14,6 +16,7 @@ import {
   cancelMySubscription,
   changePlan,
   createCheckout,
+  getBillingStatus,
   getManageSubscriptionUrl,
 } from "@/lib/billing.functions";
 
