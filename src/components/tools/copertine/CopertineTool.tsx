@@ -193,7 +193,37 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
     setImageLayers((prev) => prev.filter((l) => l.id !== id));
   }
 
+  // Zoom con rotella sullo sfondo, ancorato al puntatore.
+  const bgRef = useRef<BackgroundImageState | null>(null);
+  bgRef.current = bgImage;
+
+  useEffect(() => {
+    const el = canvasRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      const bg = bgRef.current;
+      if (!bg) return;
+      e.preventDefault();
+      const dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 100 : 1);
+      const factor = Math.exp(-dy * 0.0015);
+      const nextWidth = Math.min(6000, Math.max(60, bg.width * factor));
+      const k = nextWidth / bg.width;
+      const rect = el.getBoundingClientRect();
+      const px = e.clientX - rect.left;
+      const py = e.clientY - rect.top;
+      setBgImage({
+        ...bg,
+        width: Math.round(nextWidth),
+        left: Math.round(px - (px - bg.left) * k),
+        top: Math.round(py - (py - bg.top) * k),
+      });
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
+
   const chargeGuard = useRef(false);
+
 
   async function handleExport() {
     // Guardia sincrona: blocca doppio click/rientranza prima di qualsiasi await.
