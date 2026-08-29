@@ -134,16 +134,19 @@ Dati forniti dall'autore:
 - pubblico: ${input.audience} (${input.ageDetails})
 - pagine interne rilevate: ${input.interiorPages || "n/d"}
 
-Analizza copertina e pagine interne allegate, poi produci JSON con questa forma esatta:
+Analizza copertina e pagine interne allegate. La descrizione deve essere LUNGA e ARTICOLATA
+(1600-2400 caratteri complessivi), scritta con voce umana e riferimenti espliciti a ciò che si vede
+davvero nelle pagine analizzate. Produci JSON con questa forma esatta:
 {
   "subject": "soggetto reale dedotto dai contenuti (max 6 parole)",
   "title": "titolo max 60 caratteri, contiene la keyword principale",
   "subtitle": "sottotitolo SEO 100-180 caratteri con keyword secondarie",
-  "description": "descrizione 5-6 paragrafi separati da \\n\\n: par.1-2 struttura PAS (problema + agitazione), par.3-4 soluzione e benefici concreti visti nelle pagine, par.5 desiderio, par.6 call to action. Nessun HTML.",
+  "description": "descrizione lunga di 8-9 paragrafi separati da \\n\\n, 1600-2400 caratteri totali. Struttura: par.1 gancio umano che descrive una scena quotidiana del lettore; par.2 il problema reale; par.3 agitazione (cosa succede se non si risolve, delusioni con libri simili); par.4 presentazione del libro con i dettagli concreti visti nelle pagine; par.5 elenco discorsivo di 3-4 benefici legati a quei contenuti reali; par.6 dettagli tecnici utili (numero di pagine, stampa su un solo lato se visibile, spessore dei tratti, spazi per colorare); par.7 desiderio e piccola proiezione emotiva; par.8 rassicurazione (per chi è adatto, come usarlo); par.9 call to action calda e diretta. Nessun HTML, nessun elenco puntato, nessuna emoji, nessuna ripetizione meccanica della keyword.",
   "keywords": ["7 keyword long-tail diverse, 3-6 parole ciascuna, minuscole"],
   "categories": ["3 categorie BISAC Amazon in formato 'Ramo > Sotto > Sotto'"],
-  "insight": "1-2 frasi su cosa mostrano realmente le pagine analizzate"
+  "insight": "2-3 frasi che riassumono cosa mostrano realmente le pagine analizzate"
 }`;
+
 
   const json = await callGateway(COPY_SYSTEM, prompt, {
     interiorText: input.interiorText,
