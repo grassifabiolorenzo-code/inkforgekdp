@@ -18,6 +18,8 @@ import { generateModulesText, nextCopyVariationIndex } from "@/components/tools/
 import type { AgeId, GeneratedModulesText, LangId, NicheId } from "@/components/tools/aplus/types";
 import type { ValueModuleStyle } from "@/components/tools/aplus/canvasRenderers";
 import { exportModulesAsZip, type ModuleCanvases } from "@/components/tools/aplus/zipExport";
+import { extractCoverContent, extractPdfContent } from "@/components/tools/pdfContent";
+import { generateAplusCopy } from "@/lib/aiCopy.functions";
 
 
 /**
