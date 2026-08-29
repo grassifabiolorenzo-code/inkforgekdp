@@ -9,6 +9,28 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
  * è eseguita server-side tramite funzioni atomiche del database.
  */
 
+/* ---------------------------------------------------------------------------
+ * ⚠️⚠️⚠️  MODALITÀ TEST — TEMPORANEA  ⚠️⚠️⚠️
+ * Con `true` TUTTI i controlli su abbonamento, piano e crediti sono bypassati:
+ * qualsiasi utente autenticato accede a tutti i tool senza consumare crediti.
+ * ⛔ IMPOSTARE A `false` PRIMA DELLA MESSA IN VENDITA / PUBBLICAZIONE. ⛔
+ * ------------------------------------------------------------------------- */
+const SUBSCRIPTION_CHECK_DISABLED = true;
+
+/** Stato fittizio "tutto sbloccato" usato in modalità test. */
+const TEST_MODE_STATE: CreditState = {
+  has_subscription: true,
+  active: true,
+  status: "test_mode",
+  plan: { slug: "business", name: "Modalità test", price: 0 },
+  unlimited: true,
+  limit: -1,
+  used: 0,
+  bonus_remaining: 0,
+  allowed_tools: ["copertine", "pubblicazione", "aplus", "triage"],
+  remaining: -1,
+};
+
 export interface CreditState {
   has_subscription: boolean;
   active: boolean;
@@ -56,6 +78,11 @@ export const getAccountState = createServerFn({ method: "GET" })
         .select("*")
         .maybeSingle();
       ensured = created ?? null;
+    }
+
+    // MODALITÀ TEST: stato fittizio con tutto sbloccato (vedi flag in testa al file).
+    if (SUBSCRIPTION_CHECK_DISABLED) {
+      return { profile: ensured, credits: TEST_MODE_STATE };
     }
 
     const { data: state, error } = await supabase.rpc("get_credit_state");
@@ -114,6 +141,10 @@ export const consumeCredit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => consumeInput.parse(data))
   .handler(async ({ data, context }): Promise<ConsumeResult> => {
+    // MODALITÀ TEST: operazione sempre riuscita, nessun credito scalato.
+    if (SUBSCRIPTION_CHECK_DISABLED) {
+      return { ok: true, source: "test_mode", state: TEST_MODE_STATE };
+    }
     const { supabase } = context;
     const { data: result, error } = await supabase.rpc("consume_credit", {
       _tool_id: data.toolId,
@@ -128,6 +159,10 @@ export const consumeCredit = createServerFn({ method: "POST" })
 export const canConsume = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    // MODALITÀ TEST: sempre consentito.
+    if (SUBSCRIPTION_CHECK_DISABLED) {
+      return { allowed: true, state: TEST_MODE_STATE };
+    }
     const { data, error } = await context.supabase.rpc("get_credit_state");
     if (error) throw new Error(error.message);
     const state = data as unknown as CreditState;
@@ -154,6 +189,10 @@ export const checkToolAccess = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => toolAccessInput.parse(data))
   .handler(async ({ data, context }): Promise<ToolAccessResult> => {
+    // MODALITÀ TEST: accesso sempre consentito a qualsiasi tool.
+    if (SUBSCRIPTION_CHECK_DISABLED) {
+      return { allowed: true, reason: null, state: TEST_MODE_STATE };
+    }
     const { data: raw, error } = await context.supabase.rpc("get_credit_state");
     if (error) throw new Error(error.message);
     const state = raw as unknown as CreditState;
