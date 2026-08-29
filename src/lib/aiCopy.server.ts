@@ -48,7 +48,40 @@ function buildBlocks(prompt: string, source: SourceContent): ContentBlock[] {
   return blocks;
 }
 
-async function callGateway(system: string, prompt: string, source: SourceContent): Promise<any> {
+/** Traduce tono + livello di creatività in istruzioni di stile per il modello. */
+export function buildStyleDirective(tone?: string, creativity?: number): string {
+  const level = Math.min(10, Math.max(1, Math.round(creativity ?? 5)));
+  const tones: Record<string, string> = {
+    professionale: "professionale e misurato, chiaro e credibile, senza enfasi eccessiva",
+    amichevole: "amichevole e conversazionale, come un consiglio dato a un amico",
+    energico: "energico e dinamico, con frasi brevi e ritmo incalzante ma non urlato",
+    caloroso: "caloroso e familiare, empatico verso genitori ed educatori",
+    autorevole: "autorevole ed esperto, con precisione didattica e riferimenti concreti",
+    giocoso: "giocoso e leggero, con immagini semplici e un sorriso, mai infantile",
+  };
+  const toneText = tones[tone ?? ""] ?? tones["amichevole"]!;
+  const creativityText =
+    level <= 3
+      ? "Resta molto aderente a ciò che si vede nelle pagine: descrizioni fattuali, poche metafore."
+      : level <= 7
+        ? "Bilancia fedeltà ai contenuti e scrittura vivace: qualche immagine concreta, nessuna invenzione."
+        : "Usa una scrittura più libera e immaginifica (scene quotidiane, dettagli sensoriali), restando comunque coerente con ciò che le pagine mostrano davvero.";
+  return `TONO DI VOCE richiesto: ${toneText}.
+LIVELLO DI CREATIVITÀ: ${level}/10. ${creativityText}
+Mantieni il tono coerente in tutti i testi generati.`;
+}
+
+function temperatureFor(creativity?: number): number {
+  const level = Math.min(10, Math.max(1, Math.round(creativity ?? 5)));
+  return Math.round((0.3 + (level - 1) * 0.075) * 100) / 100;
+}
+
+async function callGateway(
+  system: string,
+  prompt: string,
+  source: SourceContent,
+  creativity?: number,
+): Promise<any> {
   const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) throw new Error("AI non configurata: LOVABLE_API_KEY mancante.");
 
@@ -57,6 +90,7 @@ async function callGateway(system: string, prompt: string, source: SourceContent
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       model: MODEL,
+      temperature: temperatureFor(creativity),
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: system },
@@ -121,12 +155,16 @@ export async function generateListingCopyAi(input: {
   audience: string;
   ageDetails: string;
   interiorPages: number;
+  tone?: string | undefined;
+  creativity?: number | undefined;
   interiorText?: string | undefined;
   interiorImages?: string[] | undefined;
   coverImages?: string[] | undefined;
 }): Promise<AiListingCopy> {
   const langName = LOCALE_NAMES[input.locale] ?? LOCALE_NAMES['en']!;
   const prompt = `Genera il listing Amazon KDP nella lingua: ${langName}.
+
+${buildStyleDirective(input.tone, input.creativity)}
 
 Dati forniti dall'autore:
 - soggetto dichiarato: ${input.subject || "(non specificato: dedurlo dai contenuti)"}
@@ -152,7 +190,7 @@ davvero nelle pagine analizzate. Produci JSON con questa forma esatta:
     interiorText: input.interiorText,
     interiorImages: input.interiorImages,
     coverImages: input.coverImages,
-  });
+  }, input.creativity);
 
   const keywords = Array.isArray(json.keywords) ? json.keywords.map(String).filter(Boolean).slice(0, 7) : [];
   const categories = Array.isArray(json.categories)
@@ -185,12 +223,16 @@ export async function generateAplusCopyAi(input: {
   niche: string;
   age: string;
   title: string;
+  tone?: string | undefined;
+  creativity?: number | undefined;
   interiorText?: string | undefined;
   interiorImages?: string[] | undefined;
   coverImages?: string[] | undefined;
 }): Promise<AiAplusCopy> {
   const langName = LOCALE_NAMES[input.lang] ?? LOCALE_NAMES['en']!;
   const prompt = `Genera i testi dei moduli Contenuto A+ Amazon KDP nella lingua: ${langName}.
+
+${buildStyleDirective(input.tone, input.creativity)}
 
 Contesto:
 - titolo/nome progetto: ${input.title || "(non specificato)"}
@@ -217,7 +259,7 @@ Rispondi con JSON di questa forma esatta:
     interiorText: input.interiorText,
     interiorImages: input.interiorImages,
     coverImages: input.coverImages,
-  });
+  }, input.creativity);
 
   const str = (v: unknown, fallback = "") => (typeof v === "string" && v.trim() ? v.trim() : fallback);
   const grid = Array.isArray(json.grid) ? json.grid.slice(0, 3) : [];
