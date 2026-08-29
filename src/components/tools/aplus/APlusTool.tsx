@@ -56,6 +56,35 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
   const [texts, setTexts] = useState<GeneratedModulesText | null>(null);
   const [canvasesReady, setCanvasesReady] = useState(false);
 
+  // Modulo 3: stile tipografico personalizzabile del blocco "Value Highlights".
+  const DEFAULT_VALUE_STYLE: ValueModuleStyle = {
+    titleSize: 21,
+    itemSize: 13,
+    marker: "✓",
+    numbered: false,
+    uppercase: true,
+  };
+  const [valueStyle, setValueStyle] = useState<ValueModuleStyle>(DEFAULT_VALUE_STYLE);
+  // Copy generato dal motore: consente il ripristino dopo le modifiche manuali.
+  const baseValue = useRef<GeneratedModulesText["value"] | null>(null);
+
+  const redrawValue = useCallback(async (value: GeneratedModulesText["value"], style: ValueModuleStyle) => {
+    const canvas = document.getElementById("aplus-value") as HTMLCanvasElement | null;
+    if (!canvas) return;
+    const { drawValueModule } = await import("@/components/tools/aplus/canvasRenderers");
+    drawValueModule(canvas, bgColor, accentColor, value, style);
+  }, [bgColor, accentColor]);
+
+  useEffect(() => {
+    if (canvasesReady && texts) void redrawValue(texts.value, valueStyle);
+  }, [canvasesReady, texts, valueStyle, redrawValue]);
+
+  function updateValueText(field: "title" | "text1" | "text2" | "text3" | "alt", next: string) {
+    setTexts((prev) => (prev ? { ...prev, value: { ...prev.value, [field]: next } } : prev));
+  }
+
+
+
   // Sorgenti dell'ultimo rendering hero: permettono di riposizionare il logo senza rigenerare.
   const heroSources = useRef<{
     front: HTMLCanvasElement | HTMLImageElement;
