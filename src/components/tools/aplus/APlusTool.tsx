@@ -814,10 +814,14 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
             </div>
           )}
           {texts && (
-
-            <pre className="whitespace-pre-wrap rounded-md border border-border bg-surface p-3 text-xs">
-              {`TITOLO SEZIONE:\n${texts.value.title}\n\nPUNTI CHIAVE:\n1. ${texts.value.text1}\n2. ${texts.value.text2}\n3. ${texts.value.text3}\n\nALT-TEXT SEO:\n${texts.value.alt}`}
-            </pre>
+            <div className="space-y-1.5 rounded-md border border-border bg-surface p-4">
+              <Label htmlFor="a-value-alt">Alt-text SEO</Label>
+              <Input
+                id="a-value-alt"
+                value={texts.value.alt}
+                onChange={(e) => updateValueText("alt", e.target.value)}
+              />
+            </div>
           )}
         </article>
 
@@ -835,11 +839,25 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
             </div>
           </div>
           {texts && (
-            <pre className="whitespace-pre-wrap rounded-md border border-border bg-surface p-3 text-xs">
-              {`TESTI COLONNE A+ (${lang.toUpperCase()} - Target: ${age}):\n\n${texts.grid.items
-                .map((g, i) => `• SLOT ${i + 1} (Pag. ${texts.grid.pages[i]}):\n${g.title}\n${g.desc}`)
-                .join("\n\n")}`}
-            </pre>
+            <div className="grid gap-3 rounded-md border border-border bg-surface p-4 sm:grid-cols-3">
+              {texts.grid.items.map((item, i) => (
+                <div key={`grid-${i}`} className="space-y-1.5">
+                  <Label htmlFor={`a-grid-title-${i}`}>
+                    Slot {i + 1} (Pag. {texts.grid.pages[i]})
+                  </Label>
+                  <Input
+                    id={`a-grid-title-${i}`}
+                    value={item.title}
+                    onChange={(e) => updateGridItem(i, "title", e.target.value)}
+                  />
+                  <Textarea
+                    rows={3}
+                    value={item.desc}
+                    onChange={(e) => updateGridItem(i, "desc", e.target.value)}
+                  />
+                </div>
+              ))}
+            </div>
           )}
         </article>
 
@@ -849,11 +867,28 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
             <canvas id="aplus-comp" width={150} height={300} className="h-auto w-full" />
           </div>
           {texts && (
-            <pre className="whitespace-pre-wrap rounded-md border border-border bg-surface p-3 text-xs">
-              {`ISTRUZIONI MODULO COMPARATIVO:\n${texts.comp.instructions}\n\nALT-TEXT SEO:\n${title} — ${texts.comp.alt}`}
-            </pre>
+            <div className="space-y-3 rounded-md border border-border bg-surface p-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="a-comp-instructions">Istruzioni modulo comparativo</Label>
+                <Textarea
+                  id="a-comp-instructions"
+                  rows={4}
+                  value={texts.comp.instructions}
+                  onChange={(e) => updateCompText("instructions", e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="a-comp-alt">Alt-text SEO</Label>
+                <Input
+                  id="a-comp-alt"
+                  value={texts.comp.alt}
+                  onChange={(e) => updateCompText("alt", e.target.value)}
+                />
+              </div>
+            </div>
           )}
         </article>
+
 
         {!texts && (
           <div className="panel p-10 text-center text-sm text-muted-foreground">
