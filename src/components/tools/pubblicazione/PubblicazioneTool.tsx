@@ -22,6 +22,8 @@ import { analyzeInteriorPdf, type InteriorAnalysisResult } from "@/components/to
 import { extractCoverContent, extractPdfContent } from "@/components/tools/pdfContent";
 import { generateListingCopy } from "@/lib/aiCopy.functions";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+
 
 /**
  * TOOL 2 — Pubblicazione (Amazon KDP International Listing Suite).
