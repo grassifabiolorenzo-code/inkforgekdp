@@ -5,6 +5,18 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 /** Server functions di billing: checkout, portale cliente, cancellazione. */
 
+/**
+ * Stato di configurazione dei pagamenti, letto lato server.
+ * Espone solo booleani (mai i valori) e serve alla dashboard per
+ * disabilitare i soli pulsanti di checkout quando mancano le credenziali.
+ */
+export const getBillingStatus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const { getBillingConfigStatus } = await import("./lemon-squeezy.server");
+    return getBillingConfigStatus();
+  });
+
 const checkoutInput = z.object({
   planSlug: z.enum(["starter", "pro", "business"]),
   redirectUrl: z.string().url(),
