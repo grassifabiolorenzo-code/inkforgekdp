@@ -1,4 +1,4 @@
-import { Download, FileDown, Loader2, Ruler, Upload } from "lucide-react";
+import { Download, FileDown, Loader2, Lock, LockOpen, Ruler, Upload } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -112,6 +112,7 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
   });
   const [subtitles, setSubtitles] = useState<SubtitleElementState[]>([]);
   const [bgImage, setBgImage] = useState<BackgroundImageState | null>(null);
+  const [bgLocked, setBgLocked] = useState(false);
   const [imageLayers, setImageLayers] = useState<ImageLayerState[]>([]);
 
 
@@ -201,6 +202,8 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
   // Zoom con rotella sullo sfondo, ancorato al puntatore.
   const bgRef = useRef<BackgroundImageState | null>(null);
   bgRef.current = bgImage;
+  const bgLockedRef = useRef(false);
+  bgLockedRef.current = bgLocked;
 
   // Carica tutti i font del database (Google Fonts) una sola volta al mount.
   useEffect(() => {
