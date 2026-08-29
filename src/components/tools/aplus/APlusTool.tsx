@@ -57,6 +57,8 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
   const [status, setStatus] = useState("In attesa dei file sorgente...");
   const [texts, setTexts] = useState<GeneratedModulesText | null>(null);
   const [canvasesReady, setCanvasesReady] = useState(false);
+  const [useAi, setUseAi] = useState(true);
+  const [aiUsed, setAiUsed] = useState(false);
 
   // Modulo 3: stile tipografico personalizzabile del blocco "Value Highlights".
   const DEFAULT_VALUE_STYLE: ValueModuleStyle = {
