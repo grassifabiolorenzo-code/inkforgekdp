@@ -18,9 +18,9 @@ export const LOCALE_NAMES: Record<string, string> = {
 };
 
 export interface SourceContent {
-  interiorText?: string;
-  interiorImages?: string[];
-  coverImages?: string[];
+  interiorText?: string | undefined;
+  interiorImages?: string[] | undefined;
+  coverImages?: string[] | undefined;
 }
 
 type ContentBlock =
@@ -96,13 +96,13 @@ Non inventare premi, dati di vendita, marchi, autori o personaggi protetti da co
 Rispondi SEMPRE ed ESCLUSIVAMENTE con un oggetto JSON valido, senza testo aggiuntivo.`;
 
 export interface AiListingCopy {
-  subject?: string;
+  subject?: string | undefined;
   title: string;
   subtitle: string;
   description: string;
   keywords: string[];
-  categories?: string[];
-  insight?: string;
+  categories?: string[] | undefined;
+  insight?: string | undefined;
 }
 
 export async function generateListingCopyAi(input: {
@@ -112,11 +112,11 @@ export async function generateListingCopyAi(input: {
   audience: string;
   ageDetails: string;
   interiorPages: number;
-  interiorText?: string;
-  interiorImages?: string[];
-  coverImages?: string[];
+  interiorText?: string | undefined;
+  interiorImages?: string[] | undefined;
+  coverImages?: string[] | undefined;
 }): Promise<AiListingCopy> {
-  const langName = LOCALE_NAMES[input.locale] ?? LOCALE_NAMES.en;
+  const langName = LOCALE_NAMES[input.locale] ?? LOCALE_NAMES['en']!;
   const prompt = `Genera il listing Amazon KDP nella lingua: ${langName}.
 
 Dati forniti dall'autore:
@@ -173,11 +173,11 @@ export async function generateAplusCopyAi(input: {
   niche: string;
   age: string;
   title: string;
-  interiorText?: string;
-  interiorImages?: string[];
-  coverImages?: string[];
+  interiorText?: string | undefined;
+  interiorImages?: string[] | undefined;
+  coverImages?: string[] | undefined;
 }): Promise<AiAplusCopy> {
-  const langName = LOCALE_NAMES[input.lang] ?? LOCALE_NAMES.en;
+  const langName = LOCALE_NAMES[input.lang] ?? LOCALE_NAMES['en']!;
   const prompt = `Genera i testi dei moduli Contenuto A+ Amazon KDP nella lingua: ${langName}.
 
 Contesto:
