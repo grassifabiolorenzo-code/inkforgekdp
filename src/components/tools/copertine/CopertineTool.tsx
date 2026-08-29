@@ -453,14 +453,34 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
                 <div className="space-y-2 border-t border-border pt-2">
                   <div className="flex items-center justify-between">
                     <Label className="text-[10px] text-muted-foreground">Larghezza (px)</Label>
-                    <span className="font-mono text-[10px] text-accent">{bgImage.width}px</span>
+                    <span className="font-mono text-[10px] text-accent">{Math.round(bgImage.width)}px</span>
                   </div>
                   <Slider
-                    min={200}
+                    min={60}
                     max={3000}
                     value={[bgImage.width]}
                     onValueChange={([w]) => setBgImage((b) => (b ? { ...b, width: w ?? b.width } : b))}
                   />
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <Label className="text-[10px] text-muted-foreground">Offset X</Label>
+                      <Input
+                        type="number"
+                        value={Math.round(bgImage.left)}
+                        onChange={(e) => setBgImage((b) => (b ? { ...b, left: Number(e.target.value) || 0 } : b))}
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[10px] text-muted-foreground">Offset Y</Label>
+                      <Input
+                        type="number"
+                        value={Math.round(bgImage.top)}
+                        onChange={(e) => setBgImage((b) => (b ? { ...b, top: Number(e.target.value) || 0 } : b))}
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                  </div>
                   <div className="flex gap-2">
                     <Button
                       size="sm"
@@ -474,8 +494,13 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
                       Rimuovi
                     </Button>
                   </div>
+                  <p className="text-[10px] text-muted-foreground">
+                    Trascina lo sfondo sul canvas per spostarlo, usa la rotella per zoomare e la maniglia in basso a destra
+                    per ridimensionarlo.
+                  </p>
                 </div>
               )}
+
             </div>
           </TabsContent>
         </Tabs>
