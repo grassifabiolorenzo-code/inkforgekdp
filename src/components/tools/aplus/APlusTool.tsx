@@ -23,7 +23,7 @@ import { exportModulesAsZip, type ModuleCanvases } from "@/components/tools/aplu
  */
 
 export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
-  const [title, setTitle] = useState("Olimpia Pubblicazioni");
+  const [title, setTitle] = useState("");
   const [niche, setNiche] = useState<NicheId>("coloring");
   const [lang, setLang] = useState<LangId>("it");
   const [age, setAge] = useState<AgeId>("4-6");
@@ -32,6 +32,7 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
   const [interiorFile, setInteriorFile] = useState<File | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoScale, setLogoScale] = useState(100);
+  const [logoOffset, setLogoOffset] = useState({ x: 0, y: 0 });
 
   const [page1, setPage1] = useState(1);
   const [page2, setPage2] = useState(2);
@@ -46,7 +47,59 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
   const [texts, setTexts] = useState<GeneratedModulesText | null>(null);
   const [canvasesReady, setCanvasesReady] = useState(false);
 
+  // Sorgenti dell'ultimo rendering hero: permettono di riposizionare il logo senza rigenerare.
+  const heroSources = useRef<{
+    front: HTMLCanvasElement | HTMLImageElement;
+    back: HTMLCanvasElement | HTMLImageElement;
+    logo: HTMLCanvasElement | null;
+    drawHero: typeof import("@/components/tools/aplus/canvasRenderers")["drawHero"];
+  } | null>(null);
+  const logoDrag = useRef<{ startX: number; startY: number; x: number; y: number; ratio: number } | null>(null);
+
+  function redrawHero(offset: { x: number; y: number }, scalePercent: number) {
+    const src = heroSources.current;
+    const canvas = document.getElementById("aplus-hero") as HTMLCanvasElement | null;
+    if (!src || !canvas) return;
+    src.drawHero(canvas, src.front, src.back, bgColor, src.logo, scalePercent / 100, offset);
+  }
+
+  useEffect(() => {
+    if (canvasesReady) redrawHero(logoOffset, logoScale);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [logoOffset, logoScale, bgColor, canvasesReady]);
+
+  function handleHeroPointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
+    if (!canvasesReady || !heroSources.current?.logo) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    logoDrag.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      x: logoOffset.x,
+      y: logoOffset.y,
+      ratio: 970 / rect.width,
+    };
+  }
+
+  function handleHeroPointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
+    const drag = logoDrag.current;
+    if (!drag) return;
+    const x = Math.round(drag.x + (e.clientX - drag.startX) * drag.ratio);
+    const y = Math.round(drag.y + (e.clientY - drag.startY) * drag.ratio);
+    setLogoOffset({ x, y });
+  }
+
+  function handleHeroPointerUp(e: React.PointerEvent<HTMLCanvasElement>) {
+    logoDrag.current = null;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      // ignore
+    }
+  }
+
   const chargeGuard = useRef(false);
+
 
   async function handleGenerate() {
     // Guardia sincrona: blocca doppio click/rientranza prima di qualsiasi await.
