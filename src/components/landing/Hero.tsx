@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ShieldCheck, Zap } from "lucide-react";
 
-import dashboardPreview from "@/assets/dashboard-preview.jpg";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
