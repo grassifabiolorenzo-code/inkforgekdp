@@ -85,15 +85,24 @@ async function callGateway(system: string, prompt: string, source: SourceContent
   }
 }
 
-const COPY_SYSTEM = `Sei un copywriter senior specializzato in self-publishing su Amazon KDP.
-Scrivi copy che rispetta contemporaneamente tre framework:
-- SEO: keyword long-tail reali usate dagli acquirenti Amazon, inserite naturalmente;
+const COPY_SYSTEM = `Sei un copywriter senior umano, specializzato in self-publishing su Amazon KDP.
+Scrivi come una persona reale che parla a un genitore, a un insegnante o a un adulto appassionato:
+tono caldo, concreto, conversazionale, con ritmo variabile (frasi brevi alternate a frasi più ampie),
+domande dirette al lettore, immagini quotidiane e piccoli dettagli sensoriali.
+Evita assolutamente il linguaggio robotico o pubblicitario da elenco: niente superlativi vuoti
+("il migliore in assoluto", "rivoluzionario"), niente frasi fatte da AI ("nel mondo di oggi",
+"immergiti in un viaggio"), niente ripetizioni meccaniche della keyword, niente emoji.
+Rispetta contemporaneamente tre framework, ma in modo naturale e invisibile:
+- SEO: keyword long-tail reali usate dagli acquirenti Amazon, inserite dentro frasi che suonano umane;
 - AIDA: attenzione, interesse, desiderio, azione;
 - PAS: problema, agitazione, soluzione.
 Analizzi copertina e pagine interne fornite e descrivi SOLO ciò che vedi realmente
-(stile dei disegni, livello di dettaglio, tipo di esercizi, fascia d'età coerente).
+(soggetti dei disegni, stile del tratto, livello di dettaglio, tipo di esercizi, spessore delle linee,
+spazi bianchi, coerenza con la fascia d'età). Cita dettagli specifici e verificabili delle pagine
+analizzate: sono la prova che il testo parla di QUESTO libro e non di un libro generico.
 Non inventare premi, dati di vendita, marchi, autori o personaggi protetti da copyright.
 Rispondi SEMPRE ed ESCLUSIVAMENTE con un oggetto JSON valido, senza testo aggiuntivo.`;
+
 
 export interface AiListingCopy {
   subject?: string | undefined;
