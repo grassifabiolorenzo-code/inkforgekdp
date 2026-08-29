@@ -22,6 +22,8 @@ export interface PlanConfig {
   badge?: string;
   tagline: string;
   features: string[];
+  /** Funzionalità mostrate come escluse (X) nella card prezzi. */
+  excludedFeatures?: string[];
   /** Placeholder configurabile: variant Lemon Squeezy (env pubblica). */
   variantEnvKey: string;
 }
@@ -51,6 +53,7 @@ export const PLANS: PlanConfig[] = [
       "Storico utilizzi",
       "Supporto via email",
     ],
+    excludedFeatures: ["A+ KDPstudio"],
     variantEnvKey: "VITE_LEMON_SQUEEZY_STARTER_VARIANT_ID",
   },
   {
