@@ -208,7 +208,9 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
       heroSources.current = { front: frontCoverImg, back: backCoverImg, logo: logoImg, drawHero };
       drawHero(heroCanvas, frontCoverImg, backCoverImg, bgColor, logoImg, logoScale / 100, logoOffset);
       drawProof(proofCanvas, intImg1, intImg2, bgColor);
-      drawValueModule(valueCanvas, bgColor, accentColor, generatedTexts.value);
+      drawValueModule(valueCanvas, bgColor, accentColor, generatedTexts.value, valueStyle);
+      baseValue.current = generatedTexts.value;
+
       drawGridSquare(grid1Canvas, intImg1, bgColor);
       drawGridSquare(grid2Canvas, intImg2, bgColor);
       drawGridSquare(grid3Canvas, intImg3, bgColor);
