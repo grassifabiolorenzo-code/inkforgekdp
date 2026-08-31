@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { ToolPageShell } from "@/components/tools/ToolPageShell";
-import { AmazonMarketTool } from "@/components/tools/amazon/AmazonMarketTool";
+import { InterniTool } from "@/components/tools/interni/InterniTool";
 import { getToolBySlot } from "@/config/tools";
 
 const tool = getToolBySlot(5)!;
@@ -14,5 +14,5 @@ export const Route = createFileRoute("/_authenticated/dashboard/tool-5")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  component: () => <ToolPageShell tool={tool}>{(runtime) => <AmazonMarketTool runtime={runtime} />}</ToolPageShell>,
+  component: () => <ToolPageShell tool={tool}>{(runtime) => <InterniTool runtime={runtime} />}</ToolPageShell>,
 });

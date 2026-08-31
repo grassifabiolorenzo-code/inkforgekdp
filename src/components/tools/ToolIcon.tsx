@@ -1,4 +1,4 @@
-import { BookOpen, FileText, Image as ImageIcon, Layers, Megaphone, ShoppingBag, Sparkles, User } from "lucide-react";
+import { BookOpen, FileText, Image as ImageIcon, LayoutGrid, Layers, Megaphone, Sparkles, User } from "lucide-react";
 
 import type { ToolConfig } from "@/config/tools";
 import { cn } from "@/lib/utils";
@@ -8,7 +8,7 @@ const ICONS = {
   "file-text": FileText,
   sparkles: Sparkles,
   layers: Layers,
-  "shopping-bag": ShoppingBag,
+  "layout-grid": LayoutGrid,
   "book-open": BookOpen,
   user: User,
   megaphone: Megaphone,

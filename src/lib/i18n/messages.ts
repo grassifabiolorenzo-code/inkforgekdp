@@ -21,7 +21,7 @@ const it = {
   "hero.headline1": "Pubblica su KDP più velocemente",
   "hero.headline2": "con qualità da studio editoriale",
   "hero.sub":
-    "InkForgeKdp riunisce copertine, listing, contenuti A+, triage immagini, schede Amazon Marketplace, blurb, bio autore e kit promozionali in un'unica piattaforma. Un solo abbonamento, otto strumenti, zero software da installare.",
+    "InkForgeKdp riunisce copertine, listing, contenuti A+, triage immagini, impaginazione interni, blurb, bio autore e kit promozionali in un'unica piattaforma. Un solo abbonamento, otto strumenti, zero software da installare.",
   "hero.cta1": "Inizia ora",
   "hero.cta2": "Scopri i piani",
   "hero.badge1": "Interfaccia e contenuti in 7 lingue",
@@ -90,12 +90,12 @@ const it = {
     "Scarti le immagini inutilizzabili prima dell'impaginazione e risparmi ore di lavoro.",
   "tool.triage.event": "Download completato delle 3 cartelle",
 
-  "tool.amazon.name": "Amazon Marketplace",
-  "tool.amazon.desc":
-    "Editor di schede prodotto per Amazon Marketplace: titolo, bullet point, descrizione, keyword, immagini e attributi personalizzati illimitati.",
-  "tool.amazon.benefit":
-    "Schede prodotto Amazon complete e pronte da esportare, con tutte le specificità che vuoi aggiungere.",
-  "tool.amazon.event": "Ogni esportazione completata",
+  "tool.interni.name": "Interni",
+  "tool.interni.desc":
+    "Impagina le tue immagini in un PDF interno pronto per KDP: formato pagina, margini e bleed corretti, ridimensionamento automatico.",
+  "tool.interni.benefit":
+    "Un unico PDF interno pronto da caricare su KDP, senza passare da altri programmi di impaginazione.",
+  "tool.interni.event": "Ogni PDF interno generato con successo",
 
   "tool.blurb.name": "Blurb & Sinossi",
   "tool.blurb.desc":
@@ -140,7 +140,7 @@ const en: Dictionary = {
   "hero.headline1": "Publish on KDP faster",
   "hero.headline2": "with publishing-studio quality",
   "hero.sub":
-    "InkForgeKdp brings covers, listings, A+ content, image triage, Amazon Marketplace listings, blurbs, author bios and promo kits together in one platform. One subscription, eight tools, no software to install.",
+    "InkForgeKdp brings covers, listings, A+ content, image triage, interior layout, blurbs, author bios and promo kits together in one platform. One subscription, eight tools, no software to install.",
   "hero.cta1": "Get started",
   "hero.cta2": "See the plans",
   "hero.badge1": "Interface and content in 7 languages",
@@ -207,12 +207,12 @@ const en: Dictionary = {
   "tool.triage.benefit": "Discard unusable images before layout and save hours of work.",
   "tool.triage.event": "Download of the 3 folders completed",
 
-  "tool.amazon.name": "Amazon Marketplace",
-  "tool.amazon.desc":
-    "Product listing editor for Amazon Marketplace: title, bullet points, description, keywords, images and unlimited custom attributes.",
-  "tool.amazon.benefit":
-    "Complete Amazon listings ready to export, with every specific detail you want to add.",
-  "tool.amazon.event": "Each completed export",
+  "tool.interni.name": "Interior Builder",
+  "tool.interni.desc":
+    "Lay out your images into a KDP-ready interior PDF: correct page size, margins and bleed, automatic image resizing.",
+  "tool.interni.benefit":
+    "One single interior PDF ready to upload to KDP, no other layout software needed.",
+  "tool.interni.event": "Each interior PDF successfully generated",
 
   "tool.blurb.name": "Blurb & Synopsis",
   "tool.blurb.desc":
@@ -320,12 +320,12 @@ const de: Dictionary = {
   "tool.triage.benefit": "Unbrauchbare Bilder vor dem Layout ausschließen und Stunden sparen.",
   "tool.triage.event": "Download der 3 Ordner abgeschlossen",
 
-  "tool.amazon.name": "Amazon Marketplace",
-  "tool.amazon.desc":
-    "Editor für Amazon-Marketplace-Angebote: Titel, Bullet Points, Beschreibung, Keywords, Bilder und beliebig viele eigene Attribute.",
-  "tool.amazon.benefit":
-    "Vollständige Amazon-Angebote, exportbereit, mit allen Details, die du hinzufügen möchtest.",
-  "tool.amazon.event": "Jeder abgeschlossene Export",
+  "tool.interni.name": "Innenseiten",
+  "tool.interni.desc":
+    "Layoutet deine Bilder zu einer KDP-tauglichen Innenseiten-PDF: korrektes Seitenformat, Ränder und Anschnitt, automatische Größenanpassung.",
+  "tool.interni.benefit":
+    "Eine einzige Innenseiten-PDF, bereit für den Upload zu KDP, ohne weitere Layout-Software.",
+  "tool.interni.event": "Jede erfolgreich erstellte Innenseiten-PDF",
 
   "tool.blurb.name": "Klappentext & Synopse",
   "tool.blurb.desc":
@@ -366,7 +366,7 @@ const fr: Dictionary = {
   "hero.headline1": "Publiez sur KDP plus vite",
   "hero.headline2": "avec une qualité de studio éditorial",
   "hero.sub":
-    "InkForgeKdp réunit couvertures, fiches produit, contenus A+, triage d'images, fiches Amazon Marketplace, quatrièmes de couverture, bios d'auteur et kits promo sur une seule plateforme. Un abonnement, huit outils, aucun logiciel à installer.",
+    "InkForgeKdp réunit couvertures, fiches produit, contenus A+, triage d'images, mise en page intérieure, quatrièmes de couverture, bios d'auteur et kits promo sur une seule plateforme. Un abonnement, huit outils, aucun logiciel à installer.",
   "hero.cta1": "Commencer",
   "hero.cta2": "Voir les offres",
   "hero.badge1": "Interface et contenus en 7 langues",
@@ -435,12 +435,12 @@ const fr: Dictionary = {
     "Écartez les images inutilisables avant la mise en page et gagnez des heures.",
   "tool.triage.event": "Téléchargement des 3 dossiers terminé",
 
-  "tool.amazon.name": "Amazon Marketplace",
-  "tool.amazon.desc":
-    "Éditeur de fiches produit pour Amazon Marketplace : titre, puces, description, mots-clés, images et attributs personnalisés illimités.",
-  "tool.amazon.benefit":
-    "Des fiches Amazon complètes, prêtes à exporter, avec tous les détails que vous souhaitez ajouter.",
-  "tool.amazon.event": "Chaque export terminé",
+  "tool.interni.name": "Intérieur",
+  "tool.interni.desc":
+    "Mettez en page vos images dans un PDF intérieur prêt pour KDP : format de page, marges et fond perdu corrects, redimensionnement automatique.",
+  "tool.interni.benefit":
+    "Un seul PDF intérieur prêt à être téléversé sur KDP, sans autre logiciel de mise en page.",
+  "tool.interni.event": "Chaque PDF intérieur généré avec succès",
 
   "tool.blurb.name": "Quatrième de couverture & Synopsis",
   "tool.blurb.desc":
@@ -481,7 +481,7 @@ const es: Dictionary = {
   "hero.headline1": "Publica en KDP más rápido",
   "hero.headline2": "con calidad de estudio editorial",
   "hero.sub":
-    "InkForgeKdp reúne portadas, fichas, contenido A+, triaje de imágenes, fichas de Amazon Marketplace, sinopsis, biografías de autor y kits promocionales en una sola plataforma. Una suscripción, ocho herramientas, sin instalar nada.",
+    "InkForgeKdp reúne portadas, fichas, contenido A+, triaje de imágenes, maquetación del interior, sinopsis, biografías de autor y kits promocionales en una sola plataforma. Una suscripción, ocho herramientas, sin instalar nada.",
   "hero.cta1": "Empezar ahora",
   "hero.cta2": "Ver los planes",
   "hero.badge1": "Interfaz y contenidos en 7 idiomas",
@@ -550,12 +550,12 @@ const es: Dictionary = {
     "Descarta las imágenes inservibles antes de maquetar y ahorra horas de trabajo.",
   "tool.triage.event": "Descarga de las 3 carpetas completada",
 
-  "tool.amazon.name": "Amazon Marketplace",
-  "tool.amazon.desc":
-    "Editor de fichas de producto para Amazon Marketplace: título, puntos clave, descripción, palabras clave, imágenes y atributos personalizados ilimitados.",
-  "tool.amazon.benefit":
-    "Fichas de Amazon completas y listas para exportar, con todos los detalles que quieras añadir.",
-  "tool.amazon.event": "Cada exportación completada",
+  "tool.interni.name": "Interior",
+  "tool.interni.desc":
+    "Maqueta tus imágenes en un PDF interior listo para KDP: tamaño de página, márgenes y sangrado correctos, redimensionado automático.",
+  "tool.interni.benefit":
+    "Un único PDF interior listo para subir a KDP, sin necesidad de otro programa de maquetación.",
+  "tool.interni.event": "Cada PDF interior generado con éxito",
 
   "tool.blurb.name": "Sinopsis & Contraportada",
   "tool.blurb.desc":
@@ -596,7 +596,7 @@ const nl: Dictionary = {
   "hero.headline1": "Publiceer sneller op KDP",
   "hero.headline2": "met kwaliteit van een uitgeversstudio",
   "hero.sub":
-    "InkForgeKdp bundelt covers, listings, A+ content, beeldtriage, Amazon Marketplace-listings, blurbs, auteursbio's en promo-kits in één platform. Eén abonnement, acht tools, geen software te installeren.",
+    "InkForgeKdp bundelt covers, listings, A+ content, beeldtriage, binnenwerk-opmaak, blurbs, auteursbio's en promo-kits in één platform. Eén abonnement, acht tools, geen software te installeren.",
   "hero.cta1": "Nu starten",
   "hero.cta2": "Bekijk de pakketten",
   "hero.badge1": "Interface en content in 7 talen",
@@ -665,12 +665,12 @@ const nl: Dictionary = {
     "Filter onbruikbare beelden voor de opmaak en bespaar uren werk.",
   "tool.triage.event": "Download van de 3 mappen voltooid",
 
-  "tool.amazon.name": "Amazon Marketplace",
-  "tool.amazon.desc":
-    "Editor voor productvermeldingen op Amazon Marketplace: titel, bullet points, beschrijving, zoekwoorden, afbeeldingen en onbeperkt eigen kenmerken.",
-  "tool.amazon.benefit":
-    "Complete Amazon-vermeldingen, klaar om te exporteren, met alle details die je wilt toevoegen.",
-  "tool.amazon.event": "Elke voltooide export",
+  "tool.interni.name": "Binnenwerk",
+  "tool.interni.desc":
+    "Maak van je afbeeldingen een KDP-klare binnenwerk-PDF: correct paginaformaat, marges en afloop, automatisch formaat aanpassen.",
+  "tool.interni.benefit":
+    "Eén enkele binnenwerk-PDF, klaar om te uploaden naar KDP, zonder ander opmaakprogramma.",
+  "tool.interni.event": "Elke succesvol gegenereerde binnenwerk-PDF",
 
   "tool.blurb.name": "Blurb & Synopsis",
   "tool.blurb.desc":
@@ -711,7 +711,7 @@ const pt: Dictionary = {
   "hero.headline1": "Publique na KDP mais rápido",
   "hero.headline2": "com qualidade de estúdio editorial",
   "hero.sub":
-    "O InkForgeKdp reúne capas, listings, conteúdo A+, triagem de imagens, fichas Amazon Marketplace, sinopses, biografias de autor e kits promocionais numa só plataforma. Uma subscrição, oito ferramentas, sem instalar software.",
+    "O InkForgeKdp reúne capas, listings, conteúdo A+, triagem de imagens, diagramação do miolo, sinopses, biografias de autor e kits promocionais numa só plataforma. Uma subscrição, oito ferramentas, sem instalar software.",
   "hero.cta1": "Começar agora",
   "hero.cta2": "Ver os planos",
   "hero.badge1": "Interface e conteúdos em 7 idiomas",
@@ -780,12 +780,12 @@ const pt: Dictionary = {
     "Elimine as imagens inutilizáveis antes da paginação e poupe horas de trabalho.",
   "tool.triage.event": "Download das 3 pastas concluído",
 
-  "tool.amazon.name": "Amazon Marketplace",
-  "tool.amazon.desc":
-    "Editor de fichas de produto para a Amazon Marketplace: título, bullet points, descrição, palavras-chave, imagens e atributos personalizados ilimitados.",
-  "tool.amazon.benefit":
-    "Fichas Amazon completas e prontas a exportar, com todos os detalhes que quiseres adicionar.",
-  "tool.amazon.event": "Cada exportação concluída",
+  "tool.interni.name": "Miolo",
+  "tool.interni.desc":
+    "Diagrame suas imagens em um PDF de miolo pronto para a KDP: tamanho de página, margens e sangria corretos, redimensionamento automático.",
+  "tool.interni.benefit":
+    "Um único PDF de miolo pronto para enviar à KDP, sem precisar de outro programa de diagramação.",
+  "tool.interni.event": "Cada PDF de miolo gerado com sucesso",
 
   "tool.blurb.name": "Sinopse & Contracapa",
   "tool.blurb.desc":

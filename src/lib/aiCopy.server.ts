@@ -504,69 +504,6 @@ Produci JSON con questa forma esatta:
 }
 
 /* ------------------------------------------------------------------------ */
-/* Tool 5 — Amazon Marketplace (scheda prodotto generica, non solo libri)   */
-/* ------------------------------------------------------------------------ */
-
-const AMAZON_SYSTEM = `Sei un copywriter e-commerce senior, specializzato in schede prodotto per Amazon
-Marketplace (qualsiasi categoria merceologica, non solo libri). Scrivi bullet point in stile Amazon:
-un BENEFICIO CHIAVE IN MAIUSCOLO all'inizio di ogni bullet, seguito da un trattino e una spiegazione
-concreta orientata al cliente (materiali, uso, misure, cosa risolve). Scrivi come un umano esperto
-di conversione e-commerce, mai robotico: niente superlativi vuoti ("il migliore in assoluto",
-"rivoluzionario"), niente frasi fatte da AI ("nel mondo di oggi"), niente emoji, niente ripetizioni
-meccaniche della keyword. I search term backend NON devono ripetere parole già presenti nel titolo,
-nel brand o nei bullet, restano in minuscolo, senza punteggiatura, entro 249 byte totali (regola
-Amazon Seller Central). Non inventare certificazioni, premi, marchi registrati o dati tecnici non
-forniti dal venditore. Rispondi SEMPRE ed ESCLUSIVAMENTE con un oggetto JSON valido, senza testo
-aggiuntivo.`;
-
-export interface AiAmazonCopy {
-  bulletPoints: string[];
-  description: string;
-  searchTerms: string;
-}
-
-export async function generateAmazonCopyAi(input: {
-  locale: string;
-  productName: string;
-  brand?: string | undefined;
-  category?: string | undefined;
-  notes?: string | undefined;
-  tone?: string | undefined;
-  creativity?: number | undefined;
-}): Promise<AiAmazonCopy> {
-  const langName = LOCALE_NAMES[input.locale] ?? LOCALE_NAMES["en"]!;
-  const prompt = `Genera i contenuti di vendita per una scheda prodotto Amazon Marketplace nella lingua: ${langName}.
-
-${buildStyleDirective(input.tone, input.creativity)}
-
-Dati forniti dal venditore:
-- nome prodotto: ${input.productName}
-- brand: ${input.brand || "(non specificato)"}
-- categoria: ${input.category || "(non specificata)"}
-- punti di forza / dettagli da valorizzare: ${input.notes || "(nessuno: resta plausibile e generico per questa categoria, senza inventare specifiche tecniche)"}
-
-Produci JSON con questa forma esatta:
-{
-  "bulletPoints": ["5 bullet point in stile Amazon (BENEFICIO IN MAIUSCOLO — spiegazione), ciascuno max 200 caratteri"],
-  "description": "descrizione prodotto di 3-5 paragrafi separati da \\n\\n, 600-1000 caratteri totali, senza HTML, orientata ai benefici concreti per il cliente",
-  "searchTerms": "keyword backend separate da spazio singolo, minuscole, senza ripetere parole già in titolo/brand/bullet, entro 249 byte totali"
-}`;
-
-  const json = await callGateway(AMAZON_SYSTEM, prompt, {}, input.creativity);
-
-  const bulletPoints = Array.isArray(json.bulletPoints)
-    ? json.bulletPoints.map(String).filter(Boolean).slice(0, 5)
-    : [];
-  if (bulletPoints.length === 0 || !json.description) throw new Error("Risposta AI incompleta.");
-
-  return {
-    bulletPoints,
-    description: String(json.description),
-    searchTerms: typeof json.searchTerms === "string" ? json.searchTerms.trim() : "",
-  };
-}
-
-/* ------------------------------------------------------------------------ */
 /* Tool 4 — Triage: suggerimento AI di categoria (revisione resta manuale)  */
 /* ------------------------------------------------------------------------ */
 

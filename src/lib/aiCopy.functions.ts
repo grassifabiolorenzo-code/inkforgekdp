@@ -130,28 +130,6 @@ export const generatePromoCopy = createServerFn({ method: "POST" })
     }
   });
 
-const amazonInput = z.object({
-  locale: z.string().min(2).max(5),
-  productName: z.string().max(200),
-  brand: z.string().max(120).optional(),
-  category: z.string().max(120).optional(),
-  notes: z.string().max(600).optional(),
-  tone: z.string().max(40).optional(),
-  creativity: z.number().int().min(1).max(10).optional(),
-});
-
-export const generateAmazonCopy = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) => amazonInput.parse(data))
-  .handler(async ({ data }) => {
-    const { generateAmazonCopyAi } = await import("@/lib/aiCopy.server");
-    try {
-      return { ok: true as const, copy: await generateAmazonCopyAi(data) };
-    } catch (error) {
-      return { ok: false as const, error: error instanceof Error ? error.message : "Errore AI" };
-    }
-  });
-
 const triageInput = z.object({
   locale: z.string().min(2).max(5),
   imageDataUrl: dataUrl,

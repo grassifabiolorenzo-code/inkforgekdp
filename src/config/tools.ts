@@ -4,7 +4,7 @@
  * Nessun componente deve duplicare questa configurazione.
  */
 
-export type ToolId = "copertine" | "pubblicazione" | "aplus" | "triage" | "amazon" | "blurb" | "bio" | "promo";
+export type ToolId = "copertine" | "pubblicazione" | "aplus" | "triage" | "interni" | "blurb" | "bio" | "promo";
 
 export interface ToolConfig {
   id: ToolId;
@@ -12,7 +12,7 @@ export interface ToolConfig {
   name: string;
   /** Rotta della dashboard (modulo indipendente). */
   route: string;
-  icon: "image" | "file-text" | "sparkles" | "layers" | "shopping-bag" | "book-open" | "user" | "megaphone";
+  icon: "image" | "file-text" | "sparkles" | "layers" | "layout-grid" | "book-open" | "user" | "megaphone";
   description: string;
   benefit: string;
   /** Evento che consuma il credito (etichetta UI). */
@@ -76,16 +76,16 @@ export const TOOLS: ToolConfig[] = [
     cost: 1,
   },
   {
-    id: "amazon",
+    id: "interni",
     slot: 5,
-    name: "Amazon Marketplace",
+    name: "Interni",
     route: "/dashboard/tool-5",
-    icon: "shopping-bag",
+    icon: "layout-grid",
     description:
-      "Editor di schede prodotto per Amazon Marketplace: titolo, bullet point, descrizione, keyword, immagini e attributi personalizzati illimitati.",
-    benefit: "Schede prodotto Amazon complete e pronte da esportare, con tutte le specificità che vuoi aggiungere.",
-    creditEvent: "Ogni esportazione completata",
-    creditAction: "export_completed",
+      "Impaginatore per gli interni del libro: carica le immagini, imposta formato KDP, margini e bleed, ed esporta un PDF interno unico pronto per la stampa.",
+    benefit: "Un unico PDF interno pronto per KDP, senza passare da altri programmi di impaginazione.",
+    creditEvent: "Ogni PDF interno generato con successo",
+    creditAction: "generation_completed",
     cost: 1,
   },
   {
