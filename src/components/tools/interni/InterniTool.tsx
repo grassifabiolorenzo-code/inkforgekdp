@@ -35,6 +35,7 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
   const [generating, setGenerating] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<TemplateId>(TEMPLATE_LIBRARY[0]!.id);
   const [downloadingPageId, setDownloadingPageId] = useState<string | null>(null);
+  const [generatedPdf, setGeneratedPdf] = useState<{ blob: Blob; filename: string } | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -73,6 +74,24 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pages, trim.widthIn, trim.heightIn, margins, defaultFillMode, printMode, fillerColor]);
+
+  // Il PDF già generato non corrisponde più alle impostazioni correnti: invalida il download rapido
+  // (evita di far riscaricare un file non aggiornato senza che l'utente se ne accorga).
+  useEffect(() => {
+    setGeneratedPdf(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pages, trim.widthIn, trim.heightIn, margins, defaultFillMode, printMode, fillerColor]);
+
+  function triggerBlobDownload(blob: Blob, filename: string) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
 
   function handleAddFiles(fileList: FileList | null) {
     if (!fileList || fileList.length === 0) return;
@@ -185,18 +204,14 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
       const operationId = newOperationId("interni-pdf");
       try {
         const blob = await buildInteriorPdf(pages, docSpec);
-
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `Interno_KDP_${trim.id}_${Date.now()}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
+        const filename = `Interno_KDP_${trim.id}_${Date.now()}.pdf`;
+        triggerBlobDownload(blob, filename);
 
         const result = await runtime.charge(operationId, "PDF interno generato");
         if (!result.ok) return;
+        // Tenuto in stato: permette di riscaricarlo in seguito (es. se il download automatico
+        // viene bloccato dal browser) senza rigenerare il PDF e senza consumare un altro credito.
+        setGeneratedPdf({ blob, filename });
         toast.success(result.duplicate ? "PDF generato" : "PDF generato — 1 credito");
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Generazione PDF non riuscita.");
@@ -494,6 +509,23 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
           )}
           Genera PDF interno (1 credito)
         </Button>
+
+        {generatedPdf && (
+          <div className="space-y-2 rounded-md border border-border bg-surface p-3">
+            <p className="text-xs text-muted-foreground">
+              PDF generato. Se il download automatico non è partito (o l'hai chiuso per sbaglio), puoi
+              riscaricarlo qui — non consuma un altro credito.
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => triggerBlobDownload(generatedPdf.blob, generatedPdf.filename)}
+            >
+              <Download className="mr-2 size-4" /> Scarica di nuovo il PDF generato
+            </Button>
+          </div>
+        )}
       </div>
 
       <div className="panel space-y-3 p-6">
