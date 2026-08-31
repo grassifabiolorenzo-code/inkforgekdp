@@ -9,23 +9,38 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      setSession(nextSession);
-      setUser(nextSession?.user ?? null);
-    });
+    // Se il backend non è raggiungibile/configurato in questo ambiente, non
+    // deve mai far crashare l'intera pagina: restiamo semplicemente "ospiti".
+    try {
+      const { data: sub } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+        setSession(nextSession);
+        setUser(nextSession?.user ?? null);
+      });
 
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
+      supabase.auth
+        .getSession()
+        .then(({ data }) => {
+          setSession(data.session);
+          setUser(data.session?.user ?? null);
+        })
+        .catch(() => undefined)
+        .finally(() => setLoading(false));
+
+      return () => sub.subscription.unsubscribe();
+    } catch (error) {
+      console.error("[auth] inizializzazione non riuscita", error);
       setLoading(false);
-    });
-
-    return () => sub.subscription.unsubscribe();
+      return undefined;
+    }
   }, []);
 
   return { session, user, loading };
 }
 
 export async function signOut() {
-  await supabase.auth.signOut();
+  try {
+    await supabase.auth.signOut();
+  } catch (error) {
+    console.error("[auth] logout non riuscito", error);
+  }
 }
