@@ -6,12 +6,13 @@ import { Button } from "@/components/ui/button";
 import { FaqSection } from "@/components/landing/FaqSection";
 import { SiteFooter } from "@/components/landing/SiteFooter";
 import { SiteNav } from "@/components/landing/SiteNav";
+import { APlusPreviewDemo } from "@/components/landing/demo/APlusPreviewDemo";
 import { InteriorPreviewDemo } from "@/components/landing/demo/InteriorPreviewDemo";
 import { ListingPreviewDemo } from "@/components/landing/demo/ListingPreviewDemo";
 
 const title = "Prova gratis InkForgeKdp — anteprima senza registrazione";
 const description =
-  "Vedi subito quanto tempo risparmi con InkForgeKdp: prova due tool gratis, senza registrazione. Anteprima con filigrana, testo completo e download sbloccati con un abbonamento.";
+  "Vedi subito quanto tempo risparmi con InkForgeKdp: prova tre tool gratis, senza registrazione. Anteprima con filigrana, testo completo e download sbloccati con un abbonamento.";
 
 export const Route = createFileRoute("/prova")({
   head: () => ({
@@ -52,7 +53,7 @@ function ProvaPage() {
             Quanto tempo perdi ancora a impaginare <span className="text-gradient">a mano</span>?
           </h1>
           <p className="relative mx-auto mt-4 max-w-2xl px-4 text-muted-foreground">
-            Prova due dei nostri strumenti qui sotto, dal vivo, senza creare un account. L'anteprima è reale — è
+            Prova tre dei nostri strumenti qui sotto, dal vivo, senza creare un account. L'anteprima è reale — è
             volutamente limitata: filigrana sulle immagini, testo parziale, nessun download pulito. Il risultato
             completo lo sblocchi con un abbonamento.
           </p>
@@ -94,7 +95,14 @@ function ProvaPage() {
           </div>
         </section>
 
-        {/* Demo live 2 — interni */}
+        {/* Demo live 2 — A+ KDPstudio */}
+        <section className="mx-auto max-w-6xl px-4 py-10">
+          <div className="panel p-6 sm:p-10">
+            <APlusPreviewDemo />
+          </div>
+        </section>
+
+        {/* Demo live 3 — interni */}
         <section className="mx-auto max-w-6xl px-4 py-10">
           <div className="panel p-6 sm:p-10">
             <InteriorPreviewDemo />
