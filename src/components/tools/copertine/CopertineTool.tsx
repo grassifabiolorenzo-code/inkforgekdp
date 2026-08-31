@@ -11,7 +11,8 @@ const STUDIO_URL = "/tools/copertine-studio.html";
  * Copertine: lo studio KDP completo viene servito come applicazione autonoma
  * (public/tools/copertine-studio.html) ed è integrato qui in un frame isolato.
  * Il contratto crediti resta lato piattaforma: lo studio chiede il permesso
- * prima di esportare e il credito viene scalato solo a export completato.
+ * prima di rasterizzare e poi chiede conferma dell'addebito reale subito dopo
+ * la rasterizzazione; il download parte solo se l'addebito va a buon fine.
  */
 export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
   const frameRef = useRef<HTMLIFrameElement>(null);
@@ -36,15 +37,20 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
         return;
       }
 
-      if (data.type === "export-done") {
-        // Addebito unico, solo dopo il download riuscito.
+      if (data.type === "charge-request") {
+        // Addebito confermato PRIMA che lo studio avvii il download: se fallisce,
+        // lo studio annulla l'esportazione e nessun file viene consegnato.
         if (chargeGuard.current) return;
         chargeGuard.current = true;
+        let charged = false;
         try {
-          await runtime.charge(newOperationId("copertine-export-png"), "Export copertina KDP HD");
+          const result = await runtime.charge(newOperationId("copertine-export-png"), "Export copertina KDP HD");
+          charged = result.ok;
         } finally {
           chargeGuard.current = false;
         }
+        frameWindow.postMessage({ source: "op-host", id: data.id, charged }, "*");
+        return;
       }
     }
 

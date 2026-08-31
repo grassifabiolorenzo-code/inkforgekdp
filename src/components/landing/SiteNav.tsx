@@ -24,12 +24,8 @@ export function SiteNav() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-        <Link to="/" aria-label="InkForgeKdp home">
-          <Logo />
-        </Link>
-
-        <nav className="hidden items-center gap-1 md:flex">
+      <div className="mx-auto grid h-20 max-w-6xl grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 px-4">
+        <nav className="col-start-1 hidden items-center gap-1 md:flex">
           {links.map((l) => (
             <Link
               key={l.to}
@@ -43,7 +39,11 @@ export function SiteNav() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-2 md:flex">
+        <Link to="/" aria-label="InkForgeKdp home" className="col-start-2 justify-self-center">
+          <Logo className="h-14 w-auto" />
+        </Link>
+
+        <div className="col-start-3 hidden items-center justify-end gap-2 md:flex">
           <LanguageSwitcher variant="full" />
           {user ? (
             <Button asChild>
@@ -63,7 +63,7 @@ export function SiteNav() {
           )}
         </div>
 
-        <div className="flex items-center gap-1 md:hidden">
+        <div className="col-start-3 flex items-center justify-end gap-1 md:hidden">
           <LanguageSwitcher />
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>

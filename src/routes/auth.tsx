@@ -107,7 +107,7 @@ function AuthPage() {
       <div className="relative w-full max-w-md">
         <div className="mb-8 text-center">
           <Link to="/" className="inline-block">
-            <Logo />
+            <Logo className="h-14 w-auto" />
           </Link>
         </div>
 

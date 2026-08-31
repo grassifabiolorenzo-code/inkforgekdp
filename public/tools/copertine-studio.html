@@ -454,6 +454,25 @@
                 window.parent.postMessage({ source: 'op-copertine', type: 'export-request', id }, '*');
             });
         };
+
+        // Addebita il credito solo dopo la rasterizzazione HD: il download parte
+        // esclusivamente se la piattaforma conferma l'addebito riuscito.
+        window.__opConfirmCharge = function () {
+            if (window.parent === window) return Promise.resolve(true);
+            return new Promise((resolve) => {
+                const id = 'chg_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+                const timer = setTimeout(() => { cleanup(); resolve(false); }, 20000);
+                function onMsg(e) {
+                    const d = e.data;
+                    if (!d || d.source !== 'op-host' || d.id !== id) return;
+                    cleanup();
+                    resolve(!!d.charged);
+                }
+                function cleanup() { clearTimeout(timer); window.removeEventListener('message', onMsg); }
+                window.addEventListener('message', onMsg);
+                window.parent.postMessage({ source: 'op-copertine', type: 'charge-request', id }, '*');
+            });
+        };
     </script>
 
     <script>
@@ -1105,11 +1124,16 @@
                             }
                         });
 
+                        const charged = await window.__opConfirmCharge();
+                        if (!charged) {
+                            alert('Addebito del credito non riuscito: esportazione annullata.');
+                            return;
+                        }
+
                         const link = document.createElement('a');
                         link.download = `Copertina_KDP_HD_${Date.now()}.png`;
                         link.href = canvas.toDataURL('image/png');
                         link.click();
-                        window.parent.postMessage({ source: 'op-copertine', type: 'export-done' }, '*');
                     } catch (err) {
                         alert('Errore durante l\'esportazione: ' + err.message);
                     } finally {

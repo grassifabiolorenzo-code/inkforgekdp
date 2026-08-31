@@ -138,6 +138,11 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
       setDownloadingPageId(page.id);
       try {
         const canvas = await renderSinglePagePreview(page, docSpec);
+
+        // Credito confermato prima di consegnare il file: nessun download se il charge fallisce.
+        const result = await runtime.charge(newOperationId("interni-page-download"), "Download immagine pagina");
+        if (!result.ok) return;
+
         const url = canvas.toDataURL("image/png");
         const a = document.createElement("a");
         a.href = url;
@@ -145,9 +150,6 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
         document.body.appendChild(a);
         a.click();
         a.remove();
-
-        const result = await runtime.charge(newOperationId("interni-page-download"), "Download immagine pagina");
-        if (!result.ok) return;
         toast.success(result.duplicate ? "Immagine scaricata" : "Immagine scaricata — 1 credito");
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Download immagine non riuscito.");
@@ -205,10 +207,13 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
       try {
         const blob = await buildInteriorPdf(pages, docSpec);
         const filename = `Interno_KDP_${trim.id}_${Date.now()}.pdf`;
-        triggerBlobDownload(blob, filename);
 
+        // Il credito viene confermato PRIMA di consegnare il file: se il charge fallisse
+        // (limite raggiunto, abbonamento non attivo, ecc.) nessun download deve partire.
         const result = await runtime.charge(operationId, "PDF interno generato");
         if (!result.ok) return;
+
+        triggerBlobDownload(blob, filename);
         // Tenuto in stato: permette di riscaricarlo in seguito (es. se il download automatico
         // viene bloccato dal browser) senza rigenerare il PDF e senza consumare un altro credito.
         setGeneratedPdf({ blob, filename });

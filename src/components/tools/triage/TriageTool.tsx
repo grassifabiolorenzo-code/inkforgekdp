@@ -227,6 +227,11 @@ export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
       const result: TriageResult = { promosse, rimandate, bocciate };
       const blob = await buildTriageZip(result, batchSize, outputLocale);
 
+      // Credito confermato PRIMA di consegnare il file: se il charge fallisse (limite raggiunto,
+      // abbonamento non attivo, ecc.) nessun download deve partire.
+      const charged = await runtime.charge(operationId, "Download completato delle 3 cartelle");
+      if (!charged.ok) return;
+
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -236,9 +241,6 @@ export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      // Download completato → solo ora consumiamo il credito.
-      const charged = await runtime.charge(operationId, "Download completato delle 3 cartelle");
-      if (!charged.ok) return;
       toast.success(charged.duplicate ? "Download completato" : "Download completato — 1 credito");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Download non riuscito");
