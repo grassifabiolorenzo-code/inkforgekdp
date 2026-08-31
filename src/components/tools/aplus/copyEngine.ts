@@ -39,13 +39,10 @@ export function applyCopyVariation(baseCopy: NicheCopy, lang: LangId, variationI
     copy.value.text3 = `${copy.value.text3} · ${v.gridLead}`;
     copy.value.alt = `${copy.value.alt}${v.altTail}`;
   }
-  if (Array.isArray(copy.grid)) {
-    copy.grid = copy.grid.map((item, i) => ({
-      ...item,
-      title: i === 0 ? v.gridLead : item.title,
-      desc: `${item.desc} ${v.bodyTail.trim()}`,
-    }));
-  }
+  // Nota: i 3 item della griglia (Modulo 4) NON vengono alterati dalla variazione.
+  // I testi in aplusDatabase.json sono già scritti per essere distinti tra loro
+  // (aspetti diversi del prodotto): appendere la stessa coda a tutti e tre li
+  // rendeva quasi identici l'uno con l'altro.
   if (typeof copy.comp === "string") {
     copy.comp = `${copy.comp} ${v.bodyTail.trim()}`;
   }

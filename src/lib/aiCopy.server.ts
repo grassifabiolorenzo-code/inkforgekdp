@@ -259,6 +259,12 @@ impronta SEO + AIDA + PAS e frasi brevi adatte ai banner A+. Ogni modulo deve di
 diverso e specifico di QUESTO libro: nessuna frase generica riutilizzabile per un altro titolo,
 nessun superlativo vuoto, nessuna emoji.
 
+I 3 elementi di "grid" devono essere OBBLIGATORIAMENTE distinti tra loro: ciascuno copre un
+aspetto concreto diverso del prodotto (es. uno la qualità del tratto/stampa, uno l'organizzazione
+delle pagine o degli spazi, uno il formato/materiali/praticità d'uso) — mai due elementi che
+ripetono lo stesso concetto con parole diverse, e mai la stessa frase o chiusura ripetuta in
+più di un elemento.
+
 
 Rispondi con JSON di questa forma esatta:
 {
