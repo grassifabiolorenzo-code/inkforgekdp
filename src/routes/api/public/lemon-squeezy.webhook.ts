@@ -10,7 +10,12 @@ import { STARTER_BONUS_CREDITS } from "@/config/plans";
 interface LemonWebhook {
   meta?: {
     event_name?: string;
-    custom_data?: { user_id?: string; plan_slug?: string; purchase_type?: string; credits?: string };
+    custom_data?: {
+      user_id?: string;
+      plan_slug?: string;
+      purchase_type?: string;
+      credits?: string;
+    };
   };
   data?: {
     id?: string;
@@ -55,9 +60,8 @@ export const Route = createFileRoute("/api/public/lemon-squeezy/webhook")({
         const raw = await request.text();
         const signature = request.headers.get("x-signature");
 
-        const { verifyWebhookSignature, planSlugForVariant } = await import(
-          "@/lib/lemon-squeezy.server"
-        );
+        const { verifyWebhookSignature, planSlugForVariant } =
+          await import("@/lib/lemon-squeezy.server");
 
         let valid = false;
         try {
@@ -80,18 +84,80 @@ export const Route = createFileRoute("/api/public/lemon-squeezy/webhook")({
         // Acquisto one-time del pacchetto crediti extra (non un abbonamento).
         if (event === "order_created") {
           const customData = payload.meta?.custom_data;
+          const orderAttrs = payload.data?.attributes ?? {};
+          const orderId = payload.data?.id;
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
           if (customData?.purchase_type === "credit_pack" && customData.user_id) {
             const amount = Number(customData.credits ?? "0");
-            const orderId = payload.data?.id;
             if (amount > 0 && orderId) {
-              const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
               const { error } = await supabaseAdmin.rpc("add_purchased_credits", {
                 _user_id: customData.user_id,
                 _amount: amount,
                 _operation_id: `ls-order-${orderId}`,
                 _description: `Acquisto pacchetto ${amount} crediti`,
               });
-              if (error) console.error("[lemon-webhook] add_purchased_credits failed", error.message);
+              if (error)
+                console.error("[lemon-webhook] add_purchased_credits failed", error.message);
+            }
+          }
+
+          // Ledger pagamenti: registrato per qualunque ordine one-time (non solo i pacchetti crediti),
+          // così /admin/payments mostra la cronologia reale invece di restare vuoto.
+          if (orderId) {
+            const totalCents = orderAttrs["total"];
+            const { error: payError } = await supabaseAdmin.from("payments").upsert(
+              {
+                user_id: customData?.user_id ?? null,
+                provider: "lemon_squeezy",
+                provider_payment_id: String(orderId),
+                provider_order_id: String(orderId),
+                plan_slug:
+                  customData?.plan_slug ??
+                  (customData?.purchase_type === "credit_pack" ? "credits10" : null),
+                amount: typeof totalCents === "number" ? totalCents / 100 : null,
+                currency:
+                  typeof orderAttrs["currency"] === "string"
+                    ? (orderAttrs["currency"] as string)
+                    : "EUR",
+                status: "succeeded",
+                description:
+                  customData?.purchase_type === "credit_pack"
+                    ? "Pacchetto crediti extra"
+                    : "Ordine one-time",
+              },
+              { onConflict: "provider,provider_payment_id", ignoreDuplicates: true },
+            );
+            if (payError)
+              console.error(
+                "[lemon-webhook] payments upsert (order_created) failed",
+                payError.message,
+              );
+          }
+          return new Response("ok", { status: 200 });
+        }
+
+        // Rimborso di un ordine one-time (es. pacchetto crediti). Non tocca i crediti già erogati:
+        // un eventuale storno manuale dei crediti resta una decisione dell'admin, non automatica.
+        if (event === "order_refunded") {
+          const orderId = payload.data?.id;
+          if (orderId) {
+            const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+            const { error } = await supabaseAdmin
+              .from("payments")
+              .update({ status: "refunded" })
+              .eq("provider", "lemon_squeezy")
+              .eq("provider_payment_id", String(orderId));
+            if (error) console.error("[lemon-webhook] refund update failed", error.message);
+
+            const { data: payRow } = await supabaseAdmin
+              .from("payments")
+              .select("user_id")
+              .eq("provider_payment_id", String(orderId))
+              .maybeSingle();
+            if (payRow?.user_id) {
+              const { dispatchNotification } = await import("@/services/notifications.server");
+              await dispatchNotification({ event: "payment_refunded", userId: payRow.user_id });
             }
           }
           return new Response("ok", { status: 200 });
@@ -102,8 +168,9 @@ export const Route = createFileRoute("/api/public/lemon-squeezy/webhook")({
         const attrs = payload.data?.attributes ?? {};
         const userId = payload.meta?.custom_data?.user_id ?? null;
         const lsSubscriptionId = String(
-          (event.startsWith("subscription_payment") ? attrs["subscription_id"] : payload.data?.id) ??
-            "",
+          (event.startsWith("subscription_payment")
+            ? attrs["subscription_id"]
+            : payload.data?.id) ?? "",
         );
         if (!lsSubscriptionId) return new Response("missing subscription id", { status: 400 });
 
@@ -196,6 +263,37 @@ export const Route = createFileRoute("/api/public/lemon-squeezy/webhook")({
             _amount: STARTER_BONUS_CREDITS,
           });
           if (bonusError) console.error("[lemon-webhook] bonus error", bonusError.message);
+        }
+
+        // Ledger pagamenti: una riga per ogni fattura di abbonamento riuscita/fallita, così
+        // /admin/payments mostra la cronologia reale invece di derivarla solo dallo stato corrente.
+        if (event === "subscription_payment_success" || event === "subscription_payment_failed") {
+          const invoiceId = payload.data?.id;
+          if (invoiceId) {
+            const totalCents = attrs["total"];
+            const { data: subRow } = await supabaseAdmin
+              .from("subscriptions")
+              .select("id")
+              .eq("lemon_squeezy_subscription_id", lsSubscriptionId)
+              .maybeSingle();
+            const { error: payError } = await supabaseAdmin.from("payments").upsert(
+              {
+                user_id: resolvedUserId,
+                subscription_id: subRow?.id ?? null,
+                provider: "lemon_squeezy",
+                provider_payment_id: String(invoiceId),
+                plan_slug: planSlug,
+                amount: typeof totalCents === "number" ? totalCents / 100 : null,
+                currency:
+                  typeof attrs["currency"] === "string" ? (attrs["currency"] as string) : "EUR",
+                status: event === "subscription_payment_success" ? "succeeded" : "failed",
+                description: `Fattura abbonamento ${planSlug ?? ""}`.trim(),
+              },
+              { onConflict: "provider,provider_payment_id", ignoreDuplicates: true },
+            );
+            if (payError)
+              console.error("[lemon-webhook] payments upsert (invoice) failed", payError.message);
+          }
         }
 
         // Notifiche (architettura pronta, provider collegabile in seguito).

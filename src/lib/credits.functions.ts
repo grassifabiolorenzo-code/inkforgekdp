@@ -27,7 +27,16 @@ const TEST_MODE_STATE: CreditState = {
   limit: -1,
   used: 0,
   bonus_remaining: 0,
-  allowed_tools: ["copertine", "pubblicazione", "aplus", "triage", "interni", "blurb", "bio", "promo"],
+  allowed_tools: [
+    "copertine",
+    "pubblicazione",
+    "aplus",
+    "triage",
+    "interni",
+    "blurb",
+    "bio",
+    "promo",
+  ],
   remaining: -1,
 };
 
@@ -78,6 +87,11 @@ export const getAccountState = createServerFn({ method: "GET" })
         .select("*")
         .maybeSingle();
       ensured = created ?? null;
+
+      if (ensured) {
+        const { dispatchNotification } = await import("@/services/notifications.server");
+        await dispatchNotification({ event: "welcome", userId, email: ensured.email });
+      }
     }
 
     // MODALITÀ TEST: stato fittizio con tutto sbloccato (vedi flag in testa al file).

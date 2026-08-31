@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteRouteImport } from './routes/_admin/route'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as FaqRouteImport } from './routes/faq'
@@ -17,7 +18,19 @@ import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProvaRouteImport } from './routes/prova'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as AdminAdminRouteImport } from './routes/_admin/admin'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AdminAdminIndexRouteImport } from './routes/_admin/admin.index'
+import { Route as AdminAdminAdministratorsRouteImport } from './routes/_admin/admin.administrators'
+import { Route as AdminAdminAnalyticsRouteImport } from './routes/_admin/admin.analytics'
+import { Route as AdminAdminAuditLogsRouteImport } from './routes/_admin/admin.audit-logs'
+import { Route as AdminAdminFeaturesRouteImport } from './routes/_admin/admin.features'
+import { Route as AdminAdminPaymentsRouteImport } from './routes/_admin/admin.payments'
+import { Route as AdminAdminPlansRouteImport } from './routes/_admin/admin.plans'
+import { Route as AdminAdminSettingsRouteImport } from './routes/_admin/admin.settings'
+import { Route as AdminAdminSubscriptionsRouteImport } from './routes/_admin/admin.subscriptions'
+import { Route as AdminAdminSystemRouteImport } from './routes/_admin/admin.system'
+import { Route as AdminAdminUsersRouteImport } from './routes/_admin/admin.users'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
 import { Route as AuthenticatedDashboardProfileRouteImport } from './routes/_authenticated/dashboard.profile'
 import { Route as AuthenticatedDashboardSettingsRouteImport } from './routes/_authenticated/dashboard.settings'
@@ -31,11 +44,16 @@ import { Route as AuthenticatedDashboardTool6RouteImport } from './routes/_authe
 import { Route as AuthenticatedDashboardTool7RouteImport } from './routes/_authenticated/dashboard.tool-7'
 import { Route as AuthenticatedDashboardTool8RouteImport } from './routes/_authenticated/dashboard.tool-8'
 import { Route as AuthenticatedDashboardUsageRouteImport } from './routes/_authenticated/dashboard.usage'
+import { Route as AdminAdminUsersIdRouteImport } from './routes/_admin/admin.users.$id'
 import { Route as ApiPublicLemonSqueezyWebhookRouteImport } from './routes/api/public/lemon-squeezy.webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRouteRoute = AdminRouteRouteImport.update({
+  id: '/_admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
@@ -72,10 +90,71 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAdminRoute = AdminAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AdminAdminIndexRoute = AdminAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminAdministratorsRoute =
+  AdminAdminAdministratorsRouteImport.update({
+    id: '/administrators',
+    path: '/administrators',
+    getParentRoute: () => AdminAdminRoute,
+  } as any)
+const AdminAdminAnalyticsRoute = AdminAdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminAuditLogsRoute = AdminAdminAuditLogsRouteImport.update({
+  id: '/audit-logs',
+  path: '/audit-logs',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminFeaturesRoute = AdminAdminFeaturesRouteImport.update({
+  id: '/features',
+  path: '/features',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminPaymentsRoute = AdminAdminPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminPlansRoute = AdminAdminPlansRouteImport.update({
+  id: '/plans',
+  path: '/plans',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminSettingsRoute = AdminAdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminSubscriptionsRoute = AdminAdminSubscriptionsRouteImport.update({
+  id: '/subscriptions',
+  path: '/subscriptions',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminSystemRoute = AdminAdminSystemRouteImport.update({
+  id: '/system',
+  path: '/system',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminUsersRoute = AdminAdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminAdminRoute,
 } as any)
 const AuthenticatedDashboardIndexRoute =
   AuthenticatedDashboardIndexRouteImport.update({
@@ -155,6 +234,11 @@ const AuthenticatedDashboardUsageRoute =
     path: '/usage',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AdminAdminUsersIdRoute = AdminAdminUsersIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminAdminUsersRoute,
+} as any)
 const ApiPublicLemonSqueezyWebhookRoute =
   ApiPublicLemonSqueezyWebhookRouteImport.update({
     id: '/api/public/lemon-squeezy/webhook',
@@ -170,7 +254,18 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/prova': typeof ProvaRoute
   '/terms': typeof TermsRoute
+  '/admin': typeof AdminAdminRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/admin/administrators': typeof AdminAdminAdministratorsRoute
+  '/admin/analytics': typeof AdminAdminAnalyticsRoute
+  '/admin/audit-logs': typeof AdminAdminAuditLogsRoute
+  '/admin/features': typeof AdminAdminFeaturesRoute
+  '/admin/payments': typeof AdminAdminPaymentsRoute
+  '/admin/plans': typeof AdminAdminPlansRoute
+  '/admin/settings': typeof AdminAdminSettingsRoute
+  '/admin/subscriptions': typeof AdminAdminSubscriptionsRoute
+  '/admin/system': typeof AdminAdminSystemRoute
+  '/admin/users': typeof AdminAdminUsersRouteWithChildren
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
   '/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
   '/dashboard/subscription': typeof AuthenticatedDashboardSubscriptionRoute
@@ -183,7 +278,9 @@ export interface FileRoutesByFullPath {
   '/dashboard/tool-7': typeof AuthenticatedDashboardTool7Route
   '/dashboard/tool-8': typeof AuthenticatedDashboardTool8Route
   '/dashboard/usage': typeof AuthenticatedDashboardUsageRoute
+  '/admin/': typeof AdminAdminIndexRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/admin/users/$id': typeof AdminAdminUsersIdRoute
   '/api/public/lemon-squeezy/webhook': typeof ApiPublicLemonSqueezyWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -194,6 +291,16 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/prova': typeof ProvaRoute
   '/terms': typeof TermsRoute
+  '/admin/administrators': typeof AdminAdminAdministratorsRoute
+  '/admin/analytics': typeof AdminAdminAnalyticsRoute
+  '/admin/audit-logs': typeof AdminAdminAuditLogsRoute
+  '/admin/features': typeof AdminAdminFeaturesRoute
+  '/admin/payments': typeof AdminAdminPaymentsRoute
+  '/admin/plans': typeof AdminAdminPlansRoute
+  '/admin/settings': typeof AdminAdminSettingsRoute
+  '/admin/subscriptions': typeof AdminAdminSubscriptionsRoute
+  '/admin/system': typeof AdminAdminSystemRoute
+  '/admin/users': typeof AdminAdminUsersRouteWithChildren
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
   '/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
   '/dashboard/subscription': typeof AuthenticatedDashboardSubscriptionRoute
@@ -206,12 +313,15 @@ export interface FileRoutesByTo {
   '/dashboard/tool-7': typeof AuthenticatedDashboardTool7Route
   '/dashboard/tool-8': typeof AuthenticatedDashboardTool8Route
   '/dashboard/usage': typeof AuthenticatedDashboardUsageRoute
+  '/admin': typeof AdminAdminIndexRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
+  '/admin/users/$id': typeof AdminAdminUsersIdRoute
   '/api/public/lemon-squeezy/webhook': typeof ApiPublicLemonSqueezyWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_admin': typeof AdminRouteRouteWithChildren
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/faq': typeof FaqRoute
@@ -219,7 +329,18 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/prova': typeof ProvaRoute
   '/terms': typeof TermsRoute
+  '/_admin/admin': typeof AdminAdminRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/_admin/admin/administrators': typeof AdminAdminAdministratorsRoute
+  '/_admin/admin/analytics': typeof AdminAdminAnalyticsRoute
+  '/_admin/admin/audit-logs': typeof AdminAdminAuditLogsRoute
+  '/_admin/admin/features': typeof AdminAdminFeaturesRoute
+  '/_admin/admin/payments': typeof AdminAdminPaymentsRoute
+  '/_admin/admin/plans': typeof AdminAdminPlansRoute
+  '/_admin/admin/settings': typeof AdminAdminSettingsRoute
+  '/_admin/admin/subscriptions': typeof AdminAdminSubscriptionsRoute
+  '/_admin/admin/system': typeof AdminAdminSystemRoute
+  '/_admin/admin/users': typeof AdminAdminUsersRouteWithChildren
   '/_authenticated/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
   '/_authenticated/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
   '/_authenticated/dashboard/subscription': typeof AuthenticatedDashboardSubscriptionRoute
@@ -232,7 +353,9 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/tool-7': typeof AuthenticatedDashboardTool7Route
   '/_authenticated/dashboard/tool-8': typeof AuthenticatedDashboardTool8Route
   '/_authenticated/dashboard/usage': typeof AuthenticatedDashboardUsageRoute
+  '/_admin/admin/': typeof AdminAdminIndexRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/_admin/admin/users/$id': typeof AdminAdminUsersIdRoute
   '/api/public/lemon-squeezy/webhook': typeof ApiPublicLemonSqueezyWebhookRoute
 }
 export interface FileRouteTypes {
@@ -245,7 +368,18 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/prova'
     | '/terms'
+    | '/admin'
     | '/dashboard'
+    | '/admin/administrators'
+    | '/admin/analytics'
+    | '/admin/audit-logs'
+    | '/admin/features'
+    | '/admin/payments'
+    | '/admin/plans'
+    | '/admin/settings'
+    | '/admin/subscriptions'
+    | '/admin/system'
+    | '/admin/users'
     | '/dashboard/profile'
     | '/dashboard/settings'
     | '/dashboard/subscription'
@@ -258,7 +392,9 @@ export interface FileRouteTypes {
     | '/dashboard/tool-7'
     | '/dashboard/tool-8'
     | '/dashboard/usage'
+    | '/admin/'
     | '/dashboard/'
+    | '/admin/users/$id'
     | '/api/public/lemon-squeezy/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -269,6 +405,16 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/prova'
     | '/terms'
+    | '/admin/administrators'
+    | '/admin/analytics'
+    | '/admin/audit-logs'
+    | '/admin/features'
+    | '/admin/payments'
+    | '/admin/plans'
+    | '/admin/settings'
+    | '/admin/subscriptions'
+    | '/admin/system'
+    | '/admin/users'
     | '/dashboard/profile'
     | '/dashboard/settings'
     | '/dashboard/subscription'
@@ -281,11 +427,14 @@ export interface FileRouteTypes {
     | '/dashboard/tool-7'
     | '/dashboard/tool-8'
     | '/dashboard/usage'
+    | '/admin'
     | '/dashboard'
+    | '/admin/users/$id'
     | '/api/public/lemon-squeezy/webhook'
   id:
     | '__root__'
     | '/'
+    | '/_admin'
     | '/_authenticated'
     | '/auth'
     | '/faq'
@@ -293,7 +442,18 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/prova'
     | '/terms'
+    | '/_admin/admin'
     | '/_authenticated/dashboard'
+    | '/_admin/admin/administrators'
+    | '/_admin/admin/analytics'
+    | '/_admin/admin/audit-logs'
+    | '/_admin/admin/features'
+    | '/_admin/admin/payments'
+    | '/_admin/admin/plans'
+    | '/_admin/admin/settings'
+    | '/_admin/admin/subscriptions'
+    | '/_admin/admin/system'
+    | '/_admin/admin/users'
     | '/_authenticated/dashboard/profile'
     | '/_authenticated/dashboard/settings'
     | '/_authenticated/dashboard/subscription'
@@ -306,12 +466,15 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/tool-7'
     | '/_authenticated/dashboard/tool-8'
     | '/_authenticated/dashboard/usage'
+    | '/_admin/admin/'
     | '/_authenticated/dashboard/'
+    | '/_admin/admin/users/$id'
     | '/api/public/lemon-squeezy/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRouteRoute: typeof AdminRouteRouteWithChildren
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   FaqRoute: typeof FaqRoute
@@ -329,6 +492,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_admin': {
+      id: '/_admin'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AdminRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -380,12 +550,96 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_admin/admin': {
+      id: '/_admin/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminAdminRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_admin/admin/': {
+      id: '/_admin/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminAdminIndexRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/administrators': {
+      id: '/_admin/admin/administrators'
+      path: '/administrators'
+      fullPath: '/admin/administrators'
+      preLoaderRoute: typeof AdminAdminAdministratorsRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/analytics': {
+      id: '/_admin/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAdminAnalyticsRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/audit-logs': {
+      id: '/_admin/admin/audit-logs'
+      path: '/audit-logs'
+      fullPath: '/admin/audit-logs'
+      preLoaderRoute: typeof AdminAdminAuditLogsRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/features': {
+      id: '/_admin/admin/features'
+      path: '/features'
+      fullPath: '/admin/features'
+      preLoaderRoute: typeof AdminAdminFeaturesRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/payments': {
+      id: '/_admin/admin/payments'
+      path: '/payments'
+      fullPath: '/admin/payments'
+      preLoaderRoute: typeof AdminAdminPaymentsRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/plans': {
+      id: '/_admin/admin/plans'
+      path: '/plans'
+      fullPath: '/admin/plans'
+      preLoaderRoute: typeof AdminAdminPlansRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/settings': {
+      id: '/_admin/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminAdminSettingsRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/subscriptions': {
+      id: '/_admin/admin/subscriptions'
+      path: '/subscriptions'
+      fullPath: '/admin/subscriptions'
+      preLoaderRoute: typeof AdminAdminSubscriptionsRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/system': {
+      id: '/_admin/admin/system'
+      path: '/system'
+      fullPath: '/admin/system'
+      preLoaderRoute: typeof AdminAdminSystemRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/users': {
+      id: '/_admin/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminAdminUsersRouteImport
+      parentRoute: typeof AdminAdminRoute
     }
     '/_authenticated/dashboard/': {
       id: '/_authenticated/dashboard/'
@@ -478,6 +732,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardUsageRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_admin/admin/users/$id': {
+      id: '/_admin/admin/users/$id'
+      path: '/$id'
+      fullPath: '/admin/users/$id'
+      preLoaderRoute: typeof AdminAdminUsersIdRouteImport
+      parentRoute: typeof AdminAdminUsersRoute
+    }
     '/api/public/lemon-squeezy/webhook': {
       id: '/api/public/lemon-squeezy/webhook'
       path: '/api/public/lemon-squeezy/webhook'
@@ -487,6 +748,62 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AdminAdminUsersRouteChildren {
+  AdminAdminUsersIdRoute: typeof AdminAdminUsersIdRoute
+}
+
+const AdminAdminUsersRouteChildren: AdminAdminUsersRouteChildren = {
+  AdminAdminUsersIdRoute: AdminAdminUsersIdRoute,
+}
+
+const AdminAdminUsersRouteWithChildren = AdminAdminUsersRoute._addFileChildren(
+  AdminAdminUsersRouteChildren,
+)
+
+interface AdminAdminRouteChildren {
+  AdminAdminAdministratorsRoute: typeof AdminAdminAdministratorsRoute
+  AdminAdminAnalyticsRoute: typeof AdminAdminAnalyticsRoute
+  AdminAdminAuditLogsRoute: typeof AdminAdminAuditLogsRoute
+  AdminAdminFeaturesRoute: typeof AdminAdminFeaturesRoute
+  AdminAdminPaymentsRoute: typeof AdminAdminPaymentsRoute
+  AdminAdminPlansRoute: typeof AdminAdminPlansRoute
+  AdminAdminSettingsRoute: typeof AdminAdminSettingsRoute
+  AdminAdminSubscriptionsRoute: typeof AdminAdminSubscriptionsRoute
+  AdminAdminSystemRoute: typeof AdminAdminSystemRoute
+  AdminAdminUsersRoute: typeof AdminAdminUsersRouteWithChildren
+  AdminAdminIndexRoute: typeof AdminAdminIndexRoute
+}
+
+const AdminAdminRouteChildren: AdminAdminRouteChildren = {
+  AdminAdminAdministratorsRoute: AdminAdminAdministratorsRoute,
+  AdminAdminAnalyticsRoute: AdminAdminAnalyticsRoute,
+  AdminAdminAuditLogsRoute: AdminAdminAuditLogsRoute,
+  AdminAdminFeaturesRoute: AdminAdminFeaturesRoute,
+  AdminAdminPaymentsRoute: AdminAdminPaymentsRoute,
+  AdminAdminPlansRoute: AdminAdminPlansRoute,
+  AdminAdminSettingsRoute: AdminAdminSettingsRoute,
+  AdminAdminSubscriptionsRoute: AdminAdminSubscriptionsRoute,
+  AdminAdminSystemRoute: AdminAdminSystemRoute,
+  AdminAdminUsersRoute: AdminAdminUsersRouteWithChildren,
+  AdminAdminIndexRoute: AdminAdminIndexRoute,
+}
+
+const AdminAdminRouteWithChildren = AdminAdminRoute._addFileChildren(
+  AdminAdminRouteChildren,
+)
+
+interface AdminRouteRouteChildren {
+  AdminAdminRoute: typeof AdminAdminRouteWithChildren
+}
+
+const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminAdminRoute: AdminAdminRouteWithChildren,
+}
+
+const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
+  AdminRouteRouteChildren,
+)
 
 interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardProfileRoute: typeof AuthenticatedDashboardProfileRoute
@@ -540,6 +857,7 @@ const AuthenticatedRouteRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRouteRoute: AdminRouteRouteWithChildren,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   FaqRoute: FaqRoute,
