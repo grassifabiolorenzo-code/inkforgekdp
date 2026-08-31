@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { CREDIT_PACK } from "@/config/plans";
 
 /** Server functions di billing: checkout, portale cliente, cancellazione. */
 
@@ -56,6 +57,53 @@ export const createCheckout = createServerFn({ method: "POST" })
       return { url: url as string | null, error: null as string | null };
     } catch (err) {
       console.error("[billing] checkout failed", err);
+      return {
+        url: null as string | null,
+        error: "Checkout non disponibile al momento." as string | null,
+      };
+    }
+  });
+
+const creditPackCheckoutInput = z.object({ redirectUrl: z.string().url() });
+
+/**
+ * Checkout one-time (non abbonamento) per il pacchetto crediti extra. Non tocca la
+ * sottoscrizione esistente: i crediti vengono accreditati dal webhook su "order_created".
+ */
+export const createCreditPackCheckout = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => creditPackCheckoutInput.parse(data))
+  .handler(async ({ data, context }) => {
+    const { createCheckoutUrl, getBillingConfigStatus } = await import("./lemon-squeezy.server");
+    const claims = context.claims as { email?: string; user_metadata?: { name?: string } };
+
+    const status = getBillingConfigStatus();
+    if (!status.creditPackReady) {
+      return {
+        url: null as string | null,
+        error: "Pacchetto crediti non ancora configurato. Riprova più tardi." as string | null,
+      };
+    }
+
+    try {
+      const url = await createCheckoutUrl({
+        planSlug: CREDIT_PACK.id,
+        email: claims.email ?? null,
+        name: claims.user_metadata?.name ?? null,
+        userId: context.userId,
+        redirectUrl: data.redirectUrl,
+        extraCustomData: { purchase_type: "credit_pack", credits: String(CREDIT_PACK.credits) },
+      });
+
+      if (!url) {
+        return {
+          url: null as string | null,
+          error: "Pacchetto crediti non ancora configurato. Riprova più tardi." as string | null,
+        };
+      }
+      return { url: url as string | null, error: null as string | null };
+    } catch (err) {
+      console.error("[billing] credit pack checkout failed", err);
       return {
         url: null as string | null,
         error: "Checkout non disponibile al momento." as string | null,

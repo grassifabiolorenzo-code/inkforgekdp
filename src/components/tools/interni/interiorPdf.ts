@@ -1,4 +1,5 @@
 import { BLEED_IN, DPI } from "./constants";
+import { drawTemplate } from "./templateLibrary";
 import type { FillMode, InteriorPage, PageMargins, PrintMode } from "./types";
 
 function loadImage(file: File): Promise<HTMLImageElement> {
@@ -11,20 +12,22 @@ function loadImage(file: File): Promise<HTMLImageElement> {
 }
 
 /**
- * Disegna una pagina (immagine o vuota) su un canvas della risoluzione di stampa richiesta.
- * I margini "inside"/"outside" vengono specchiati in base a `isRecto`: su una pagina destra
- * (recto) l'interno/dorso è a sinistra, su una pagina sinistra (verso) è a destra.
- * - "cover": l'immagine riempie l'intera pagina (bleed incluso), ritagliando l'eccesso, margini ignorati.
- * - "contain": l'immagine viene adattata dentro i margini, ridimensionamento automatico, centrata.
+ * Disegna il contenuto di una pagina (immagine, template o vuota) su un canvas della
+ * risoluzione di stampa richiesta. I margini "inside"/"outside" vengono specchiati in base a
+ * `isRecto`: su una pagina destra (recto) l'interno/dorso è a sinistra, su una sinistra (verso)
+ * è a destra.
+ * - "cover" (solo immagini): l'immagine riempie l'intera pagina (bleed incluso), ritaglia l'eccesso.
+ * - "contain" (solo immagini): adattamento automatico dentro i margini, centrata, nessun ritaglio.
+ * - I template disegnano da soli la propria impaginazione interna e ignorano fillMode/margini.
  */
-function renderPageCanvas(
-  img: HTMLImageElement | null,
+async function renderContentCanvas(
+  page: InteriorPage,
   pageWIn: number,
   pageHIn: number,
   margins: PageMargins,
   isRecto: boolean,
   fillMode: FillMode,
-): HTMLCanvasElement {
+): Promise<HTMLCanvasElement> {
   const canvas = document.createElement("canvas");
   canvas.width = Math.round(pageWIn * DPI);
   canvas.height = Math.round(pageHIn * DPI);
@@ -32,7 +35,14 @@ function renderPageCanvas(
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  if (!img) return canvas;
+  if (page.kind === "template" && page.templateId) {
+    drawTemplate(ctx, page.templateId, canvas.width, canvas.height);
+    return canvas;
+  }
+
+  if (page.kind !== "image" || !page.file) return canvas; // pagina vuota
+
+  const img = await loadImage(page.file);
 
   if (fillMode === "cover") {
     const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
@@ -120,9 +130,25 @@ export async function renderFirstPagePreview(pages: InteriorPage[], spec: Interi
   if (first.isFiller) return renderFillerCanvas(pageWIn, pageHIn, spec.fillerColor);
 
   const page = first.source!;
-  const img = page.kind === "image" && page.file ? await loadImage(page.file) : null;
   // La prima pagina fisica è sempre recto (destra).
-  return renderPageCanvas(img, pageWIn, pageHIn, spec.margins, true, resolveFillMode(page, spec.defaultFillMode));
+  return renderContentCanvas(page, pageWIn, pageHIn, spec.margins, true, resolveFillMode(page, spec.defaultFillMode));
+}
+
+/** Anteprima canvas per una singola pagina, indipendente dal documento (usata per il download del singolo file). */
+export async function renderSinglePagePreview(
+  page: InteriorPage,
+  spec: InteriorDocSpec,
+  isRecto = true,
+): Promise<HTMLCanvasElement> {
+  const bleed = resolveFillMode(page, spec.defaultFillMode) === "cover" ? BLEED_IN : 0;
+  return renderContentCanvas(
+    page,
+    spec.trimWidthIn + bleed * 2,
+    spec.trimHeightIn + bleed * 2,
+    spec.margins,
+    isRecto,
+    resolveFillMode(page, spec.defaultFillMode),
+  );
 }
 
 /**
@@ -150,14 +176,16 @@ export async function buildInteriorPdf(pages: InteriorPage[], spec: InteriorDocS
     const physical = sequence[i]!;
     const isRecto = i % 2 === 0;
 
-    let canvas: HTMLCanvasElement;
-    if (physical.isFiller) {
-      canvas = renderFillerCanvas(pageWIn, pageHIn, spec.fillerColor);
-    } else {
-      const page = physical.source!;
-      const img = page.kind === "image" && page.file ? await loadImage(page.file) : null;
-      canvas = renderPageCanvas(img, pageWIn, pageHIn, spec.margins, isRecto, resolveFillMode(page, spec.defaultFillMode));
-    }
+    const canvas = physical.isFiller
+      ? renderFillerCanvas(pageWIn, pageHIn, spec.fillerColor)
+      : await renderContentCanvas(
+          physical.source!,
+          pageWIn,
+          pageHIn,
+          spec.margins,
+          isRecto,
+          resolveFillMode(physical.source!, spec.defaultFillMode),
+        );
 
     const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
     if (i > 0) doc.addPage([pageWIn, pageHIn], orientation);

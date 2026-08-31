@@ -30,8 +30,10 @@ export type PrintMode = "continuous" | "singleSidedWithFiller";
 
 export interface InteriorPage {
   id: string;
-  kind: "image" | "blank";
+  kind: "image" | "blank" | "template";
   file?: File;
+  /** Presente solo quando kind === "template". */
+  templateId?: import("./templateLibrary").TemplateId;
   name?: string;
   /** "default" = usa l'impostazione generale del documento. */
   fillModeOverride: FillMode | "default";

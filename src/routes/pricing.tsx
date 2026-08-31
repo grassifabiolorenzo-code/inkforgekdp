@@ -35,7 +35,7 @@ function PricingPage() {
             Un piano per <span className="text-gradient">ogni ritmo di pubblicazione</span>
           </h1>
           <p className="relative mx-auto mt-4 max-w-xl px-4 text-muted-foreground">
-            Tutti e 4 i tool sono inclusi in ogni piano. Cambia solo il numero di utilizzi mensili.
+            Otto strumenti in totale: quali sono inclusi e quanti utilizzi mensili hai dipende dal piano scelto.
           </p>
         </div>
         <PricingSection />

@@ -16,6 +16,7 @@ import {
   cancelMySubscription,
   changePlan,
   createCheckout,
+  createCreditPackCheckout,
   getBillingStatus,
   getManageSubscriptionUrl,
 } from "@/lib/billing.functions";
@@ -35,12 +36,14 @@ function SubscriptionPage() {
   const account = useAccount();
   const state = account.data?.credits;
   const checkout = useServerFn(createCheckout);
+  const creditPackCheckout = useServerFn(createCreditPackCheckout);
   const manage = useServerFn(getManageSubscriptionUrl);
   const cancel = useServerFn(cancelMySubscription);
   const switchPlan = useServerFn(changePlan);
   const billingStatusFn = useServerFn(getBillingStatus);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [buyingCreditPack, setBuyingCreditPack] = useState(false);
 
   // Stato configurazione pagamenti letto dal server: disabilita solo il checkout.
   const billingStatus = useQuery({
@@ -83,6 +86,21 @@ function SubscriptionPage() {
     }
   }
 
+  async function handleBuyCreditPack() {
+    setBuyingCreditPack(true);
+    try {
+      const result = await creditPackCheckout({
+        data: { redirectUrl: `${window.location.origin}/dashboard/subscription` },
+      });
+      if (result.url) window.location.href = result.url;
+      else toast.error(result.error ?? "Checkout non disponibile al momento.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Checkout non riuscito");
+    } finally {
+      setBuyingCreditPack(false);
+    }
+  }
+
   async function handleManage() {
     setBusy(true);
     try {
@@ -118,7 +136,12 @@ function SubscriptionPage() {
 
         {state?.has_subscription && (
           <div className="grid gap-6 lg:grid-cols-[20rem_1fr]">
-            <CreditsCard state={state} />
+            <CreditsCard
+              state={state}
+              onBuyCreditPack={handleBuyCreditPack}
+              buyingCreditPack={buyingCreditPack}
+              creditPackAvailable={billingStatus.data?.creditPackReady}
+            />
             <div className="panel space-y-3 p-6">
               <p className="text-sm text-muted-foreground">Stato</p>
               <p className="text-xl font-bold">

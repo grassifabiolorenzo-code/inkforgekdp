@@ -3,7 +3,7 @@ import { Check, Sparkles, X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { PLANS, type PlanSlug } from "@/config/plans";
+import { CREDIT_PACK, PLANS, type PlanSlug } from "@/config/plans";
 import { cn } from "@/lib/utils";
 
 export function PricingSection({
@@ -144,6 +144,19 @@ export function PricingSection({
             </div>
           );
         })}
+      </div>
+
+      <div className="mx-auto mt-8 flex max-w-3xl flex-col items-center gap-2 rounded-xl border border-border bg-surface p-5 text-center sm:flex-row sm:justify-between sm:text-left">
+        <div>
+          <p className="text-sm font-semibold">Finiti i crediti prima del rinnovo?</p>
+          <p className="text-xs text-muted-foreground">
+            Aggiungi {CREDIT_PACK.credits} crediti extra quando vuoi, senza cambiare piano — non scadono e si
+            sommano a quelli del tuo abbonamento.
+          </p>
+        </div>
+        <span className="shrink-0 rounded-lg border border-border bg-surface-elevated px-4 py-2 text-sm font-bold">
+          €{CREDIT_PACK.price.toFixed(2)} <span className="font-normal text-muted-foreground">/ {CREDIT_PACK.credits} crediti</span>
+        </span>
       </div>
     </section>
   );

@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, Download, FilePlus2, Loader2, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, BookImage, Download, FilePlus2, ImageDown, Loader2, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -10,8 +10,11 @@ import type { ToolRuntime } from "@/components/tools/ToolPageShell";
 import { newOperationId } from "@/hooks/useAccount";
 
 import { DEFAULT_FILLER_COLOR, DEFAULT_MARGINS, TRIM_SIZES, getTrimSize } from "@/components/tools/interni/constants";
-import { buildInteriorPdf, renderFirstPagePreview } from "@/components/tools/interni/interiorPdf";
+import { buildInteriorPdf, renderFirstPagePreview, renderSinglePagePreview } from "@/components/tools/interni/interiorPdf";
+import { TEMPLATE_LIBRARY, getTemplateSpec, type TemplateId } from "@/components/tools/interni/templateLibrary";
 import type { FillMode, InteriorPage, PageMargins, PrintMode, TrimSizeId } from "@/components/tools/interni/types";
+
+const TEMPLATE_CATEGORIES = [...new Set(TEMPLATE_LIBRARY.map((t) => t.category))];
 
 let pageUid = 0;
 const nextPageId = () => `page-${Date.now().toString(36)}-${(pageUid += 1)}`;
@@ -30,10 +33,13 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
   const [printMode, setPrintMode] = useState<PrintMode>("continuous");
   const [fillerColor, setFillerColor] = useState(DEFAULT_FILLER_COLOR);
   const [generating, setGenerating] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<TemplateId>(TEMPLATE_LIBRARY[0]!.id);
+  const [downloadingPageId, setDownloadingPageId] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const chargeGuard = useRef(false);
+  const pageDownloadGuard = useRef(false);
 
   const trim = getTrimSize(trimSizeId);
 
@@ -89,6 +95,49 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
       })),
     ]);
     if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  function addTemplatePage() {
+    const spec = getTemplateSpec(selectedTemplateId);
+    setPages((prev) => [
+      ...prev,
+      { id: nextPageId(), kind: "template", templateId: selectedTemplateId, name: spec?.label ?? "Template", fillModeOverride: "default" },
+    ]);
+  }
+
+  /** Scarica una singola pagina come PNG. Azione a parte dal PDF completo: costa 1 credito. */
+  async function handleDownloadPageImage(page: InteriorPage) {
+    if (pageDownloadGuard.current) return;
+    pageDownloadGuard.current = true;
+    try {
+      if (!runtime.canOperate) {
+        runtime.blockOperation();
+        return;
+      }
+      if (!(await runtime.ensureAccess())) return;
+
+      setDownloadingPageId(page.id);
+      try {
+        const canvas = await renderSinglePagePreview(page, docSpec);
+        const url = canvas.toDataURL("image/png");
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${page.name || "pagina"}_${trim.id}.png`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        const result = await runtime.charge(newOperationId("interni-page-download"), "Download immagine pagina");
+        if (!result.ok) return;
+        toast.success(result.duplicate ? "Immagine scaricata" : "Immagine scaricata — 1 credito");
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Download immagine non riuscito.");
+      } finally {
+        setDownloadingPageId(null);
+      }
+    } finally {
+      pageDownloadGuard.current = false;
+    }
   }
 
   function insertBlankPageAfter(index: number) {
@@ -322,6 +371,42 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
           </p>
         </div>
 
+        {/* Libreria interni a basso contenuto */}
+        <div className="space-y-2 rounded-md border border-border bg-surface p-3">
+          <Label className="flex items-center gap-2 text-xs tracking-wide uppercase text-muted-foreground">
+            <BookImage className="size-3.5" />
+            Libreria interni a basso contenuto
+          </Label>
+          <p className="text-[11px] text-muted-foreground">
+            Pagine pronte (quaderni, planner, attività) generate al momento: nessuna immagine esterna, si adattano
+            automaticamente al formato scelto.
+          </p>
+          <div className="flex items-center gap-2">
+            <Select value={selectedTemplateId} onValueChange={(v) => setSelectedTemplateId(v as TemplateId)}>
+              <SelectTrigger className="flex-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {TEMPLATE_CATEGORIES.map((category) => (
+                  <div key={category}>
+                    <p className="px-2 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      {category}
+                    </p>
+                    {TEMPLATE_LIBRARY.filter((t) => t.category === category).map((t) => (
+                      <SelectItem key={t.id} value={t.id}>
+                        {t.label}
+                      </SelectItem>
+                    ))}
+                  </div>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button type="button" variant="outline" onClick={addTemplatePage}>
+              <FilePlus2 className="mr-1.5 size-3.5" /> Aggiungi
+            </Button>
+          </div>
+        </div>
+
         {/* Elenco pagine */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
@@ -372,6 +457,20 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
                   </Button>
                   <Button variant="ghost" size="sm" className="size-7 p-0" onClick={() => insertBlankPageAfter(index)} title="Inserisci pagina vuota dopo">
                     <FilePlus2 className="size-3.5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="size-7 p-0"
+                    disabled={downloadingPageId === page.id}
+                    onClick={() => handleDownloadPageImage(page)}
+                    title="Scarica questa pagina come PNG (1 credito)"
+                  >
+                    {downloadingPageId === page.id ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : (
+                      <ImageDown className="size-3.5" />
+                    )}
                   </Button>
                   <Button
                     variant="ghost"

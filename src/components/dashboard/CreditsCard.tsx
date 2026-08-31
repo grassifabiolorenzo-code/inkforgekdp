@@ -1,12 +1,24 @@
 import { Link } from "@tanstack/react-router";
-import { Infinity as InfinityIcon, Sparkles } from "lucide-react";
+import { Infinity as InfinityIcon, Plus, Sparkles } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { CREDIT_PACK } from "@/config/plans";
 import type { CreditState } from "@/lib/credits.functions";
 
-export function CreditsCard({ state }: { state: CreditState }) {
+export function CreditsCard({
+  state,
+  onBuyCreditPack,
+  buyingCreditPack,
+  creditPackAvailable,
+}: {
+  state: CreditState;
+  /** Se assente, il pulsante d'acquisto non viene mostrato (es. pagina che non gestisce il checkout). */
+  onBuyCreditPack?: (() => void) | undefined;
+  buyingCreditPack?: boolean | undefined;
+  creditPackAvailable?: boolean | undefined;
+}) {
   if (state.unlimited) {
     return (
       <div className="panel-highlight glow-green space-y-3 p-6">
@@ -51,9 +63,27 @@ export function CreditsCard({ state }: { state: CreditState }) {
         Crediti rimanenti: <span className="font-semibold text-foreground">{remaining}</span>
       </p>
 
-      <Button variant="outline" size="sm" asChild>
-        <Link to="/dashboard/usage">Visualizza utilizzo</Link>
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button variant="outline" size="sm" asChild>
+          <Link to="/dashboard/usage">Visualizza utilizzo</Link>
+        </Button>
+        {onBuyCreditPack && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onBuyCreditPack}
+            disabled={buyingCreditPack || creditPackAvailable === false}
+            title={
+              creditPackAvailable === false
+                ? "Pacchetto crediti non ancora disponibile"
+                : undefined
+            }
+          >
+            <Plus className="mr-1.5 size-3.5" />
+            {CREDIT_PACK.credits} crediti extra — €{CREDIT_PACK.price.toFixed(2)}
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

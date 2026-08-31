@@ -125,3 +125,18 @@ export const upgradePathFrom = (slug: string | null | undefined): PlanConfig[] =
 
 export const planLimitLabel = (plan: PlanConfig) =>
   plan.unlimited ? "Illimitati" : `${plan.monthlyLimit}`;
+
+/**
+ * Pacchetto di crediti extra acquistabile una tantum (senza abbonamento), per chi esaurisce i
+ * crediti del piano prima del rinnovo. Prezzo: €0,49/credito — più caro del costo per credito di
+ * Starter (€0,30) per non rendere conveniente restare su un piano piccolo e comprare extra invece
+ * di fare upgrade, ma comunque un impulso a basso attrito per un bisogno occasionale. Non scade e
+ * non si riporta al rinnovo: si somma semplicemente al monte crediti disponibile.
+ */
+export const CREDIT_PACK = {
+  id: "credits10" as const,
+  credits: 10,
+  price: 4.9,
+  currency: "EUR",
+  variantEnvKey: "VITE_LEMON_SQUEEZY_CREDITPACK10_VARIANT_ID",
+};

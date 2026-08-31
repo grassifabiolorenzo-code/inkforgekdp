@@ -27,6 +27,8 @@ export function readLemonConfig(): LemonConfig {
       starter: process.env["LEMON_SQUEEZY_STARTER_VARIANT_ID"] ?? "",
       pro: process.env["LEMON_SQUEEZY_PRO_VARIANT_ID"] ?? "",
       business: process.env["LEMON_SQUEEZY_BUSINESS_VARIANT_ID"] ?? "",
+      // Prodotto "one-time" (non abbonamento) per il pacchetto da 10 crediti extra.
+      credits10: process.env["LEMON_SQUEEZY_CREDITPACK10_VARIANT_ID"] ?? "",
     },
   };
 }
@@ -38,6 +40,8 @@ export interface BillingConfigStatus {
   storeId: boolean;
   webhookSecret: boolean;
   variants: Record<"starter" | "pro" | "business", boolean>;
+  /** Configurazione del pacchetto crediti extra, separata: non blocca gli abbonamenti se manca. */
+  creditPackReady: boolean;
 }
 
 export function getBillingConfigStatus(): BillingConfigStatus {
@@ -55,6 +59,7 @@ export function getBillingConfigStatus(): BillingConfigStatus {
     webhookSecret: Boolean(process.env["LEMON_SQUEEZY_WEBHOOK_SECRET"]),
     variants,
     ready: apiKey && storeId && variants.starter && variants.pro && variants.business,
+    creditPackReady: apiKey && storeId && Boolean(config.variants["credits10"]),
   };
 }
 
@@ -96,6 +101,8 @@ export async function createCheckoutUrl(opts: {
   userId: string;
   name?: string | null;
   redirectUrl: string;
+  /** Campi extra propagati nel custom_data del webhook (es. per distinguere acquisti one-time). */
+  extraCustomData?: Record<string, string>;
 }): Promise<string | null> {
   const { storeId, variants } = readLemonConfig();
   const variantId = variants[opts.planSlug];
@@ -111,7 +118,7 @@ export async function createCheckoutUrl(opts: {
             email: opts.email ?? undefined,
             name: opts.name ?? undefined,
             // Identifica l'utente nel webhook.
-            custom: { user_id: opts.userId, plan_slug: opts.planSlug },
+            custom: { user_id: opts.userId, plan_slug: opts.planSlug, ...opts.extraCustomData },
           },
           product_options: { redirect_url: opts.redirectUrl, enabled_variants: [Number(variantId)] },
 },

@@ -10,7 +10,7 @@ import { STARTER_BONUS_CREDITS } from "@/config/plans";
 interface LemonWebhook {
   meta?: {
     event_name?: string;
-    custom_data?: { user_id?: string; plan_slug?: string };
+    custom_data?: { user_id?: string; plan_slug?: string; purchase_type?: string; credits?: string };
   };
   data?: {
     id?: string;
@@ -76,6 +76,27 @@ export const Route = createFileRoute("/api/public/lemon-squeezy/webhook")({
         }
 
         const event = payload.meta?.event_name ?? "";
+
+        // Acquisto one-time del pacchetto crediti extra (non un abbonamento).
+        if (event === "order_created") {
+          const customData = payload.meta?.custom_data;
+          if (customData?.purchase_type === "credit_pack" && customData.user_id) {
+            const amount = Number(customData.credits ?? "0");
+            const orderId = payload.data?.id;
+            if (amount > 0 && orderId) {
+              const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+              const { error } = await supabaseAdmin.rpc("add_purchased_credits", {
+                _user_id: customData.user_id,
+                _amount: amount,
+                _operation_id: `ls-order-${orderId}`,
+                _description: `Acquisto pacchetto ${amount} crediti`,
+              });
+              if (error) console.error("[lemon-webhook] add_purchased_credits failed", error.message);
+            }
+          }
+          return new Response("ok", { status: 200 });
+        }
+
         if (!ACTIVE_EVENTS.has(event)) return new Response("ignored", { status: 200 });
 
         const attrs = payload.data?.attributes ?? {};

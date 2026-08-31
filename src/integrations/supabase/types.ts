@@ -244,6 +244,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_purchased_credits: {
+        Args: { _amount: number; _description?: string; _operation_id: string; _user_id: string }
+        Returns: Json
+      }
       consume_credit: {
         Args: { _description?: string; _operation_id: string; _tool_id: string }
         Returns: Json
