@@ -11,6 +11,23 @@ export interface TrimSizeSpec {
  * adattata dentro il margine, ridimensionamento automatico, nessun ritaglio. */
 export type FillMode = "cover" | "contain";
 
+/** Margini per lato pagina. "inside" = verso il dorso/rilegatura, "outside" = verso il bordo
+ * esterno: vengono specchiati automaticamente tra pagine destre (recto) e sinistre (verso). */
+export interface PageMargins {
+  topIn: number;
+  bottomIn: number;
+  insideIn: number;
+  outsideIn: number;
+}
+
+/**
+ * "continuous" = le pagine si susseguono senza interruzioni (comportamento classico).
+ * "singleSidedWithFiller" = dopo ogni immagine viene inserita automaticamente una pagina di
+ * riempimento (bianca o del colore scelto), per ottenere una stampa di fatto solo fronte con
+ * il retro "neutro" — utile per evitare che pennarelli/pastelli passino sul disegno successivo.
+ */
+export type PrintMode = "continuous" | "singleSidedWithFiller";
+
 export interface InteriorPage {
   id: string;
   kind: "image" | "blank";

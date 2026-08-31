@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, Download, FilePlus2, Loader2, Trash2, Upload } from "lucide-react";
+import { ArrowDown, ArrowUp, Download, FilePlus2, Loader2, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -9,9 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import type { ToolRuntime } from "@/components/tools/ToolPageShell";
 import { newOperationId } from "@/hooks/useAccount";
 
-import { DEFAULT_MARGIN_IN, TRIM_SIZES, getTrimSize } from "@/components/tools/interni/constants";
-import { buildInteriorPdf, renderPagePreview } from "@/components/tools/interni/interiorPdf";
-import type { FillMode, InteriorPage, TrimSizeId } from "@/components/tools/interni/types";
+import { DEFAULT_FILLER_COLOR, DEFAULT_MARGINS, TRIM_SIZES, getTrimSize } from "@/components/tools/interni/constants";
+import { buildInteriorPdf, renderFirstPagePreview } from "@/components/tools/interni/interiorPdf";
+import type { FillMode, InteriorPage, PageMargins, PrintMode, TrimSizeId } from "@/components/tools/interni/types";
 
 let pageUid = 0;
 const nextPageId = () => `page-${Date.now().toString(36)}-${(pageUid += 1)}`;
@@ -19,14 +19,16 @@ const nextPageId = () => `page-${Date.now().toString(36)}-${(pageUid += 1)}`;
 /**
  * TOOL 5 — Interni.
  * Impaginatore per gli interni del libro: carica una raccolta di immagini, imposta formato
- * pagina KDP (trim size, margini, bleed) e ottieni un unico PDF interno pronto per la stampa.
- * 1 credito per ogni PDF generato con successo.
+ * pagina KDP (trim size, margini asimmetrici, bleed) e modalità di stampa, poi ottieni un
+ * unico PDF interno pronto per la stampa. 1 credito per ogni PDF generato con successo.
  */
 export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
   const [pages, setPages] = useState<InteriorPage[]>([]);
   const [trimSizeId, setTrimSizeId] = useState<TrimSizeId>("8.5x11");
-  const [marginIn, setMarginIn] = useState(DEFAULT_MARGIN_IN);
+  const [margins, setMargins] = useState<PageMargins>(DEFAULT_MARGINS);
   const [defaultFillMode, setDefaultFillMode] = useState<FillMode>("contain");
+  const [printMode, setPrintMode] = useState<PrintMode>("continuous");
+  const [fillerColor, setFillerColor] = useState(DEFAULT_FILLER_COLOR);
   const [generating, setGenerating] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -35,19 +37,26 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
 
   const trim = getTrimSize(trimSizeId);
 
-  // Anteprima live della prima pagina, aggiornata a ogni cambio di impostazione.
+  function updateMargin(field: keyof PageMargins, value: number) {
+    setMargins((prev) => ({ ...prev, [field]: Math.max(0, value) }));
+  }
+
+  const docSpec = {
+    trimWidthIn: trim.widthIn,
+    trimHeightIn: trim.heightIn,
+    margins,
+    defaultFillMode,
+    printMode,
+    fillerColor,
+  };
+
+  // Anteprima live della prima pagina fisica, aggiornata a ogni cambio di impostazione.
   useEffect(() => {
-    const firstPage = pages[0];
     const canvasEl = previewCanvasRef.current;
-    if (!firstPage || !canvasEl) return;
+    if (!canvasEl || pages.length === 0) return;
     let cancelled = false;
-    void renderPagePreview(firstPage, {
-      trimWidthIn: trim.widthIn,
-      trimHeightIn: trim.heightIn,
-      marginIn,
-      defaultFillMode,
-    }).then((rendered) => {
-      if (cancelled) return;
+    void renderFirstPagePreview(pages, docSpec).then((rendered) => {
+      if (cancelled || !rendered) return;
       canvasEl.width = rendered.width;
       canvasEl.height = rendered.height;
       const ctx = canvasEl.getContext("2d");
@@ -56,7 +65,8 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
     return () => {
       cancelled = true;
     };
-  }, [pages, trim.widthIn, trim.heightIn, marginIn, defaultFillMode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pages, trim.widthIn, trim.heightIn, margins, defaultFillMode, printMode, fillerColor]);
 
   function handleAddFiles(fileList: FileList | null) {
     if (!fileList || fileList.length === 0) return;
@@ -125,12 +135,7 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
       setGenerating(true);
       const operationId = newOperationId("interni-pdf");
       try {
-        const blob = await buildInteriorPdf(pages, {
-          trimWidthIn: trim.widthIn,
-          trimHeightIn: trim.heightIn,
-          marginIn,
-          defaultFillMode,
-        });
+        const blob = await buildInteriorPdf(pages, docSpec);
 
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -167,35 +172,81 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
           </p>
         </div>
 
-        {/* Impostazioni documento */}
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label>Formato pagina (Trim Size)</Label>
-            <Select value={trimSizeId} onValueChange={(v) => setTrimSizeId(v as TrimSizeId)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {TRIM_SIZES.map((t) => (
-                  <SelectItem key={t.id} value={t.id}>
-                    {t.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <div className="space-y-1.5">
+          <Label>Formato pagina (Trim Size)</Label>
+          <Select value={trimSizeId} onValueChange={(v) => setTrimSizeId(v as TrimSizeId)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {TRIM_SIZES.map((t) => (
+                <SelectItem key={t.id} value={t.id}>
+                  {t.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Margini asimmetrici */}
+        <div className="space-y-2 rounded-md border border-border bg-surface p-3">
+          <Label className="text-xs tracking-wide uppercase text-muted-foreground">
+            Margini (pollici) — per modalità "con margine"
+          </Label>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="space-y-1">
+              <Label htmlFor="m-top" className="text-[11px]">Alto</Label>
+              <Input
+                id="m-top"
+                type="number"
+                min={0}
+                max={2}
+                step={0.05}
+                value={margins.topIn}
+                onChange={(e) => updateMargin("topIn", Number(e.target.value) || 0)}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="m-bottom" className="text-[11px]">Basso</Label>
+              <Input
+                id="m-bottom"
+                type="number"
+                min={0}
+                max={2}
+                step={0.05}
+                value={margins.bottomIn}
+                onChange={(e) => updateMargin("bottomIn", Number(e.target.value) || 0)}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="m-inside" className="text-[11px]">Interno (dorso)</Label>
+              <Input
+                id="m-inside"
+                type="number"
+                min={0}
+                max={2}
+                step={0.05}
+                value={margins.insideIn}
+                onChange={(e) => updateMargin("insideIn", Number(e.target.value) || 0)}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="m-outside" className="text-[11px]">Esterno</Label>
+              <Input
+                id="m-outside"
+                type="number"
+                min={0}
+                max={2}
+                step={0.05}
+                value={margins.outsideIn}
+                onChange={(e) => updateMargin("outsideIn", Number(e.target.value) || 0)}
+              />
+            </div>
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="interni-margin">Margine (pollici, per modalità "con margine")</Label>
-            <Input
-              id="interni-margin"
-              type="number"
-              min={0}
-              max={2}
-              step={0.05}
-              value={marginIn}
-              onChange={(e) => setMarginIn(Math.max(0, Number(e.target.value) || 0))}
-            />
-          </div>
+          <p className="text-[11px] text-muted-foreground">
+            "Interno" è il lato verso il dorso/rilegatura e viene specchiato automaticamente tra pagine destre e
+            sinistre; di solito conviene tenerlo leggermente più ampio di "Esterno".
+          </p>
         </div>
 
         <div className="space-y-1.5">
@@ -212,6 +263,44 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
           <p className="text-[11px] text-muted-foreground">
             Puoi comunque scegliere uno stile diverso per ogni singola pagina qui sotto.
           </p>
+        </div>
+
+        {/* Modalità di stampa */}
+        <div className="space-y-2 rounded-md border border-border bg-surface p-3">
+          <Label className="text-xs tracking-wide uppercase text-muted-foreground">Modalità di stampa</Label>
+          <Select value={printMode} onValueChange={(v) => setPrintMode(v as PrintMode)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="continuous">Immagine continua, senza interruzioni</SelectItem>
+              <SelectItem value="singleSidedWithFiller">Solo fronte, retro di riempimento (bianco o colore)</SelectItem>
+            </SelectContent>
+          </Select>
+          {printMode === "singleSidedWithFiller" ? (
+            <>
+              <p className="text-[11px] text-muted-foreground">
+                Dopo ogni immagine viene inserita automaticamente una pagina di riempimento, per ottenere una
+                stampa di fatto solo fronte (utile per evitare che pennarelli/pastelli passino sul disegno
+                successivo).
+              </p>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="filler-color" className="text-[11px]">Colore riempimento</Label>
+                <Input
+                  id="filler-color"
+                  type="color"
+                  value={fillerColor}
+                  onChange={(e) => setFillerColor(e.target.value)}
+                  className="h-8 w-16 p-1"
+                />
+                <span className="text-[11px] text-muted-foreground">{fillerColor}</span>
+              </div>
+            </>
+          ) : (
+            <p className="text-[11px] text-muted-foreground">
+              Le pagine si susseguono nell'ordine dell'elenco, senza pagine aggiuntive.
+            </p>
+          )}
         </div>
 
         {/* Upload */}
@@ -313,8 +402,9 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
           Anteprima pagina 1
         </h3>
         <p className="text-xs text-muted-foreground">
-          {trim.label} · {DEFAULT_MARGIN_IN === marginIn ? "margine standard" : `margine ${marginIn}"`} ·{" "}
-          {defaultFillMode === "cover" ? "piena pagina" : "con margine"}
+          {trim.label} · interno {margins.insideIn}" / esterno {margins.outsideIn}" ·{" "}
+          {defaultFillMode === "cover" ? "piena pagina" : "con margine"} ·{" "}
+          {printMode === "singleSidedWithFiller" ? "solo fronte + riempimento" : "continua"}
         </p>
         <div className="flex items-center justify-center overflow-hidden rounded-md border border-border bg-black/60 p-3">
           {pages.length > 0 ? (

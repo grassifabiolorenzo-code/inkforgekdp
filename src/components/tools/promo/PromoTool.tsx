@@ -284,7 +284,17 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
               </div>
               <div className="space-y-1.5">
                 {output.adsHeadlines.map((h, i) => (
-                  <Input key={`h-${i}`} readOnly value={h} className="h-9 text-xs" />
+                  <div key={`h-${i}`} className="flex items-center gap-2">
+                    <Input readOnly value={h} className="h-9 text-xs" />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 px-2 text-[11px]"
+                      onClick={() => copyToClipboard(h, `Headline ${i + 1}`)}
+                    >
+                      Copia
+                    </Button>
+                  </div>
                 ))}
               </div>
             </div>
@@ -302,7 +312,17 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
               </div>
               <div className="space-y-1.5">
                 {output.adsBullets.map((b, i) => (
-                  <Input key={`b-${i}`} readOnly value={b} className="h-9 text-xs" />
+                  <div key={`b-${i}`} className="flex items-center gap-2">
+                    <Input readOnly value={b} className="h-9 text-xs" />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 px-2 text-[11px]"
+                      onClick={() => copyToClipboard(b, `Bullet ${i + 1}`)}
+                    >
+                      Copia
+                    </Button>
+                  </div>
                 ))}
               </div>
             </div>
