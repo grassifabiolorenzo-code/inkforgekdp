@@ -12,6 +12,7 @@ import type { MessageKey } from "@/lib/i18n/messages";
 
 const links: { to: string; key: MessageKey }[] = [
   { to: "/", key: "nav.home" },
+  { to: "/prova", key: "nav.demo" },
   { to: "/pricing", key: "nav.pricing" },
   { to: "/faq", key: "nav.faq" },
 ];

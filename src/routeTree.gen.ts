@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ProvaRouteImport } from './routes/prova'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
@@ -59,6 +60,11 @@ const PricingRoute = PricingRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProvaRoute = ProvaRouteImport.update({
+  id: '/prova',
+  path: '/prova',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/faq': typeof FaqRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
+  '/prova': typeof ProvaRoute
   '/terms': typeof TermsRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
@@ -185,6 +192,7 @@ export interface FileRoutesByTo {
   '/faq': typeof FaqRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
+  '/prova': typeof ProvaRoute
   '/terms': typeof TermsRoute
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
   '/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
@@ -209,6 +217,7 @@ export interface FileRoutesById {
   '/faq': typeof FaqRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
+  '/prova': typeof ProvaRoute
   '/terms': typeof TermsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/_authenticated/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
@@ -234,6 +243,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/pricing'
     | '/privacy'
+    | '/prova'
     | '/terms'
     | '/dashboard'
     | '/dashboard/profile'
@@ -257,6 +267,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/pricing'
     | '/privacy'
+    | '/prova'
     | '/terms'
     | '/dashboard/profile'
     | '/dashboard/settings'
@@ -280,6 +291,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/pricing'
     | '/privacy'
+    | '/prova'
     | '/terms'
     | '/_authenticated/dashboard'
     | '/_authenticated/dashboard/profile'
@@ -305,6 +317,7 @@ export interface RootRouteChildren {
   FaqRoute: typeof FaqRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
+  ProvaRoute: typeof ProvaRoute
   TermsRoute: typeof TermsRoute
   ApiPublicLemonSqueezyWebhookRoute: typeof ApiPublicLemonSqueezyWebhookRoute
 }
@@ -351,6 +364,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/prova': {
+      id: '/prova'
+      path: '/prova'
+      fullPath: '/prova'
+      preLoaderRoute: typeof ProvaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -525,6 +545,7 @@ const rootRouteChildren: RootRouteChildren = {
   FaqRoute: FaqRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
+  ProvaRoute: ProvaRoute,
   TermsRoute: TermsRoute,
   ApiPublicLemonSqueezyWebhookRoute: ApiPublicLemonSqueezyWebhookRoute,
 }

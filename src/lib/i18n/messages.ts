@@ -8,6 +8,7 @@ import type { Locale } from "./config";
 const it = {
   "nav.home": "Home",
   "nav.pricing": "Prezzi",
+  "nav.demo": "Prova gratis",
   "nav.faq": "FAQ",
   "nav.dashboard": "Dashboard",
   "nav.login": "Accedi",
@@ -127,6 +128,7 @@ type Dictionary = Record<MessageKey, string>;
 const en: Dictionary = {
   "nav.home": "Home",
   "nav.pricing": "Pricing",
+  "nav.demo": "Free preview",
   "nav.faq": "FAQ",
   "nav.dashboard": "Dashboard",
   "nav.login": "Sign in",
@@ -240,6 +242,7 @@ const en: Dictionary = {
 const de: Dictionary = {
   "nav.home": "Start",
   "nav.pricing": "Preise",
+  "nav.demo": "Kostenlos testen",
   "nav.faq": "FAQ",
   "nav.dashboard": "Dashboard",
   "nav.login": "Anmelden",
@@ -353,6 +356,7 @@ const de: Dictionary = {
 const fr: Dictionary = {
   "nav.home": "Accueil",
   "nav.pricing": "Tarifs",
+  "nav.demo": "Essai gratuit",
   "nav.faq": "FAQ",
   "nav.dashboard": "Tableau de bord",
   "nav.login": "Se connecter",
@@ -468,6 +472,7 @@ const fr: Dictionary = {
 const es: Dictionary = {
   "nav.home": "Inicio",
   "nav.pricing": "Precios",
+  "nav.demo": "Prueba gratis",
   "nav.faq": "FAQ",
   "nav.dashboard": "Panel",
   "nav.login": "Iniciar sesión",
@@ -583,6 +588,7 @@ const es: Dictionary = {
 const nl: Dictionary = {
   "nav.home": "Home",
   "nav.pricing": "Prijzen",
+  "nav.demo": "Gratis proberen",
   "nav.faq": "FAQ",
   "nav.dashboard": "Dashboard",
   "nav.login": "Inloggen",
@@ -698,6 +704,7 @@ const nl: Dictionary = {
 const pt: Dictionary = {
   "nav.home": "Início",
   "nav.pricing": "Preços",
+  "nav.demo": "Teste grátis",
   "nav.faq": "FAQ",
   "nav.dashboard": "Painel",
   "nav.login": "Entrar",
