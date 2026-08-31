@@ -1,0 +1,577 @@
+import { Copy, Download, ImageIcon, Loader2, Upload, Wand2 } from "lucide-react";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { ToolRuntime } from "@/components/tools/ToolPageShell";
+import { OutputLanguageSelect, useOutputLanguage } from "@/components/tools/OutputLanguageSelect";
+import { newOperationId } from "@/hooks/useAccount";
+
+import {
+  type Audience,
+  type BookType,
+  defaultAgeDetails,
+  formatListingForExport,
+  generateListing,
+  type Listing,
+} from "@/components/tools/pubblicazione/listingLogic";
+import { analyzeInteriorPdf, type InteriorAnalysisResult } from "@/components/tools/pubblicazione/pdfAnalysis";
+import { extractCoverContent, extractPdfContent } from "@/components/tools/pdfContent";
+import { generateListingCopy } from "@/lib/aiCopy.functions";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { AiStyleControls } from "@/components/tools/ai/AiStyleControls";
+import { DEFAULT_CREATIVITY, DEFAULT_TONE, type AiToneId } from "@/components/tools/ai/aiStyle";
+import { SeoPanel } from "@/components/tools/pubblicazione/SeoPanel";
+
+
+/**
+ * TOOL 2 — Pubblicazione (Amazon KDP International Listing Suite).
+ * Porting fedele dell'app standalone: analisi reale del PDF interno,
+ * generazione di titolo/sottotitolo/descrizione PAS+AIDA, 7 keyword backend,
+ * categorie BISAC, audit qualità/conformità e stima del potenziale di vendita.
+ * 1 credito per ogni generazione completata con successo.
+ */
+
+const BOOK_TYPES: { id: BookType; label: string }[] = [
+  { id: "coloring", label: "Coloring Book" },
+  { id: "activity", label: "Activity Book (Labirinti, Puzzle)" },
+  { id: "notebook", label: "Music Staff / Quaderno Speciale" },
+  { id: "exercise", label: "Quaderno Didattico" },
+];
+
+const AUDIENCES: { id: Audience; label: string }[] = [
+  { id: "toddlers", label: "Bambini (2-8 anni)" },
+  { id: "teens", label: "Ragazzi / Preadolescenti (9-14 anni)" },
+  { id: "adults", label: "Adulti & Relax" },
+];
+
+export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
+  const outputLocale = useOutputLanguage();
+  const [subject, setSubject] = useState("");
+  const [bookType, setBookType] = useState<BookType>("coloring");
+  const [audience, setAudience] = useState<Audience>("toddlers");
+  const [ageDetails, setAgeDetails] = useState(defaultAgeDetails("toddlers"));
+
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+
+  const [interiorFile, setInteriorFile] = useState<File | null>(null);
+  const [interiorStatus, setInteriorStatus] = useState<string>("");
+  const [interiorStatusOk, setInteriorStatusOk] = useState<boolean | null>(null);
+  const [interiorAnalysis, setInteriorAnalysis] = useState<InteriorAnalysisResult>({
+    scanned: false,
+    totalPages: 0,
+    errorsFound: [],
+  });
+  const [analyzingInterior, setAnalyzingInterior] = useState(false);
+
+  const [generating, setGenerating] = useState(false);
+  const [listing, setListing] = useState<Listing | null>(null);
+
+  const [useAi, setUseAi] = useState(true);
+  const [aiInsight, setAiInsight] = useState<string | null>(null);
+  const [aiUsed, setAiUsed] = useState(false);
+  const [aiStep, setAiStep] = useState<string | null>(null);
+  const [tone, setTone] = useState<AiToneId>(DEFAULT_TONE);
+  const [creativity, setCreativity] = useState(DEFAULT_CREATIVITY);
+
+  function handleAudienceChange(value: Audience) {
+    setAudience(value);
+    setAgeDetails(defaultAgeDetails(value));
+  }
+
+  function handleCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] ?? null;
+    setCoverFile(file);
+    if (!file) {
+      setCoverPreview(null);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => setCoverPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  async function handleInteriorChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] ?? null;
+    setInteriorFile(file);
+    setInteriorAnalysis({ scanned: false, totalPages: 0, errorsFound: [] });
+    if (!file) {
+      setInteriorStatus("");
+      setInteriorStatusOk(null);
+      return;
+    }
+    setAnalyzingInterior(true);
+    setInteriorStatus("Analisi pagine in corso...");
+    setInteriorStatusOk(null);
+    try {
+      const result = await analyzeInteriorPdf(file);
+      setInteriorAnalysis(result);
+      setInteriorStatus(`Analisi completata: ${result.totalPages} pagine scansionate con successo.`);
+      setInteriorStatusOk(true);
+    } catch (error) {
+      console.error(error);
+      setInteriorStatus("Errore durante la lettura del PDF interno.");
+      setInteriorStatusOk(false);
+    } finally {
+      setAnalyzingInterior(false);
+    }
+  }
+
+  const chargeGuard = useRef(false);
+
+  async function handleGenerate() {
+    // Guardia sincrona: blocca doppio click/rientranza prima di qualsiasi await.
+    if (chargeGuard.current) return;
+    chargeGuard.current = true;
+    try {
+    if (!runtime.canOperate) {
+      runtime.blockOperation();
+      return;
+    }
+
+    // Verifica server-side del piano e dei crediti.
+    if (!(await runtime.ensureAccess())) return;
+
+    setGenerating(true);
+    const operationId = newOperationId("pubblicazione-gen");
+
+    try {
+      let result = generateListing({
+        locale: outputLocale,
+        subject,
+        bookType,
+        audience,
+        ageDetails,
+        hasCover: !!coverFile,
+        hasInterior: !!interiorFile,
+        interiorScanned: interiorAnalysis.scanned,
+        interiorPages: interiorAnalysis.totalPages,
+      });
+
+      let insight: string | null = null;
+      let usedAi = false;
+
+      if (useAi && (coverFile || interiorFile)) {
+        try {
+          setAiStep("Analisi AI di copertina e pagine interne...");
+          const cover = coverFile ? await extractCoverContent(coverFile) : null;
+          const interior = interiorFile
+            ? await extractPdfContent(interiorFile, { maxImages: 3, maxTextPages: 6 })
+            : null;
+
+          setAiStep("Scrittura testi SEO + AIDA + PAS...");
+          const response = await generateListingCopy({
+            data: {
+              locale: outputLocale,
+              subject,
+              bookType,
+              audience,
+              ageDetails,
+              interiorPages: interior?.totalPages ?? interiorAnalysis.totalPages,
+              tone,
+              creativity,
+              interiorText: interior?.text || undefined,
+              interiorImages: interior?.images,
+              coverImages: cover?.images,
+            },
+          });
+
+          if (response.ok) {
+            const copy = response.copy;
+            result = {
+              ...result,
+              title: copy.title || result.title,
+              subtitle: copy.subtitle || result.subtitle,
+              description: copy.description || result.description,
+              keywords: copy.keywords.length >= 3 ? copy.keywords.slice(0, 7) : result.keywords,
+              categories:
+                copy.categories && copy.categories.length === 3 ? copy.categories : result.categories,
+            };
+            insight = copy.insight ?? null;
+            usedAi = true;
+          } else {
+            toast.warning(`AI non disponibile: ${response.error}. Usati i testi del motore interno.`);
+          }
+        } catch (aiError) {
+          console.error(aiError);
+          toast.warning("Analisi AI non riuscita: usati i testi del motore interno.");
+        } finally {
+          setAiStep(null);
+        }
+      }
+
+      // Generazione completata → consumo del credito.
+      const charge = await runtime.charge(operationId, "Generazione listing KDP completata");
+      if (!charge.ok) return;
+      setListing(result);
+      setAiInsight(insight);
+      setAiUsed(usedAi);
+      toast.success(charge.duplicate ? "Generazione completata" : "Generazione completata — 1 credito");
+
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Generazione non riuscita");
+    } finally {
+      setGenerating(false);
+    }
+  } finally {
+      chargeGuard.current = false;
+    }
+  }
+
+  /** I testi generati restano modificabili: ogni modifica aggiorna copia ed export. */
+  function updateListing(patch: Partial<Listing>) {
+    setListing((prev) => (prev ? { ...prev, ...patch } : prev));
+  }
+
+  /** Applica un suggerimento keyword nel primo box libero (o sostituisce l'ultimo). */
+  function applySuggestedKeyword(keyword: string) {
+    setListing((prev) => {
+      if (!prev) return prev;
+      const keywords = [...prev.keywords];
+      while (keywords.length < 7) keywords.push("");
+      const index = keywords.findIndex((k) => !k.trim());
+      keywords[index === -1 ? 6 : index] = keyword;
+      return { ...prev, keywords };
+    });
+    toast.success(`Keyword "${keyword}" inserita nei box backend`);
+  }
+
+  function copyToClipboard(text: string, label: string) {
+    void navigator.clipboard.writeText(text);
+    toast.success(`${label} copiato negli appunti`);
+  }
+
+
+  function downloadListing() {
+    if (!listing) return;
+    const blob = new Blob([formatListingForExport(listing)], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `kdp-listing-${(subject || "listing").toLowerCase().replace(/\s+/g, "-")}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
+      <div className="panel space-y-5 p-6">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">
+          Amazon KDP Listing Suite
+        </h3>
+        <p className="text-xs text-muted-foreground">
+          PAS &amp; AIDA + Long-Tail SEO + Audit AI qualità interno
+        </p>
+
+        <OutputLanguageSelect id="p-output-lang" />
+
+
+        <div className="space-y-1.5">
+          <Label htmlFor="p-subject">Soggetto / Personaggio</Label>
+          <Input
+            id="p-subject"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            placeholder="Es. inserisci il soggetto del tuo libro"
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <Label>Formato / tipo di libro</Label>
+          <Select value={bookType} onValueChange={(v) => setBookType(v as BookType)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {BOOK_TYPES.map((t) => (
+                <SelectItem key={t.id} value={t.id}>
+                  {t.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label>Pubblico di riferimento</Label>
+          <Select value={audience} onValueChange={(v) => handleAudienceChange(v as Audience)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {AUDIENCES.map((a) => (
+                <SelectItem key={a.id} value={a.id}>
+                  {a.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="p-age">Sotto-target specifico</Label>
+          <Input id="p-age" value={ageDetails} onChange={(e) => setAgeDetails(e.target.value)} />
+        </div>
+
+        <div className="space-y-1.5">
+          <Label>Copertina (PDF/PNG)</Label>
+          <label className="flex cursor-pointer flex-col items-center gap-2 rounded-md border-2 border-dashed border-border bg-surface p-4 text-center text-xs text-muted-foreground hover:border-accent">
+            <Upload className="size-4" />
+            {coverFile ? `Caricata: ${coverFile.name}` : "Clicca per caricare la copertina"}
+            <input type="file" accept="image/*,.pdf" className="hidden" onChange={handleCoverChange} />
+          </label>
+          {coverPreview && (
+            <img
+              src={coverPreview}
+              alt="Anteprima copertina"
+              className="mt-1 h-28 w-20 rounded-md border border-border object-cover"
+            />
+          )}
+        </div>
+
+        <div className="space-y-1.5">
+          <Label>File interno (PDF)</Label>
+          <label className="flex cursor-pointer flex-col items-center gap-2 rounded-md border-2 border-dashed border-border bg-surface p-4 text-center text-xs text-muted-foreground hover:border-accent">
+            {analyzingInterior ? <Loader2 className="size-4 animate-spin" /> : <ImageIcon className="size-4" />}
+            {interiorFile ? `Caricato: ${interiorFile.name}` : "Clicca per caricare il PDF interno"}
+            <input type="file" accept=".pdf" className="hidden" onChange={handleInteriorChange} />
+          </label>
+          {interiorStatus && (
+            <p
+              className={`text-xs italic ${
+                interiorStatusOk === true
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : interiorStatusOk === false
+                    ? "text-destructive"
+                    : "text-muted-foreground"
+              }`}
+            >
+              {interiorStatus}
+            </p>
+          )}
+        </div>
+
+        <div className="flex items-start justify-between gap-3 rounded-md border border-border bg-surface p-3">
+          <div className="space-y-0.5">
+            <Label htmlFor="p-use-ai" className="text-sm">
+              AI sui contenuti reali (gratuita)
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              Analizza copertina e pagine interne per testi inerenti, con impronta SEO + AIDA + PAS.
+            </p>
+          </div>
+          <Switch id="p-use-ai" checked={useAi} onCheckedChange={setUseAi} />
+        </div>
+
+        <AiStyleControls
+          idPrefix="p-ai"
+          tone={tone}
+          onToneChange={setTone}
+          creativity={creativity}
+          onCreativityChange={setCreativity}
+          disabled={!useAi}
+        />
+
+        <Button
+          onClick={handleGenerate}
+          disabled={generating || runtime.charging}
+          className="bg-gradient-brand w-full text-primary-foreground hover:opacity-90"
+        >
+          {generating || runtime.charging ? (
+            <Loader2 className="mr-2 size-4 animate-spin" />
+          ) : (
+            <Wand2 className="mr-2 size-4" />
+          )}
+          Genera listing PAS &amp; AIDA (1 credito)
+        </Button>
+        {aiStep && <p className="text-xs italic text-accent">{aiStep}</p>}
+        <p className="text-xs text-muted-foreground">
+          Ogni generazione completata consuma 1 credito. Le generazioni non riuscite non vengono
+          addebitate.
+        </p>
+
+      </div>
+
+      <div className="space-y-4">
+        {!listing ? (
+          <div className="panel p-10 text-center text-sm text-muted-foreground">
+            Nessuna generazione ancora. Compila i campi e genera il tuo primo listing KDP.
+          </div>
+        ) : (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="panel space-y-1 border-l-4 border-l-amber-400 p-5">
+                <h4 className="text-sm font-semibold">🔍 Audit Qualità &amp; Conformità</h4>
+                <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                  {listing.complianceScore} / 100
+                </p>
+                <p className="text-xs text-muted-foreground">{listing.complianceText}</p>
+              </div>
+              <div className="panel space-y-1 border-l-4 border-l-emerald-500 p-5">
+                <h4 className="text-sm font-semibold">📈 Potenziale di Vendita (vs Bestseller)</h4>
+                <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                  {listing.salesScore} / 100
+                </p>
+                <p className="text-xs text-muted-foreground">{listing.salesText}</p>
+              </div>
+            </div>
+
+            {(aiUsed || aiInsight) && (
+              <div className="panel space-y-1 border-l-4 border-l-accent p-5">
+                <h4 className="text-sm font-semibold">
+                  ✨ Testi generati dall&apos;AI sui contenuti reali
+                </h4>
+                <p className="text-xs text-muted-foreground">
+                  {aiInsight ?? "Copertina e pagine interne analizzate: copy SEO + AIDA + PAS."}
+                </p>
+              </div>
+            )}
+
+            {listing.interiorPages > 0 && (
+              <p className="text-xs text-muted-foreground">
+                Pagine interne analizzate: <strong>{listing.interiorPages}</strong>
+              </p>
+            )}
+
+
+            <SeoPanel listing={listing} subject={subject} onApplyKeyword={applySuggestedKeyword} />
+
+            <article className="panel space-y-4 p-6">
+              <p className="text-xs text-muted-foreground">
+                Tutti i testi sono modificabili: le modifiche vengono usate sia dai pulsanti Copia sia
+                dall&apos;esportazione .txt.
+              </p>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between gap-3">
+                  <Label htmlFor="p-out-title" className="text-xs tracking-wide uppercase text-muted-foreground">
+                    Titolo ({listing.title.length} caratteri)
+                  </Label>
+                  <Button variant="ghost" size="sm" onClick={() => copyToClipboard(listing.title, "Titolo")}>
+                    <Copy className="size-4" />
+                  </Button>
+                </div>
+                <Input
+                  id="p-out-title"
+                  value={listing.title}
+                  onChange={(e) => updateListing({ title: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between gap-3">
+                  <Label htmlFor="p-out-subtitle" className="text-xs tracking-wide uppercase text-muted-foreground">
+                    Sottotitolo ({listing.subtitle.length} caratteri)
+                  </Label>
+                  <Button variant="ghost" size="sm" onClick={() => copyToClipboard(listing.subtitle, "Sottotitolo")}>
+                    <Copy className="size-4" />
+                  </Button>
+                </div>
+                <Textarea
+                  id="p-out-subtitle"
+                  rows={3}
+                  value={listing.subtitle}
+                  onChange={(e) => updateListing({ subtitle: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between gap-3">
+                  <Label htmlFor="p-out-desc" className="text-xs tracking-wide uppercase text-muted-foreground">
+                    Descrizione (PAS + AIDA — {listing.description.length} caratteri)
+                  </Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyToClipboard(listing.description, "Descrizione")}
+                  >
+                    <Copy className="size-4" />
+                  </Button>
+                </div>
+                <Textarea
+                  id="p-out-desc"
+                  rows={18}
+                  className="font-mono text-xs leading-relaxed"
+                  value={listing.description}
+                  onChange={(e) => updateListing({ description: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <p className="text-xs tracking-wide uppercase text-muted-foreground">
+                  7 Keyword Backend (Search Terms — campi singoli)
+                </p>
+                <div className="mt-2 space-y-1.5">
+                  {listing.keywords.map((kw, index) => (
+                    <div key={`kw-${index}`} className="flex items-center gap-2">
+                      <span className="w-16 shrink-0 text-[11px] text-muted-foreground">Box {index + 1}</span>
+                      <Input
+                        value={kw}
+                        className="h-9 text-xs"
+                        onChange={(e) =>
+                          updateListing({
+                            keywords: listing.keywords.map((k, i) => (i === index ? e.target.value : k)),
+                          })
+                        }
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 px-2 text-[11px]"
+                        onClick={() => copyToClipboard(kw, `Keyword Box ${index + 1}`)}
+                      >
+                        Copia
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-xs tracking-wide uppercase text-muted-foreground">
+                    3 Categorie ad alto traffico (BISAC)
+                  </p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyToClipboard(listing.categories.join("\n"), "Categorie")}
+                  >
+                    <Copy className="size-4" />
+                  </Button>
+                </div>
+                <div className="mt-2 space-y-1.5">
+                  {listing.categories.map((cat, index) => (
+                    <Input
+                      key={`cat-${index}`}
+                      value={cat}
+                      className="h-9 text-xs"
+                      onChange={(e) =>
+                        updateListing({
+                          categories: listing.categories.map((c, i) => (i === index ? e.target.value : c)),
+                        })
+                      }
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <Button variant="outline" className="w-full" onClick={downloadListing}>
+                <Download className="mr-2 size-4" />
+                Esporta listing (.txt)
+              </Button>
+            </article>
+
+          </>
+        )}
+      </div>
+    </div>
+  );
+  }

@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="it" class="h-full bg-slate-950 text-slate-100 selection:bg-violet-500 selection:text-slate-950">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COPERTINE Studio KDP — InkForgeKdp</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google WebFont Loader -->
+    <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
+
+    <!-- html2canvas per Esportazione HD -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #171226; }
+        ::-webkit-scrollbar-thumb { background: #3a3358; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4c4375; }
+
+        /* InkForgeKdp brand homogenization: superfici scure violacee + accento viola/verde */
+        body.bg-slate-950 { background-color: #171226 !important; }
+        .bg-slate-900, .bg-slate-900\/90 { background-color: rgba(30, 25, 51, 0.95) !important; }
+        .bg-slate-950\/80 { background-color: rgba(23, 18, 38, 0.85) !important; }
+        .bg-slate-800 { background-color: #2a2344 !important; }
+        .hover\:bg-slate-700:hover { background-color: #352c56 !important; }
+        .bg-slate-800\/50 { background-color: rgba(42, 35, 68, 0.5) !important; }
+        .bg-slate-950\/50 { background-color: rgba(23, 18, 38, 0.6) !important; }
+        .border-slate-800 { border-color: #2e2848 !important; }
+        .border-slate-700 { border-color: #3a3358 !important; }
+
+        .draggable-element { 
+            user-select: none; 
+            cursor: move; 
+            touch-action: none; 
+            position: absolute; 
+            box-sizing: border-box;
+            overflow: visible !important;
+            min-width: 120px;
+        }
+        .draggable-element:hover { outline: 1px dashed rgba(167, 139, 250, 0.8); outline-offset: 3px; }
+        .element-selected { outline: 2px solid #a78bfa !important; outline-offset: 4px; z-index: 50; }
+
+        .render-text {
+            box-sizing: border-box;
+            display: block;
+            line-height: 1.15;
+            padding: 6px 12px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            overflow: visible !important;
+        }
+
+        /* KDP GUIDES & OVERLAYS */
+        .kdp-bleed-guide { border: 2px dashed rgba(239, 68, 68, 0.7); }
+        .kdp-margin-safe { border: 1px dashed rgba(59, 130, 246, 0.5); }
+        .kdp-spine-guide {
+            background: rgba(239, 68, 68, 0.12);
+            border-left: 1px dashed rgba(239, 68, 68, 0.7);
+            border-right: 1px dashed rgba(239, 68, 68, 0.7);
+        }
+
+        /* TEXT STYLES & EFFECTS ENGINE */
+        .fx-none { text-shadow: none; filter: none; background: none; -webkit-background-clip: border-box; -webkit-text-fill-color: currentColor; }
+        .fx-outline { text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0px 4px 10px rgba(0,0,0,0.8); -webkit-text-fill-color: currentColor; }
+        .fx-glow { text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor; -webkit-text-fill-color: currentColor; }
+        .fx-shadow { text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.95), 2px 2px 3px rgba(0, 0, 0, 0.8); -webkit-text-fill-color: currentColor; }
+
+        /* IMAGE LAYERS ENGINE */
+        .image-layer { position: absolute; box-sizing: border-box; cursor: move; user-select: none; touch-action: none; }
+        .image-layer img { display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+        .image-layer.image-layer-selected { outline: 2px solid #a78bfa; outline-offset: 3px; }
+        #imageLayersStage { position: absolute; inset: 0; z-index: 15; pointer-events: none; overflow: hidden; }
+        #imageLayersStage .image-layer { pointer-events: auto; }
+    </style>
+</head>
+
+<body class="h-full flex flex-col overflow-hidden bg-slate-950 text-slate-100">
+
+    <!-- Header App -->
+    <header class="h-14 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-5 shrink-0 z-30">
+        <div class="flex items-center gap-3">
+            <div class="bg-violet-500/10 border border-violet-500/30 p-2 rounded-lg text-violet-400">
+                <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+            </div>
+            <div>
+                <h1 class="text-sm font-bold tracking-wide text-white flex items-center gap-2">
+                    COPERTINE Studio
+                    <span class="text-[10px] bg-violet-500/20 text-violet-300 border border-violet-500/30 px-2 py-0.5 rounded font-mono">KDP Pro</span>
+                </h1>
+                <p class="text-[11px] text-slate-400">InkForgeKdp • Studio Copertine Multi-Formato KDP</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <button id="toggleGuidesBtn" class="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-medium transition flex items-center gap-1.5">
+                <i class="fa-solid fa-ruler-combined text-violet-400"></i> Guide KDP & Bleed
+            </button>
+            <button id="exportBtn" class="px-4 py-1.5 rounded-lg bg-gradient-to-r from-violet-600 to-emerald-500 hover:from-violet-500 hover:to-emerald-400 text-white text-xs font-bold transition shadow-lg shadow-violet-500/30 flex items-center gap-2">
+                <i class="fa-solid fa-file-export"></i> Esporta Stampa HD (300 DPI)
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- SIDEBAR CONTROLS -->
+        <aside class="w-96 bg-slate-900/90 border-r border-slate-800 flex flex-col shrink-0 z-20 overflow-hidden">
+            
+            <!-- Navigation Tabs -->
+            <div class="flex border-b border-slate-800 bg-slate-950/80 text-xs font-semibold overflow-x-auto scrollbar-none">
+                <button class="tab-btn flex-1 py-3 px-2 text-center border-b-2 border-violet-400 text-violet-400 transition whitespace-nowrap" data-tab="tab-kdp">📐 KDP Spec</button>
+                <button class="tab-btn flex-1 py-3 px-2 text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition whitespace-nowrap" data-tab="tab-front">1. Fronte</button>
+                <button class="tab-btn flex-1 py-3 px-2 text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition whitespace-nowrap" data-tab="tab-spine">2. Dorso</button>
+                <button class="tab-btn flex-1 py-3 px-2 text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition whitespace-nowrap" data-tab="tab-back">3. Retro</button>
+                <button class="tab-btn flex-1 py-3 px-2 text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition whitespace-nowrap" data-tab="tab-bg">⚙️ Sfondo</button>
+                <button class="tab-btn flex-1 py-3 px-2 text-center border-b-2 border-transparent text-violet-300 hover:text-violet-200 transition whitespace-nowrap bg-violet-500/10" data-tab="tab-fonts"><i class="fa-solid fa-font"></i> Fonts</button>
+            </div>
+
+            <!-- Tab Contents -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-4">
+
+                <!-- TAB 0: KDP SPECIFICHE -->
+                <div id="tab-kdp" class="tab-content space-y-4">
+                    <div class="bg-violet-500/10 p-3.5 rounded-xl border border-violet-500/30 space-y-3">
+                        <h2 class="text-xs font-bold uppercase text-violet-400 tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-calculator"></i> Calcolatore Copertina KDP
+                        </h2>
+                        <div class="space-y-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-400 mb-0.5">Formato Libro (Trim Size)</label>
+                                <select id="kdpTrimSelect" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                                    <option value="8.5x11" selected>8.5" x 11" (Standard Quaderni/Coloring)</option>
+                                    <option value="6x9">6" x 9" (Saggistica/Narrativa)</option>
+                                    <option value="8.25x11">8.25" x 11" (Album/Spartiti)</option>
+                                    <option value="8.5x8.5">8.5" x 8.5" (Quadrato)</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] text-slate-400 mb-0.5">N. Pagine Totali</label>
+                                    <input type="number" id="kdpPageCountInput" value="110" min="24" max="800" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-slate-400 mb-0.5">Tipo Carta</label>
+                                    <select id="kdpPaperTypeSelect" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                                        <option value="white">Bianca (0.002252")</option>
+                                        <option value="cream">Crema (0.0025")</option>
+                                        <option value="color">Colore (0.002347")</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-2 bg-slate-950/60 rounded text-[10px] font-mono text-slate-300 space-y-1 border border-slate-800">
+                            <div>Dorso Calcolato: <span id="calculatedSpinePx" class="text-violet-400 font-bold">74px</span> (<span id="calculatedSpineIn">0.2477"</span>)</div>
+                            <div>Dimensioni Telaio 300 DPI: <span id="calculatedCanvasPx" class="text-slate-200">5250 x 3375 px</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 1: FRONTE -->
+                <div id="tab-front" class="tab-content space-y-4 hidden">
+                    <!-- CONTROLLO TITOLO -->
+                    <div class="bg-slate-800/50 p-3.5 rounded-xl border border-slate-700/60 space-y-3">
+                        <h2 class="text-xs font-bold uppercase text-violet-400 tracking-wider">Titolo Principale</h2>
+                        <input type="text" id="titleInput" value="" placeholder="Titolo del libro" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-white focus:outline-none focus:border-violet-400">
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-400 mb-0.5">Font</label>
+                                <select id="titleFontSelect" class="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-xs text-white font-selector-dropdown"></select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-400 mb-0.5">Colore Base</label>
+                                <input type="color" id="titleColorInput" value="#a78bfa" class="w-full h-7 rounded border border-slate-700 bg-transparent cursor-pointer">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-400 mb-0.5">Dimensione</label>
+                                <input type="range" id="titleSizeInput" min="16" max="90" value="42" class="w-full accent-violet-400">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-400 mb-0.5">Effetto Stile FX</label>
+                            <select id="titleFxSelect" class="fx-selector w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                                <option value="fx-none">Normale</option>
+                                <option value="fx-outline">Contorno Nero</option>
+                                <option value="fx-glow">Glow Brillante</option>
+                                <option value="fx-shadow">Ombra 3D</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- GESTIONE SOTTOTITOLI MULTIPLI -->
+                    <div class="bg-slate-800/50 p-3.5 rounded-xl border border-slate-700/60 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xs font-bold uppercase text-violet-400 tracking-wider">Sottotitoli Dinamici</h2>
+                            <button id="addSubtitleBtn" class="px-2.5 py-1 rounded bg-violet-500 hover:bg-violet-400 text-slate-950 text-[11px] font-bold transition flex items-center gap-1">
+                                <i class="fa-solid fa-plus"></i> Aggiungi Sottotitolo
+                            </button>
+                        </div>
+                        <div id="subtitlesListContainer" class="space-y-3"></div>
+                    </div>
+
+                    <!-- CONTROLLO AUTORE -->
+                    <div class="bg-slate-800/50 p-3.5 rounded-xl border border-slate-700/60 space-y-3">
+                        <h2 class="text-xs font-bold uppercase text-violet-400 tracking-wider">Autore / Brand</h2>
+                        <input type="text" id="authorInput" value="" placeholder="Autore / Brand" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-white focus:outline-none focus:border-violet-400">
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-400 mb-0.5">Font</label>
+                                <select id="authorFontSelect" class="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-xs text-white font-selector-dropdown"></select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-400 mb-0.5">Colore</label>
+                                <input type="color" id="authorColorInput" value="#fcd34d" class="w-full h-7 rounded border border-slate-700 bg-transparent cursor-pointer">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-400 mb-0.5">Dimensione</label>
+                                <input type="range" id="authorSizeInput" min="8" max="42" value="12" class="w-full accent-violet-400">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-400 mb-0.5">Effetto Stile FX</label>
+                            <select id="authorFxSelect" class="fx-selector w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                                <option value="fx-none">Normale</option>
+                                <option value="fx-outline">Contorno Nero</option>
+                                <option value="fx-glow">Glow Brillante</option>
+                                <option value="fx-shadow">Ombra 3D</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- LIVELLI IMMAGINI -->
+                    <div class="bg-slate-800/50 p-3.5 rounded-xl border border-violet-500/20 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xs font-bold uppercase text-violet-400 tracking-wider"><i class="fa-solid fa-images"></i> Livelli Immagine</h2>
+                            <span id="imageLayerCount" class="text-[10px] text-violet-300 font-mono">0 elementi</span>
+                        </div>
+                        <label class="block cursor-pointer">
+                            <div class="border-2 border-dashed border-slate-700 hover:border-violet-400 rounded-xl p-3 text-center bg-slate-900/60 transition">
+                                <i class="fa-solid fa-plus text-lg text-violet-400 mb-1"></i>
+                                <span class="block text-xs font-semibold text-slate-200">Carica Immagini (PNG/JPG)</span>
+                            </div>
+                            <input type="file" id="imageFilesInput" accept="image/*" multiple class="hidden">
+                        </label>
+                        <div id="imageLayersList" class="space-y-3 max-h-[260px] overflow-y-auto pr-1"></div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: DORSO -->
+                <div id="tab-spine" class="tab-content space-y-4 hidden">
+                    <div class="bg-slate-800/50 p-3.5 rounded-xl border border-slate-700/60 space-y-3">
+                        <h2 class="text-xs font-bold uppercase text-violet-400 tracking-wider">Testo Dorso</h2>
+                        <input type="text" id="spineTextInput" value="" placeholder="Testo del dorso" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-white focus:outline-none">
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-400 mb-0.5">Font</label>
+                                <select id="spineFontSelect" class="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-xs text-white font-selector-dropdown"></select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-400 mb-0.5">Colore</label>
+                                <input type="color" id="spineColorInput" value="#ffffff" class="w-full h-7 rounded border border-slate-700 bg-transparent cursor-pointer">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-400 mb-0.5">Dimensione</label>
+                                <input type="range" id="spineSizeInput" min="6" max="24" value="10" class="w-full accent-violet-400">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-400 mb-0.5">Effetto Stile FX</label>
+                            <select id="spineFxSelect" class="fx-selector w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                                <option value="fx-none">Normale</option>
+                                <option value="fx-outline">Contorno Nero</option>
+                                <option value="fx-glow">Glow Brillante</option>
+                                <option value="fx-shadow">Ombra 3D</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: RETRO -->
+                <div id="tab-back" class="tab-content space-y-4 hidden">
+                    <div class="bg-slate-800/50 p-3.5 rounded-xl border border-slate-700/60 space-y-3">
+                        <h2 class="text-xs font-bold uppercase text-violet-400 tracking-wider">Sinossi</h2>
+                        <textarea id="backBlurbInput" rows="4" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-white focus:outline-none"></textarea>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-400 mb-0.5">Font</label>
+                                <select id="backBlurbFontSelect" class="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-xs text-white font-selector-dropdown"></select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-400 mb-0.5">Colore</label>
+                                <input type="color" id="backBlurbColorInput" value="#ffffff" class="w-full h-7 rounded border border-slate-700 bg-transparent cursor-pointer">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-400 mb-0.5">Dimensione</label>
+                                <input type="range" id="backBlurbSizeInput" min="8" max="32" value="11" class="w-full accent-violet-400">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-400 mb-0.5">Effetto Stile FX</label>
+                            <select id="backBlurbFxSelect" class="fx-selector w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                                <option value="fx-none">Normale</option>
+                                <option value="fx-outline">Contorno Nero</option>
+                                <option value="fx-glow">Glow Brillante</option>
+                                <option value="fx-shadow">Ombra 3D</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: SFONDO -->
+                <div id="tab-bg" class="tab-content space-y-4 hidden">
+                    <div class="bg-slate-800/50 p-3.5 rounded-xl border border-slate-700/60 space-y-3">
+                        <h2 class="text-xs font-bold uppercase text-violet-400 tracking-wider">Sfondo Copertina</h2>
+                        <label class="block cursor-pointer">
+                            <div class="border-2 border-dashed border-slate-700 hover:border-violet-400 rounded-xl p-4 text-center bg-slate-900 transition">
+                                <i class="fa-solid fa-cloud-arrow-up text-xl text-slate-400 mb-1"></i>
+                                <span class="block text-xs font-semibold text-slate-300">Carica Sfondo Wrap-Around</span>
+                            </div>
+                            <input type="file" id="bgFileInput" accept="image/*" class="hidden">
+                        </label>
+
+                        <div id="bgControls" class="space-y-3 pt-2 border-t border-slate-700/50 hidden">
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="text-[10px] text-slate-400">Dimensione / Larghezza (px)</label>
+                                    <span id="bgWidthVal" class="text-[10px] font-mono text-violet-400">900px</span>
+                                </div>
+                                <input type="range" id="bgWidthInput" min="200" max="3000" value="900" class="w-full accent-violet-400">
+                            </div>
+                            <div class="flex gap-2">
+                                <button id="bgFitBtn" class="flex-1 py-1.5 px-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-[11px] text-slate-200 font-semibold transition flex items-center justify-center gap-1">
+                                    <i class="fa-solid fa-expand text-violet-400"></i> Adatta Canvas
+                                </button>
+                                <button id="bgResetBtn" class="flex-1 py-1.5 px-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-[11px] text-slate-200 font-semibold transition flex items-center justify-center gap-1">
+                                    <i class="fa-solid fa-rotate-left text-violet-400"></i> Centra
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 5: FONTS -->
+                <div id="tab-fonts" class="tab-content space-y-4 hidden">
+                    <div class="bg-slate-800/50 p-3.5 rounded-xl border border-slate-700/60 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xs font-bold uppercase text-violet-400 tracking-wider">Libreria Fonts (Google Fonts)</h2>
+                            <span class="text-[10px] text-slate-400 font-mono" id="fontCountDisplay">0 Font</span>
+                        </div>
+                        <input type="text" id="fontSearchInput" placeholder="Cerca font per nome..." class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-white focus:outline-none focus:border-violet-400">
+                        <div id="fontPreviewList" class="space-y-2 max-h-[380px] overflow-y-auto pr-1"></div>
+                    </div>
+                </div>
+
+            </div>
+        </aside>
+
+        <!-- CANVAS PREVIEW WORKSPACE -->
+        <section class="flex-1 bg-slate-950 p-6 flex flex-col items-center justify-center relative overflow-hidden">
+            <div class="text-center mb-3">
+                <span class="text-xs text-slate-400 font-mono" id="canvasSpecLabel">KDP WRAP-AROUND CANVAS • 8.5" x 11" (Con Abbondanza / Bleed)</span>
+            </div>
+
+            <div id="coverContainer" class="relative shadow-2xl transition-all duration-300 select-none max-h-[85vh] flex items-center justify-center">
+                <div id="coverSpread" class="relative w-[900px] h-[600px] bg-slate-900 flex overflow-hidden shadow-2xl border border-slate-800" style="background-color: #0f172a;">
+                    
+                    <!-- Sfondo Wrap-Around -->
+                    <div id="bgWrapper" class="draggable-element absolute top-0 left-0 w-[900px] z-0 hidden">
+                        <img id="bgImageLayer" class="w-full h-auto object-cover pointer-events-none" alt="Background">
+                    </div>
+
+                    <!-- Livelli Immagine Dinamici -->
+                    <div id="imageLayersStage"></div>
+
+                    <!-- KDP OVERLAYS & GUIDES -->
+                    <div id="kdpGuides" class="absolute inset-0 z-40 pointer-events-none hidden">
+                        <!-- Margine di Taglio (Bleed Guide) -->
+                        <div class="absolute inset-[10px] kdp-bleed-guide"></div>
+                        
+                        <!-- Safe Margin per i Testi -->
+                        <div class="absolute inset-[20px] kdp-margin-safe"></div>
+
+                        <!-- Guida Dorso Dinamica -->
+                        <div id="spineGuideOverlay" class="absolute top-0 bottom-0 left-[48.5%] w-[3%] kdp-spine-guide flex items-center justify-center">
+                            <span class="text-[8px] font-mono text-rose-300 rotate-90 uppercase tracking-widest font-bold whitespace-nowrap">Dorso KDP</span>
+                        </div>
+
+                        <!-- Barcode Safe Zone (Obbligatoria KDP) -->
+                        <div class="absolute bottom-[20px] left-[20px] w-[120px] h-[70px] bg-slate-900/90 border border-slate-700 flex flex-col items-center justify-center text-center p-1">
+                            <i class="fa-solid fa-barcode text-2xl text-slate-400"></i>
+                            <span class="text-[7px] text-violet-400 font-mono uppercase font-bold mt-0.5">Riserva Barcode KDP</span>
+                        </div>
+                    </div>
+
+                    <!-- 1. RETRO -->
+                    <div id="backCoverArea" class="relative w-[48.5%] h-full z-10 text-white pointer-events-none">
+                        <div id="dragBackBlurb" class="draggable-element pointer-events-auto absolute left-[20px] top-[40px] w-[calc(100%-40px)] z-10">
+                            <p id="renderBackBlurb" class="render-text text-[11px] leading-relaxed drop-shadow-[0_2px_5px_rgba(0,0,0,0.95)] opacity-95"></p>
+                        </div>
+                    </div>
+
+                    <!-- 2. DORSO -->
+                    <div id="spineArea" class="relative w-[3%] h-full z-10 flex items-center justify-center pointer-events-none">
+                        <div id="dragSpineText" class="draggable-element pointer-events-auto absolute z-10 flex items-center justify-center">
+                            <p id="renderSpineText" class="render-text text-[10px] uppercase font-bold tracking-widest whitespace-nowrap" style="writing-mode: vertical-rl; transform: rotate(180deg);"></p>
+                        </div>
+                    </div>
+
+                    <!-- 3. FRONTE -->
+                    <div id="frontCoverArea" class="relative w-[48.5%] h-full z-10 text-white pointer-events-none">
+                        <!-- TITOLO PRINCIPALE -->
+                        <div id="dragTitle" class="draggable-element pointer-events-auto absolute left-[20px] top-[40px] w-[calc(100%-40px)] text-center z-10">
+                            <h1 id="renderTitle" class="render-text text-4xl font-extrabold uppercase tracking-wide fx-none"></h1>
+                        </div>
+
+                        <!-- STAGE PER SOTTOTITOLI DINAMICI -->
+                        <div id="subtitlesCanvasStage"></div>
+
+                        <!-- AUTORE -->
+                        <div id="dragAuthor" class="draggable-element pointer-events-auto absolute left-[20px] top-[500px] w-[calc(100%-40px)] text-center z-10">
+                            <p id="renderAuthor" class="render-text text-xs font-bold uppercase tracking-widest text-violet-300"></p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- SCRIPT ENGINE FIXATO -->
+    <script>
+        // Ponte con la piattaforma InkForgeKdp: verifica accesso/crediti prima dell'export.
+        window.__opRequestExport = function () {
+            if (window.parent === window) return Promise.resolve(true);
+            return new Promise((resolve) => {
+                const id = 'exp_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+                const timer = setTimeout(() => { cleanup(); resolve(false); }, 20000);
+                function onMsg(e) {
+                    const d = e.data;
+                    if (!d || d.source !== 'op-host' || d.id !== id) return;
+                    cleanup();
+                    resolve(!!d.allowed);
+                }
+                function cleanup() { clearTimeout(timer); window.removeEventListener('message', onMsg); }
+                window.addEventListener('message', onMsg);
+                window.parent.postMessage({ source: 'op-copertine', type: 'export-request', id }, '*');
+            });
+        };
+    </script>
+
+    <script>
+        const FONTS_DATABASE = [
+            "Inter", "Montserrat", "Poppins", "Cinzel", "Cinzel Decorative", "Bebas Neue", 
+            "Oswald", "Playfair Display", "Dancing Script", "Great Vibes", "Pacifico", 
+            "Caveat", "Creepster", "Nosifer", "Orbitron", "Press Start 2P", "Fira Code", 
+            "Special Elite", "Cormorant Garamond", "Lora", "Roboto Slab", "Bungee", 
+            "Luckiest Guy", "Fredoka One", "Russo One", "Righteous", "Rubik Glitch", 
+            "Alex Brush", "Sacramento", "Satisfy", "UnifrakturMaguntia", "VT323", "Lekton", "Jost"
+        ];
+
+        let loadedFonts = new Set(["Inter"]);
+        let imageLayers = [];
+        
+        let subtitles = [
+            {
+                id: 'sub_1',
+                text: "",
+                font: 'Inter',
+                color: '#ffffff',
+                size: 16,
+                fx: 'fx-none',
+                top: 110,
+                left: 20
+            }
+        ];
+
+        function loadGoogleFont(fontName) {
+            if (!fontName || loadedFonts.has(fontName)) return;
+            try {
+                WebFont.load({
+                    google: { families: [fontName + ':400,600,700,800'] },
+                    active: () => { loadedFonts.add(fontName); }
+                });
+            } catch (e) {
+                console.warn('Errore nel caricamento del font:', fontName, e);
+            }
+        }
+
+        function populateFontDropdowns() {
+            const dropdowns = document.querySelectorAll('.font-selector-dropdown');
+            dropdowns.forEach(select => {
+                const currentVal = select.value;
+                select.innerHTML = '';
+                FONTS_DATABASE.forEach(font => {
+                    const opt = document.createElement('option');
+                    opt.value = font;
+                    opt.textContent = font;
+                    if (font === 'Inter') opt.selected = true;
+                    select.appendChild(opt);
+                });
+                if (currentVal) select.value = currentVal;
+            });
+        }
+
+        /* ENGINE DRAGGABLE */
+        function makeDraggable(element) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+            element.addEventListener('mousedown', dragStart);
+            element.addEventListener('touchstart', dragStart, { passive: false });
+
+            function dragStart(e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'TEXTAREA') return;
+
+                const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+                
+                pos3 = clientX;
+                pos4 = clientY;
+
+                document.addEventListener('mousemove', elementDrag);
+                document.addEventListener('mouseup', closeDragElement);
+                document.addEventListener('touchmove', elementDrag, { passive: false });
+                document.addEventListener('touchend', closeDragElement);
+
+                document.querySelectorAll('.draggable-element, .image-layer').forEach(el => el.classList.remove('element-selected', 'image-layer-selected'));
+                element.classList.add(element.classList.contains('image-layer') ? 'image-layer-selected' : 'element-selected');
+            }
+
+            function elementDrag(e) {
+                e.preventDefault();
+                const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+
+                pos1 = pos3 - clientX;
+                pos2 = pos4 - clientY;
+                pos3 = clientX;
+                pos4 = clientY;
+
+                element.style.top = (element.offsetTop - pos2) + "px";
+                element.style.left = (element.offsetLeft - pos1) + "px";
+            }
+
+            function closeDragElement() {
+                document.removeEventListener('mousemove', elementDrag);
+                document.removeEventListener('mouseup', closeDragElement);
+                document.removeEventListener('touchmove', elementDrag);
+                document.removeEventListener('touchend', closeDragElement);
+
+                if (element.classList.contains('image-layer')) {
+                    const layer = imageLayers.find(l => l.id === element.id);
+                    if (layer) {
+                        layer.top = element.offsetTop;
+                        layer.left = element.offsetLeft;
+                    }
+                }
+
+                if (element.id && element.id.startsWith('drag_sub_')) {
+                    const subId = element.id.replace('drag_', '');
+                    const sub = subtitles.find(s => s.id === subId);
+                    if (sub) {
+                        sub.top = element.offsetTop;
+                        sub.left = element.offsetLeft;
+                    }
+                }
+            }
+        }
+
+        /* GESTIONE SOTTOTITOLI DINAMICI */
+        function renderSubtitles() {
+            const listContainer = document.getElementById('subtitlesListContainer');
+            const stage = document.getElementById('subtitlesCanvasStage');
+            if (!listContainer || !stage) return;
+
+            listContainer.innerHTML = '';
+            stage.innerHTML = '';
+
+            subtitles.forEach((sub, index) => {
+                const item = document.createElement('div');
+                item.className = 'bg-slate-900 border border-slate-700 p-2.5 rounded-lg space-y-2 text-xs';
+                item.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-violet-400">Sottotitolo #${index + 1}</span>
+                        <button onclick="removeSubtitle('${sub.id}')" class="text-rose-400 hover:text-rose-300 text-xs px-1">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                    <input type="text" value="${sub.text}" oninput="updateSubtitle('${sub.id}', 'text', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-white">
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <div>
+                            <label class="block text-[9px] text-slate-400">Font</label>
+                            <select onchange="updateSubtitle('${sub.id}', 'font', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded text-[11px] text-white font-selector-dropdown">
+                                ${FONTS_DATABASE.map(f => `<option value="${f}" ${f === sub.font ? 'selected' : ''}>${f}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[9px] text-slate-400">Colore</label>
+                            <input type="color" value="${sub.color}" onchange="updateSubtitle('${sub.id}', 'color', this.value)" class="w-full h-6 rounded border border-slate-700 bg-transparent cursor-pointer">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] text-slate-400">Dim (px)</label>
+                            <input type="range" min="10" max="60" value="${sub.size}" oninput="updateSubtitle('${sub.id}', 'size', this.value)" class="w-full accent-violet-400">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[9px] text-slate-400">Effetto FX</label>
+                        <select onchange="updateSubtitle('${sub.id}', 'fx', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded text-[11px] text-white">
+                            <option value="fx-none" ${sub.fx === 'fx-none' ? 'selected' : ''}>Normale</option>
+                            <option value="fx-outline" ${sub.fx === 'fx-outline' ? 'selected' : ''}>Contorno Nero</option>
+                            <option value="fx-glow" ${sub.fx === 'fx-glow' ? 'selected' : ''}>Glow Brillante</option>
+                            <option value="fx-shadow" ${sub.fx === 'fx-shadow' ? 'selected' : ''}>Ombra 3D</option>
+                        </select>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+
+                const dragEl = document.createElement('div');
+                dragEl.id = `drag_${sub.id}`;
+                dragEl.className = `draggable-element pointer-events-auto absolute z-10 w-[calc(100%-40px)] text-center`;
+                dragEl.style.top = `${sub.top}px`;
+                dragEl.style.left = sub.left !== undefined ? `${sub.left}px` : '20px';
+
+                const p = document.createElement('p');
+                p.id = `render_${sub.id}`;
+                p.className = `render-text font-semibold ${sub.fx}`;
+                p.style.fontFamily = `'${sub.font}', sans-serif`;
+                if (true) {
+                    p.style.color = sub.color;
+                }
+                p.style.fontSize = `${sub.size}px`;
+                p.style.lineHeight = '1.2';
+                p.innerText = sub.text;
+
+                dragEl.appendChild(p);
+                stage.appendChild(dragEl);
+
+                loadGoogleFont(sub.font);
+                makeDraggable(dragEl);
+            });
+        }
+
+        function addSubtitle() {
+            subtitles.push({
+                id: 'sub_' + Date.now(),
+                text: "NUOVO SOTTOTITOLO",
+                font: 'Inter',
+                color: '#ffffff',
+                size: 14,
+                fx: 'fx-none',
+                top: 150,
+                left: 20
+            });
+            renderSubtitles();
+        }
+
+        function removeSubtitle(id) {
+            subtitles = subtitles.filter(s => s.id !== id);
+            renderSubtitles();
+        }
+
+        function updateSubtitle(id, key, val) {
+            const sub = subtitles.find(s => s.id === id);
+            if (!sub) return;
+            sub[key] = val;
+            if (key === 'font') loadGoogleFont(val);
+            
+            const p = document.getElementById(`render_${id}`);
+            if (p) {
+                if (key === 'text') p.innerText = val;
+                if (key === 'font') p.style.fontFamily = `'${val}', sans-serif`;
+                if (key === 'size') p.style.fontSize = `${val}px`;
+                if (key === 'fx' || key === 'color') {
+                    p.className = `render-text font-semibold ${sub.fx}`;
+                    if (true) {
+                        p.style.color = sub.color;
+                    } else {
+                        p.style.color = 'transparent';
+                    }
+                }
+            }
+        }
+
+        /* GESTIONE LIVELLI IMMAGINI */
+        const imageFilesInput = document.getElementById('imageFilesInput');
+        if (imageFilesInput) {
+            imageFilesInput.addEventListener('change', (e) => {
+                const files = Array.from(e.target.files);
+                files.forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const layerId = 'img_layer_' + Date.now() + Math.random().toString(36).substr(2, 4);
+                        imageLayers.push({
+                            id: layerId,
+                            src: event.target.result,
+                            width: 200,
+                            top: 100,
+                            left: 100,
+                            name: file.name
+                        });
+                        renderImageLayers();
+                    };
+                    reader.readAsDataURL(file);
+                });
+                e.target.value = '';
+            });
+        }
+
+        function renderImageLayers() {
+            const stage = document.getElementById('imageLayersStage');
+            const listContainer = document.getElementById('imageLayersList');
+            const countDisplay = document.getElementById('imageLayerCount');
+
+            if (!stage || !listContainer) return;
+
+            stage.innerHTML = '';
+            listContainer.innerHTML = '';
+            if (countDisplay) countDisplay.textContent = `${imageLayers.length} elementi`;
+
+            imageLayers.forEach((layer, idx) => {
+                const item = document.createElement('div');
+                item.className = 'bg-slate-900 border border-slate-700 p-2 rounded-lg flex items-center justify-between text-xs gap-2';
+                item.innerHTML = `
+                    <div class="flex items-center gap-2 truncate">
+                        <img src="${layer.src}" class="w-8 h-8 object-cover rounded bg-slate-950 border border-slate-800">
+                        <span class="truncate text-slate-300 font-mono text-[11px]">${layer.name || 'Immagine ' + (idx + 1)}</span>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <input type="range" min="50" max="600" value="${layer.width}" oninput="updateImageLayerWidth('${layer.id}', this.value)" class="w-16 accent-violet-400">
+                        <button onclick="removeImageLayer('${layer.id}')" class="text-rose-400 hover:text-rose-300 text-xs p-1">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+
+                const layerEl = document.createElement('div');
+                layerEl.id = layer.id;
+                layerEl.className = 'image-layer';
+                layerEl.style.width = `${layer.width}px`;
+                layerEl.style.top = `${layer.top}px`;
+                layerEl.style.left = `${layer.left}px`;
+                layerEl.innerHTML = `<img src="${layer.src}" alt="Layer">`;
+
+                stage.appendChild(layerEl);
+                makeDraggable(layerEl);
+            });
+        }
+
+        function updateImageLayerWidth(id, width) {
+            const layer = imageLayers.find(l => l.id === id);
+            if (layer) {
+                layer.width = width;
+                const el = document.getElementById(id);
+                if (el) el.style.width = `${width}px`;
+            }
+        }
+
+        function removeImageLayer(id) {
+            imageLayers = imageLayers.filter(l => l.id !== id);
+            renderImageLayers();
+        }
+
+        /* CALCOLO SPECIFICHE KDP */
+        function updateKDPSpecs() {
+            const trim = document.getElementById('kdpTrimSelect').value;
+            const pages = parseInt(document.getElementById('kdpPageCountInput').value) || 100;
+            const paper = document.getElementById('kdpPaperTypeSelect').value;
+
+            let paperThickness = 0.002252;
+            if (paper === 'cream') paperThickness = 0.0025;
+            if (paper === 'color') paperThickness = 0.002347;
+
+            const spineInches = pages * paperThickness;
+            const spinePx = Math.round(spineInches * 300);
+
+            const [wStr, hStr] = trim.split('x');
+            const trimW = parseFloat(wStr);
+            const trimH = parseFloat(hStr);
+
+            const totalWidthInches = (trimW * 2) + spineInches + 0.25;
+            const totalHeightInches = trimH + 0.25;
+
+            const canvasW = Math.round(totalWidthInches * 300);
+            const canvasH = Math.round(totalHeightInches * 300);
+
+            document.getElementById('calculatedSpinePx').textContent = `${spinePx}px`;
+            document.getElementById('calculatedSpineIn').textContent = `${spineInches.toFixed(4)}"`;
+            document.getElementById('calculatedCanvasPx').textContent = `${canvasW} x ${canvasH} px`;
+            document.getElementById('canvasSpecLabel').textContent = `KDP WRAP-AROUND CANVAS • ${trim} (${pages} pag., ${paper}) • ${canvasW}x${canvasH}px @ 300 DPI`;
+        }
+
+        /* BINDING DEGLI INPUT TESTO ESTERNI */
+        function bindTextControls() {
+            // Titolo
+            const titleInput = document.getElementById('titleInput');
+            const titleFont = document.getElementById('titleFontSelect');
+            const titleColor = document.getElementById('titleColorInput');
+            const titleSize = document.getElementById('titleSizeInput');
+            const titleFx = document.getElementById('titleFxSelect');
+            const renderTitle = document.getElementById('renderTitle');
+
+            if (titleInput && renderTitle) {
+                titleInput.addEventListener('input', (e) => renderTitle.innerText = e.target.value || ' ');
+                titleFont.addEventListener('change', (e) => {
+                    loadGoogleFont(e.target.value);
+                    renderTitle.style.fontFamily = `'${e.target.value}', sans-serif`;
+                });
+                titleColor.addEventListener('input', (e) => {
+                    renderTitle.style.color = e.target.value;
+                    renderTitle.style.webkitTextFillColor = e.target.value;
+                });
+                titleSize.addEventListener('input', (e) => {
+                    renderTitle.style.fontSize = `${e.target.value}px`;
+                    renderTitle.style.lineHeight = '1.15';
+                });
+                titleFx.addEventListener('change', (e) => {
+                    const fxVal = e.target.value;
+                    renderTitle.className = `render-text text-4xl font-extrabold uppercase tracking-wide ${fxVal}`;
+                    renderTitle.style.color = titleColor.value;
+                    renderTitle.style.webkitTextFillColor = titleColor.value;
+                });
+            }
+
+            // Autore
+            const authorInput = document.getElementById('authorInput');
+            const authorFont = document.getElementById('authorFontSelect');
+            const authorColor = document.getElementById('authorColorInput');
+            const authorSize = document.getElementById('authorSizeInput');
+            const authorFx = document.getElementById('authorFxSelect');
+            const renderAuthor = document.getElementById('renderAuthor');
+
+            if (authorInput && renderAuthor) {
+                authorInput.addEventListener('input', (e) => renderAuthor.innerText = e.target.value || ' ');
+                authorFont.addEventListener('change', (e) => {
+                    loadGoogleFont(e.target.value);
+                    renderAuthor.style.fontFamily = `'${e.target.value}', sans-serif`;
+                });
+                authorColor.addEventListener('input', (e) => {
+                    renderAuthor.style.color = e.target.value;
+                    renderAuthor.style.webkitTextFillColor = e.target.value;
+                });
+                authorSize.addEventListener('input', (e) => {
+                    renderAuthor.style.fontSize = `${e.target.value}px`;
+                });
+                authorFx.addEventListener('change', (e) => {
+                    const fxVal = e.target.value;
+                    renderAuthor.className = `render-text text-xs font-bold uppercase tracking-widest ${fxVal}`;
+                    renderAuthor.style.color = authorColor.value;
+                    renderAuthor.style.webkitTextFillColor = authorColor.value;
+                });
+            }
+
+            // Dorso
+            const spineInput = document.getElementById('spineTextInput');
+            const spineFont = document.getElementById('spineFontSelect');
+            const spineColor = document.getElementById('spineColorInput');
+            const spineSize = document.getElementById('spineSizeInput');
+            const spineFx = document.getElementById('spineFxSelect');
+            const renderSpine = document.getElementById('renderSpineText');
+
+            if (spineInput && renderSpine) {
+                spineInput.addEventListener('input', (e) => renderSpine.innerText = e.target.value || ' ');
+                spineFont.addEventListener('change', (e) => {
+                    loadGoogleFont(e.target.value);
+                    renderSpine.style.fontFamily = `'${e.target.value}', sans-serif`;
+                });
+                spineColor.addEventListener('input', (e) => renderSpine.style.color = e.target.value);
+                spineSize.addEventListener('input', (e) => renderSpine.style.fontSize = `${e.target.value}px`);
+                spineFx.addEventListener('change', (e) => {
+                    renderSpine.className = `render-text text-[10px] uppercase font-bold tracking-widest whitespace-nowrap ${e.target.value}`;
+                });
+            }
+
+            // Sinossi Retro
+            const backInput = document.getElementById('backBlurbInput');
+            const backFont = document.getElementById('backBlurbFontSelect');
+            const backColor = document.getElementById('backBlurbColorInput');
+            const backSize = document.getElementById('backBlurbSizeInput');
+            const backFx = document.getElementById('backBlurbFxSelect');
+            const renderBack = document.getElementById('renderBackBlurb');
+
+            if (backInput && renderBack) {
+                backInput.addEventListener('input', (e) => renderBack.innerText = e.target.value || ' ');
+                backFont.addEventListener('change', (e) => {
+                    loadGoogleFont(e.target.value);
+                    renderBack.style.fontFamily = `'${e.target.value}', sans-serif`;
+                });
+                backColor.addEventListener('input', (e) => renderBack.style.color = e.target.value);
+                backSize.addEventListener('input', (e) => {
+                    renderBack.style.fontSize = `${e.target.value}px`;
+                });
+                backFx.addEventListener('change', (e) => {
+                    renderBack.className = `render-text leading-relaxed opacity-95 ${e.target.value}`;
+                });
+            }
+        }
+
+        /* FONTS LIBRARY PREVIEW & SEARCH */
+        function initFontLibrary() {
+            const fontPreviewList = document.getElementById('fontPreviewList');
+            const fontSearchInput = document.getElementById('fontSearchInput');
+            const fontCountDisplay = document.getElementById('fontCountDisplay');
+
+            if (fontCountDisplay) fontCountDisplay.textContent = `${FONTS_DATABASE.length} Font`;
+
+            function renderList(filter = '') {
+                if (!fontPreviewList) return;
+                fontPreviewList.innerHTML = '';
+
+                const filtered = FONTS_DATABASE.filter(f => f.toLowerCase().includes(filter.toLowerCase()));
+
+                filtered.forEach(font => {
+                    const card = document.createElement('div');
+                    card.className = 'p-2.5 bg-slate-900 border border-slate-800 rounded-lg hover:border-violet-500/50 transition cursor-pointer flex items-center justify-between';
+                    card.onclick = () => loadGoogleFont(font);
+
+                    card.innerHTML = `
+                        <div>
+                            <div class="text-[11px] font-mono text-slate-400">${font}</div>
+                            <div class="text-sm text-slate-100 truncate" style="font-family: '${font}', sans-serif;">Anteprima Testo</div>
+                        </div>
+                        <i class="fa-solid fa-download text-xs text-slate-500 hover:text-violet-400"></i>
+                    `;
+                    fontPreviewList.appendChild(card);
+                    loadGoogleFont(font);
+                });
+            }
+
+            if (fontSearchInput) {
+                fontSearchInput.addEventListener('input', (e) => renderList(e.target.value));
+            }
+            renderList();
+        }
+
+        /* INIZIALIZZAZIONE APPLICAZIONE */
+        document.addEventListener('DOMContentLoaded', () => {
+            populateFontDropdowns();
+            bindTextControls();
+            renderSubtitles();
+            initFontLibrary();
+            updateKDPSpecs();
+
+            // Rendi trascinabili gli elementi statici
+            ['dragTitle', 'dragAuthor', 'dragSpineText', 'dragBackBlurb'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) makeDraggable(el);
+            });
+
+            // Listener KDP
+            ['kdpTrimSelect', 'kdpPageCountInput', 'kdpPaperTypeSelect'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('change', updateKDPSpecs);
+                    el.addEventListener('input', updateKDPSpecs);
+                }
+            });
+
+            // Aggiungi Sottotitolo
+            const addSubBtn = document.getElementById('addSubtitleBtn');
+            if (addSubBtn) addSubBtn.addEventListener('click', addSubtitle);
+
+            // Caricamento Sfondo
+            const bgFileInput = document.getElementById('bgFileInput');
+            if (bgFileInput) {
+                bgFileInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            const bgWrapper = document.getElementById('bgWrapper');
+                            const bgImageLayer = document.getElementById('bgImageLayer');
+                            const bgControls = document.getElementById('bgControls');
+                            if (bgWrapper && bgImageLayer) {
+                                bgImageLayer.src = event.target.result;
+                                bgWrapper.classList.remove('hidden');
+                                if (bgControls) bgControls.classList.remove('hidden');
+
+                                bgWrapper.style.top = '0px';
+                                bgWrapper.style.left = '0px';
+                                bgWrapper.style.width = '900px';
+
+                                const bgWidthInput = document.getElementById('bgWidthInput');
+                                const bgWidthVal = document.getElementById('bgWidthVal');
+                                if (bgWidthInput) bgWidthInput.value = 900;
+                                if (bgWidthVal) bgWidthVal.textContent = '900px';
+
+                                makeDraggable(bgWrapper);
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            // Controlli Slider Dimensione Sfondo
+            const bgWidthInput = document.getElementById('bgWidthInput');
+            if (bgWidthInput) {
+                bgWidthInput.addEventListener('input', (e) => {
+                    const val = e.target.value;
+                    const bgWrapper = document.getElementById('bgWrapper');
+                    const bgWidthVal = document.getElementById('bgWidthVal');
+                    if (bgWrapper) bgWrapper.style.width = `${val}px`;
+                    if (bgWidthVal) bgWidthVal.textContent = `${val}px`;
+                });
+            }
+
+            // Pulsante Adatta Sfondo a Canvas
+            const bgFitBtn = document.getElementById('bgFitBtn');
+            if (bgFitBtn) {
+                bgFitBtn.addEventListener('click', () => {
+                    const coverSpread = document.getElementById('coverSpread');
+                    const bgWrapper = document.getElementById('bgWrapper');
+                    const bgWidthInput = document.getElementById('bgWidthInput');
+                    const bgWidthVal = document.getElementById('bgWidthVal');
+                    if (coverSpread && bgWrapper) {
+                        const w = coverSpread.clientWidth;
+                        bgWrapper.style.width = `${w}px`;
+                        bgWrapper.style.top = '0px';
+                        bgWrapper.style.left = '0px';
+                        if (bgWidthInput) bgWidthInput.value = w;
+                        if (bgWidthVal) bgWidthVal.textContent = `${w}px`;
+                    }
+                });
+            }
+
+            // Pulsante Centra Sfondo
+            const bgResetBtn = document.getElementById('bgResetBtn');
+            if (bgResetBtn) {
+                bgResetBtn.addEventListener('click', () => {
+                    const coverSpread = document.getElementById('coverSpread');
+                    const bgWrapper = document.getElementById('bgWrapper');
+                    if (coverSpread && bgWrapper) {
+                        const coverW = coverSpread.clientWidth;
+                        const coverH = coverSpread.clientHeight;
+                        const bgW = bgWrapper.offsetWidth;
+                        const bgH = bgWrapper.offsetHeight;
+
+                        bgWrapper.style.left = `${(coverW - bgW) / 2}px`;
+                        bgWrapper.style.top = `${(coverH - bgH) / 2}px`;
+                    }
+                });
+            }
+
+            // Tab Navigation
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetTab = btn.getAttribute('data-tab');
+
+                    document.querySelectorAll('.tab-btn').forEach(b => {
+                        b.classList.remove('border-violet-400', 'text-violet-400');
+                        b.classList.add('border-transparent', 'text-slate-400');
+                    });
+                    btn.classList.remove('border-transparent', 'text-slate-400');
+                    btn.classList.add('border-violet-400', 'text-violet-400');
+
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    const activeContent = document.getElementById(targetTab);
+                    if (activeContent) activeContent.classList.remove('hidden');
+                });
+            });
+
+            // Toggle Guide KDP
+            const toggleGuidesBtn = document.getElementById('toggleGuidesBtn');
+            if (toggleGuidesBtn) {
+                toggleGuidesBtn.addEventListener('click', () => {
+                    const guides = document.getElementById('kdpGuides');
+                    if (guides) guides.classList.toggle('hidden');
+                });
+            }
+
+            /* ESPORTAZIONE HD CON CONVERSIONE RASTER CANVAS HD PER GLI EFFETTI METALLICI */
+            const exportBtn = document.getElementById('exportBtn');
+            if (exportBtn) {
+                exportBtn.addEventListener('click', async () => {
+                    const allowed = await window.__opRequestExport();
+                    if (!allowed) return;
+                    const coverSpread = document.getElementById('coverSpread');
+                    const guides = document.getElementById('kdpGuides');
+                    const wasGuidesHidden = guides ? guides.classList.contains('hidden') : true;
+
+                    if (guides) guides.classList.add('hidden');
+
+                    document.querySelectorAll('.draggable-element, .image-layer').forEach(el => {
+                        el.classList.remove('element-selected', 'image-layer-selected');
+                    });
+
+                    try {
+                        const canvas = await html2canvas(coverSpread, {
+                            scale: 3,
+                            useCORS: true,
+                            backgroundColor: null,
+                            onclone: () => {
+                                // Nessuna sostituzione: i testi vengono renderizzati così come sono,
+                                // rispettando colore, font ed effetto scelti dall'utente.
+                            }
+                        });
+
+                        const link = document.createElement('a');
+                        link.download = `Copertina_KDP_HD_${Date.now()}.png`;
+                        link.href = canvas.toDataURL('image/png');
+                        link.click();
+                        window.parent.postMessage({ source: 'op-copertine', type: 'export-done' }, '*');
+                    } catch (err) {
+                        alert('Errore durante l\'esportazione: ' + err.message);
+                    } finally {
+                        if (guides && !wasGuidesHidden) guides.classList.remove('hidden');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
