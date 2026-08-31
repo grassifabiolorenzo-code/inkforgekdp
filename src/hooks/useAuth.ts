@@ -38,5 +38,9 @@ export function useAuth() {
 }
 
 export async function signOut() {
-  await supabase.auth.signOut();
+  try {
+    await supabase.auth.signOut();
+  } catch (error) {
+    console.error("[auth] logout non riuscito", error);
+  }
 }
