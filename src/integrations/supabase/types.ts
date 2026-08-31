@@ -336,6 +336,12 @@ export type Database = {
         };
         Relationships: [];
       };
+      rate_limit_hits: {
+        Row: { hits: number; key: string; window_start: string };
+        Insert: { hits?: number; key: string; window_start: string };
+        Update: { hits?: number; key?: string; window_start?: string };
+        Relationships: [];
+      };
       subscriptions: {
         Row: {
           cancelled_at: string | null;
@@ -565,6 +571,11 @@ export type Database = {
         Args: { _days?: number };
         Returns: { day: string; new_users: number }[];
       };
+      check_rate_limit: {
+        Args: { _key: string; _max_hits: number; _window_seconds: number };
+        Returns: boolean;
+      };
+      cleanup_rate_limit_hits: { Args: never; Returns: undefined };
       consume_credit: {
         Args: { _description?: string; _operation_id: string; _tool_id: string };
         Returns: Json;

@@ -2,6 +2,7 @@ import { getRequest } from "@tanstack/react-start/server";
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Json } from "@/integrations/supabase/types";
+import { logger } from "@/lib/logger.server";
 
 /**
  * Scrittura dell'audit log. Unico punto di scrittura della tabella
@@ -39,5 +40,6 @@ export async function writeAuditLog(entry: {
     metadata: (entry.metadata ?? {}) as Json,
   });
 
-  if (error) console.error("[audit-log] scrittura fallita", entry.action, error.message);
+  if (error)
+    logger.error("audit-log: scrittura fallita", { action: entry.action, error: error.message });
 }

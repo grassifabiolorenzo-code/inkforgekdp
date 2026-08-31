@@ -10,7 +10,9 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { installClientErrorCapture } from "../lib/client-error-capture";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { captureError } from "../lib/sentry";
 import { I18nProvider } from "../lib/i18n";
 
 function NotFoundComponent() {
@@ -40,6 +42,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    captureError(error, { source: "client", mechanism: "react_error_boundary" });
   }, [error]);
 
   return (
@@ -117,6 +120,10 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    installClientErrorCapture();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

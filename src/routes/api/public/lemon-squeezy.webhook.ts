@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { STARTER_BONUS_CREDITS } from "@/config/plans";
+import { logger } from "@/lib/logger.server";
 
 /**
  * Webhook Lemon Squeezy — unica fonte di verità per lo stato dell'abbonamento.
@@ -67,7 +68,7 @@ export const Route = createFileRoute("/api/public/lemon-squeezy/webhook")({
         try {
           valid = await verifyWebhookSignature(raw, signature);
         } catch (error) {
-          console.error("[lemon-webhook] config error", error);
+          logger.error("lemon-webhook: config error", { error: String(error) });
           return new Response("Webhook non configurato", { status: 500 });
         }
         if (!valid) return new Response("Invalid signature", { status: 401 });
@@ -98,7 +99,11 @@ export const Route = createFileRoute("/api/public/lemon-squeezy/webhook")({
                 _description: `Acquisto pacchetto ${amount} crediti`,
               });
               if (error)
-                console.error("[lemon-webhook] add_purchased_credits failed", error.message);
+                logger.error("lemon-webhook: add_purchased_credits failed", {
+                  error: error.message,
+                  orderId,
+                  userId: customData.user_id,
+                });
             }
           }
 
@@ -129,10 +134,10 @@ export const Route = createFileRoute("/api/public/lemon-squeezy/webhook")({
               { onConflict: "provider,provider_payment_id", ignoreDuplicates: true },
             );
             if (payError)
-              console.error(
-                "[lemon-webhook] payments upsert (order_created) failed",
-                payError.message,
-              );
+              logger.error("lemon-webhook: payments upsert (order_created) failed", {
+                error: payError.message,
+                orderId,
+              });
           }
           return new Response("ok", { status: 200 });
         }
@@ -148,7 +153,11 @@ export const Route = createFileRoute("/api/public/lemon-squeezy/webhook")({
               .update({ status: "refunded" })
               .eq("provider", "lemon_squeezy")
               .eq("provider_payment_id", String(orderId));
-            if (error) console.error("[lemon-webhook] refund update failed", error.message);
+            if (error)
+              logger.error("lemon-webhook: refund update failed", {
+                error: error.message,
+                orderId,
+              });
 
             const { data: payRow } = await supabaseAdmin
               .from("payments")
@@ -186,7 +195,7 @@ export const Route = createFileRoute("/api/public/lemon-squeezy/webhook")({
 
         const resolvedUserId = userId ?? existing?.user_id ?? null;
         if (!resolvedUserId) {
-          console.error("[lemon-webhook] utente non identificato", { event, lsSubscriptionId });
+          logger.error("lemon-webhook: utente non identificato", { event, lsSubscriptionId });
           return new Response("user not identified", { status: 202 });
         }
 
@@ -245,13 +254,21 @@ export const Route = createFileRoute("/api/public/lemon-squeezy/webhook")({
             .update(patch as never)
             .eq("id", existing.id);
           if (error) {
-            console.error("[lemon-webhook] update failed", error.message);
+            logger.error("lemon-webhook: subscription update failed", {
+              error: error.message,
+              event,
+              lsSubscriptionId,
+            });
             return new Response("db error", { status: 500 });
           }
         } else {
           const { error } = await supabaseAdmin.from("subscriptions").insert(patch as never);
           if (error) {
-            console.error("[lemon-webhook] insert failed", error.message);
+            logger.error("lemon-webhook: subscription insert failed", {
+              error: error.message,
+              event,
+              lsSubscriptionId,
+            });
             return new Response("db error", { status: 500 });
           }
         }
@@ -262,7 +279,11 @@ export const Route = createFileRoute("/api/public/lemon-squeezy/webhook")({
             _user_id: resolvedUserId,
             _amount: STARTER_BONUS_CREDITS,
           });
-          if (bonusError) console.error("[lemon-webhook] bonus error", bonusError.message);
+          if (bonusError)
+            logger.error("lemon-webhook: bonus error", {
+              error: bonusError.message,
+              userId: resolvedUserId,
+            });
         }
 
         // Ledger pagamenti: una riga per ogni fattura di abbonamento riuscita/fallita, così
@@ -292,7 +313,10 @@ export const Route = createFileRoute("/api/public/lemon-squeezy/webhook")({
               { onConflict: "provider,provider_payment_id", ignoreDuplicates: true },
             );
             if (payError)
-              console.error("[lemon-webhook] payments upsert (invoice) failed", payError.message);
+              logger.error("lemon-webhook: payments upsert (invoice) failed", {
+                error: payError.message,
+                invoiceId,
+              });
           }
         }
 
@@ -306,6 +330,7 @@ export const Route = createFileRoute("/api/public/lemon-squeezy/webhook")({
         if (event === "subscription_cancelled")
           await dispatchNotification({ event: "subscription_cancelled", userId: resolvedUserId });
 
+        logger.info("lemon-webhook: event processed", { event, userId: resolvedUserId, planSlug });
         return new Response("ok", { status: 200 });
       },
     },

@@ -1,3 +1,5 @@
+import { logger } from "@/lib/logger.server";
+
 /**
  * Architettura notifiche/email — predisposizione.
  * I singoli provider (Resend, SMTP, ecc.) potranno essere collegati qui
@@ -39,7 +41,8 @@ const ADMIN_RELEVANT_EVENTS: Partial<
  * un provider: qui si registra solo l'evento, senza fingere che una mail sia stata spedita.
  */
 export async function dispatchNotification(payload: NotificationPayload): Promise<void> {
-  console.info("[notification]", payload.event, {
+  logger.info("notification: dispatched", {
+    event: payload.event,
     userId: payload.userId ?? null,
     email: payload.email ?? null,
   });
@@ -57,6 +60,6 @@ export async function dispatchNotification(payload: NotificationPayload): Promis
       metadata: { userId: payload.userId ?? null, ...payload.data },
     });
   } catch (error) {
-    console.error("[notification] scrittura admin_notifications fallita", error);
+    logger.error("notification: scrittura admin_notifications fallita", { error: String(error) });
   }
 }

@@ -3,6 +3,10 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { CREDIT_PACK } from "@/config/plans";
+import { enforceRateLimit } from "@/lib/rateLimit.server";
+
+/** Limite comune per le azioni di billing: chiamano tutte l'API esterna di Lemon Squeezy. */
+const BILLING_RATE_LIMIT = { maxHits: 10, windowSeconds: 60 };
 
 /** Server functions di billing: checkout, portale cliente, cancellazione. */
 
@@ -40,6 +44,8 @@ export const createCheckout = createServerFn({ method: "POST" })
     }
 
     try {
+      await enforceRateLimit(`checkout:${context.userId}`, BILLING_RATE_LIMIT);
+
       const url = await createCheckoutUrl({
         planSlug: data.planSlug,
         email: claims.email ?? null,
@@ -57,9 +63,11 @@ export const createCheckout = createServerFn({ method: "POST" })
       return { url: url as string | null, error: null as string | null };
     } catch (err) {
       console.error("[billing] checkout failed", err);
+      const message =
+        err instanceof Error && err.message.startsWith("Troppe richieste") ? err.message : null;
       return {
         url: null as string | null,
-        error: "Checkout non disponibile al momento." as string | null,
+        error: (message ?? "Checkout non disponibile al momento.") as string | null,
       };
     }
   });
@@ -86,6 +94,8 @@ export const createCreditPackCheckout = createServerFn({ method: "POST" })
     }
 
     try {
+      await enforceRateLimit(`checkout:${context.userId}`, BILLING_RATE_LIMIT);
+
       const url = await createCheckoutUrl({
         planSlug: CREDIT_PACK.id,
         email: claims.email ?? null,
@@ -104,9 +114,11 @@ export const createCreditPackCheckout = createServerFn({ method: "POST" })
       return { url: url as string | null, error: null as string | null };
     } catch (err) {
       console.error("[billing] credit pack checkout failed", err);
+      const message =
+        err instanceof Error && err.message.startsWith("Troppe richieste") ? err.message : null;
       return {
         url: null as string | null,
-        error: "Checkout non disponibile al momento." as string | null,
+        error: (message ?? "Checkout non disponibile al momento.") as string | null,
       };
     }
   });
@@ -114,6 +126,8 @@ export const createCreditPackCheckout = createServerFn({ method: "POST" })
 export const getManageSubscriptionUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    await enforceRateLimit(`billing-portal:${context.userId}`, BILLING_RATE_LIMIT);
+
     const { data: sub } = await context.supabase
       .from("subscriptions")
       .select("lemon_squeezy_subscription_id, status")
@@ -135,6 +149,8 @@ export const getManageSubscriptionUrl = createServerFn({ method: "POST" })
 export const cancelMySubscription = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    await enforceRateLimit(`billing-cancel:${context.userId}`, BILLING_RATE_LIMIT);
+
     const { data: sub } = await context.supabase
       .from("subscriptions")
       .select("lemon_squeezy_subscription_id")
@@ -162,6 +178,8 @@ export const changePlan = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => changePlanInput.parse(data))
   .handler(async ({ data, context }) => {
+    await enforceRateLimit(`billing-change-plan:${context.userId}`, BILLING_RATE_LIMIT);
+
     const { data: sub } = await context.supabase
       .from("subscriptions")
       .select("lemon_squeezy_subscription_id, status")
@@ -175,9 +193,8 @@ export const changePlan = createServerFn({ method: "POST" })
       return { ok: false as const, reason: "no_subscription" as const };
     }
 
-    const { getBillingConfigStatus, readLemonConfig, updateSubscriptionVariant } = await import(
-      "./lemon-squeezy.server"
-    );
+    const { getBillingConfigStatus, readLemonConfig, updateSubscriptionVariant } =
+      await import("./lemon-squeezy.server");
     const status = getBillingConfigStatus();
     if (!status.apiKey || !status.storeId || !status.variants[data.planSlug]) {
       return { ok: false as const, reason: "variant_not_configured" as const };
