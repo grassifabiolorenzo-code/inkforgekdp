@@ -27,7 +27,7 @@ const TEST_MODE_STATE: CreditState = {
   limit: -1,
   used: 0,
   bonus_remaining: 0,
-  allowed_tools: ["copertine", "pubblicazione", "aplus", "triage"],
+  allowed_tools: ["copertine", "pubblicazione", "aplus", "triage", "amazon", "blurb", "bio", "promo"],
   remaining: -1,
 };
 
