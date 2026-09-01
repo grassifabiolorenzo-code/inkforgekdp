@@ -22,6 +22,8 @@ export const Route = createFileRoute("/status")({
       { property: "og:description", content: description },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: "/brand/logo.png" },
+      { name: "twitter:image", content: "/brand/logo.png" },
     ],
   }),
   component: StatusPage,

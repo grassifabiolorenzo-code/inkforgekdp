@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { logger } from "@/lib/logger.server";
 
 /**
  * Sistema crediti centralizzato.
@@ -104,7 +105,7 @@ export const getAccountState = createServerFn({ method: "GET" })
           _referral_code: data.referralCode,
         });
         if (referralError)
-          console.error("[referral] register_referral fallito", referralError.message);
+          logger.error("referral: register_referral fallito", { error: referralError.message });
       }
 
       if (ensured) {

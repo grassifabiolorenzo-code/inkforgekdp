@@ -24,13 +24,18 @@ export const exportMyData = createServerFn({ method: "POST" })
       supabase.from("credit_transactions").select("*").eq("user_id", userId),
     ]);
 
-    // payments non ha una policy RLS per authenticated (solo service_role): l'accesso
-    // ai propri pagamenti passa da qui, con un filtro rigido sul proprio user_id.
+    // payments, leads ed email_sends non hanno una policy RLS per authenticated (solo
+    // service_role): l'accesso ai propri dati passa da qui, con un filtro rigido sul
+    // proprio user_id (o sulla propria email per leads, che non ha una colonna user_id).
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: payments } = await supabaseAdmin
-      .from("payments")
-      .select("*")
-      .eq("user_id", userId);
+    const email = profile.data?.email ?? null;
+    const [{ data: payments }, { data: leads }, { data: emailSends }] = await Promise.all([
+      supabaseAdmin.from("payments").select("*").eq("user_id", userId),
+      email
+        ? supabaseAdmin.from("leads").select("*").eq("email", email.toLowerCase())
+        : Promise.resolve({ data: [] }),
+      supabaseAdmin.from("email_sends").select("*").eq("recipient_user_id", userId),
+    ]);
 
     return {
       exportedAt: new Date().toISOString(),
@@ -39,6 +44,8 @@ export const exportMyData = createServerFn({ method: "POST" })
       usage: usage.data ?? [],
       creditTransactions: creditTransactions.data ?? [],
       payments: payments ?? [],
+      leads: leads ?? [],
+      emailSends: emailSends ?? [],
     };
   });
 
@@ -52,6 +59,11 @@ export const deleteMyAccount = createServerFn({ method: "POST" })
     const email = (context.claims as { email?: string }).email ?? null;
 
     const { error } = await supabaseAdmin.auth.admin.deleteUser(context.userId);
+
+    if (!error) {
+      const { eraseUserMarketingData } = await import("@/lib/gdprErasure.server");
+      await eraseUserMarketingData(supabaseAdmin, context.userId, email);
+    }
 
     await writeAuditLog({
       adminId: null,

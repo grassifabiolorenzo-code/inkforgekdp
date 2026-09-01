@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { CREDIT_PACK } from "@/config/plans";
+import { logger } from "@/lib/logger.server";
 import { enforceRateLimit } from "@/lib/rateLimit.server";
 
 /** Limite comune per le azioni di billing: chiamano tutte l'API esterna di Lemon Squeezy. */
@@ -77,7 +78,9 @@ export const createCheckout = createServerFn({ method: "POST" })
       }
       return { url: url as string | null, error: null as string | null };
     } catch (err) {
-      console.error("[billing] checkout failed", err);
+      logger.error("billing: checkout fallito", {
+        error: err instanceof Error ? err.message : String(err),
+      });
       const message =
         err instanceof Error && err.message.startsWith("Troppe richieste") ? err.message : null;
       return {
@@ -128,7 +131,9 @@ export const createCreditPackCheckout = createServerFn({ method: "POST" })
       }
       return { url: url as string | null, error: null as string | null };
     } catch (err) {
-      console.error("[billing] credit pack checkout failed", err);
+      logger.error("billing: checkout pacchetto crediti fallito", {
+        error: err instanceof Error ? err.message : String(err),
+      });
       const message =
         err instanceof Error && err.message.startsWith("Troppe richieste") ? err.message : null;
       return {

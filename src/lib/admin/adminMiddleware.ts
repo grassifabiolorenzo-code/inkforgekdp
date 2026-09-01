@@ -2,6 +2,7 @@ import { createMiddleware } from "@tanstack/react-start";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { can, type AdminAction, type AdminResource, type AdminRole } from "@/lib/adminRbac";
+import { logger } from "@/lib/logger.server";
 
 /**
  * Verifica server-side del ruolo admin (mai fidarsi del frontend). Compone
@@ -26,7 +27,7 @@ export const requireAdminRole = createMiddleware({ type: "function" })
     ) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { error } = await supabaseAdmin.rpc("ensure_super_admin", { _user_id: userId });
-      if (error) console.error("[admin] bootstrap super admin fallito", error.message);
+      if (error) logger.error("admin: bootstrap super admin fallito", { error: error.message });
     }
 
     const { data: adminRow, error: roleError } = await supabase
@@ -47,7 +48,8 @@ export const requireAdminRole = createMiddleware({ type: "function" })
       .update({ last_login_at: new Date().toISOString() })
       .eq("user_id", userId)
       .then(({ error }) => {
-        if (error) console.error("[admin] aggiornamento last_login_at fallito", error.message);
+        if (error)
+          logger.error("admin: aggiornamento last_login_at fallito", { error: error.message });
       });
 
     return next({

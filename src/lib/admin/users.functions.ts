@@ -203,7 +203,16 @@ export const deleteAdminUser = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { writeAuditLog } = await import("@/lib/admin/adminAudit.server");
 
+    const { data: userRow } = await supabaseAdmin.auth.admin.getUserById(data.userId);
+    const email = userRow.user?.email ?? null;
+
     const { error } = await supabaseAdmin.auth.admin.deleteUser(data.userId);
+
+    if (!error) {
+      const { eraseUserMarketingData } = await import("@/lib/gdprErasure.server");
+      await eraseUserMarketingData(supabaseAdmin, data.userId, email);
+    }
+
     await writeAuditLog({
       adminId: context.userId,
       adminEmail: context.adminEmail,

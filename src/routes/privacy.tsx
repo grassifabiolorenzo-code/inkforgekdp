@@ -16,6 +16,8 @@ export const Route = createFileRoute("/privacy")({
       { property: "og:description", content: description },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: "/brand/logo.png" },
+      { name: "twitter:image", content: "/brand/logo.png" },
     ],
   }),
   component: PrivacyPage,
@@ -50,8 +52,8 @@ function PrivacyPage() {
           <section className="space-y-2">
             <h2 className="text-lg font-semibold text-foreground">3. File caricati nei tool</h2>
             <p>
-              I file elaborati dai tool sono usati soltanto per produrre il risultato richiesto e non
-              vengono ceduti a terzi.
+              I file elaborati dai tool sono usati soltanto per produrre il risultato richiesto e
+              non vengono ceduti a terzi.
             </p>
           </section>
           <section className="space-y-2">

@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 
 const title = "InkForgeKdp — Suite di tool per pubblicare su Amazon KDP";
 const description =
-  "Copertine, listing, contenuti A+ e triage immagini in un'unica piattaforma. Tutti i tool in ogni piano, da €15/mese.";
+  "Copertine, listing, contenuti A+ e triage immagini in un'unica piattaforma per chi pubblica su Amazon KDP. Piani da €15/mese.";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -23,6 +23,8 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: description },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: "/brand/logo.png" },
+      { name: "twitter:image", content: "/brand/logo.png" },
     ],
   }),
   component: LandingPage,

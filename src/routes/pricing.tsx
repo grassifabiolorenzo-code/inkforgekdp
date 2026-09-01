@@ -19,6 +19,8 @@ export const Route = createFileRoute("/pricing")({
       { property: "og:description", content: description },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: "/brand/logo.png" },
+      { name: "twitter:image", content: "/brand/logo.png" },
     ],
   }),
   component: PricingPage,
@@ -35,7 +37,8 @@ function PricingPage() {
             Un piano per <span className="text-gradient">ogni ritmo di pubblicazione</span>
           </h1>
           <p className="relative mx-auto mt-4 max-w-xl px-4 text-muted-foreground">
-            Otto strumenti in totale: quali sono inclusi e quanti utilizzi mensili hai dipende dal piano scelto.
+            Otto strumenti in totale: quali sono inclusi e quanti utilizzi mensili hai dipende dal
+            piano scelto.
           </p>
         </div>
         <PricingSection />
