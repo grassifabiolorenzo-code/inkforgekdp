@@ -12,7 +12,11 @@ export interface InteriorAnalysisResult {
 
 export async function analyzeInteriorPdf(file: File): Promise<InteriorAnalysisResult> {
   if (typeof window === "undefined") {
-    return { scanned: false, totalPages: 0, errorsFound: ["Analisi disponibile solo nel browser."] };
+    return {
+      scanned: false,
+      totalPages: 0,
+      errorsFound: ["Analisi disponibile solo nel browser."],
+    };
   }
 
   const pdfjsLib = await import("pdfjs-dist");
@@ -25,6 +29,11 @@ export async function analyzeInteriorPdf(file: File): Promise<InteriorAnalysisRe
   const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
   const pdfDoc = await loadingTask.promise;
   result.totalPages = pdfDoc.numPages;
+
+  if (pdfDoc.numPages === 0) {
+    result.errorsFound.push("Il PDF non contiene nessuna pagina.");
+    return result;
+  }
 
   for (let i = 1; i <= pdfDoc.numPages; i++) {
     const page = await pdfDoc.getPage(i);

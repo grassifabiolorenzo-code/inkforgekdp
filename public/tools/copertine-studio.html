@@ -438,8 +438,12 @@
     <!-- SCRIPT ENGINE FIXATO -->
     <script>
         // Ponte con la piattaforma InkForgeKdp: verifica accesso/crediti prima dell'export.
+        // Se questa pagina viene aperta senza un genitore (es. navigazione diretta
+        // all'URL, o una finestra standalone non collegata all'app), NON c'è modo
+        // sicuro di verificare permesso/addebito: si nega di default (fail-closed),
+        // mai si autorizza in automatico.
         window.__opRequestExport = function () {
-            if (window.parent === window) return Promise.resolve(true);
+            if (window.parent === window) return Promise.resolve(false);
             return new Promise((resolve) => {
                 const id = 'exp_' + Date.now() + '_' + Math.random().toString(36).slice(2);
                 const timer = setTimeout(() => { cleanup(); resolve(false); }, 20000);
@@ -458,7 +462,7 @@
         // Addebita il credito solo dopo la rasterizzazione HD: il download parte
         // esclusivamente se la piattaforma conferma l'addebito riuscito.
         window.__opConfirmCharge = function () {
-            if (window.parent === window) return Promise.resolve(true);
+            if (window.parent === window) return Promise.resolve(false);
             return new Promise((resolve) => {
                 const id = 'chg_' + Date.now() + '_' + Math.random().toString(36).slice(2);
                 const timer = setTimeout(() => { cleanup(); resolve(false); }, 20000);

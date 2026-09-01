@@ -1,4 +1,4 @@
-import { Copy, Download, Loader2, Sparkles } from "lucide-react";
+import { Copy, Download, Loader2, Sparkles, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -20,6 +20,7 @@ import { OutputLanguageSelect, useOutputLanguage } from "@/components/tools/Outp
 import { AiStyleControls } from "@/components/tools/ai/AiStyleControls";
 import { DEFAULT_CREATIVITY, DEFAULT_TONE } from "@/components/tools/ai/aiStyle";
 import { generateBlurbCopy } from "@/lib/aiCopy.functions";
+import { extractCoverContent, extractPdfContent } from "@/components/tools/pdfContent";
 
 import {
   type BlurbInput,
@@ -51,6 +52,8 @@ export function BlurbTool({ runtime }: { runtime: ToolRuntime }) {
   const [aiUsed, setAiUsed] = useState(false);
   const [output, setOutput] = useState<BlurbOutput | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [interiorFile, setInteriorFile] = useState<File | null>(null);
   const chargeGuard = useRef(false);
 
   function update(patch: Partial<Omit<BlurbInput, "tone">>) {
@@ -101,6 +104,10 @@ export function BlurbTool({ runtime }: { runtime: ToolRuntime }) {
 
         if (useAi) {
           try {
+            const cover = coverFile ? await extractCoverContent(coverFile) : null;
+            const interior = interiorFile
+              ? await extractPdfContent(interiorFile, { maxImages: 2, maxTextPages: 4 })
+              : null;
             const response = await generateBlurbCopy({
               data: {
                 locale: outputLocale,
@@ -112,6 +119,9 @@ export function BlurbTool({ runtime }: { runtime: ToolRuntime }) {
                 stakes: input.stakes || undefined,
                 tone,
                 creativity,
+                interiorText: interior?.text || undefined,
+                interiorImages: interior?.images,
+                coverImages: cover?.images,
               },
             });
             if (response.ok) {
@@ -224,6 +234,44 @@ export function BlurbTool({ runtime }: { runtime: ToolRuntime }) {
             onChange={(e) => update({ stakes: e.target.value })}
             placeholder="Es. l'eredità di famiglia e la verità su suo padre"
           />
+        </div>
+
+        <div className="space-y-1.5">
+          <Label>Copertina e/o interno del libro (opzionale)</Label>
+          <p className="text-xs text-muted-foreground">
+            Se li carichi, l'AI cita dettagli reali del libro invece di restare generica — non sono
+            obbligatori: senza, il testo si basa comunque sui campi qui sopra.
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            <label
+              htmlFor="b-cover-file"
+              className="flex cursor-pointer flex-col items-center gap-1.5 rounded-md border-2 border-dashed border-border bg-surface p-3 text-center text-xs text-muted-foreground hover:border-accent"
+            >
+              <Upload className="size-4" />
+              {coverFile ? coverFile.name : "Copertina (PDF o immagine)"}
+              <input
+                id="b-cover-file"
+                type="file"
+                accept="image/*,.pdf"
+                className="sr-only"
+                onChange={(e) => setCoverFile(e.target.files?.[0] ?? null)}
+              />
+            </label>
+            <label
+              htmlFor="b-interior-file"
+              className="flex cursor-pointer flex-col items-center gap-1.5 rounded-md border-2 border-dashed border-border bg-surface p-3 text-center text-xs text-muted-foreground hover:border-accent"
+            >
+              <Upload className="size-4" />
+              {interiorFile ? interiorFile.name : "Interno (PDF)"}
+              <input
+                id="b-interior-file"
+                type="file"
+                accept=".pdf"
+                className="sr-only"
+                onChange={(e) => setInteriorFile(e.target.files?.[0] ?? null)}
+              />
+            </label>
+          </div>
         </div>
 
         <div className="flex items-start justify-between gap-3 rounded-md border border-border bg-surface p-3">

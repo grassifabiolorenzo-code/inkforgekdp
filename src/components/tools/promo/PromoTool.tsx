@@ -1,4 +1,4 @@
-import { Copy, Download, Loader2, Sparkles } from "lucide-react";
+import { Copy, Download, Loader2, Sparkles, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -14,6 +14,7 @@ import { OutputLanguageSelect, useOutputLanguage } from "@/components/tools/Outp
 import { AiStyleControls } from "@/components/tools/ai/AiStyleControls";
 import { DEFAULT_CREATIVITY, DEFAULT_TONE } from "@/components/tools/ai/aiStyle";
 import { generatePromoCopy } from "@/lib/aiCopy.functions";
+import { extractCoverContent, extractPdfContent } from "@/components/tools/pdfContent";
 
 import {
   PLATFORMS,
@@ -46,6 +47,8 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
   const [aiUsed, setAiUsed] = useState(false);
   const [output, setOutput] = useState<PromoOutput | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [interiorFile, setInteriorFile] = useState<File | null>(null);
   const chargeGuard = useRef(false);
 
   function update(patch: Partial<Omit<PromoInput, "tone">>) {
@@ -55,7 +58,9 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
   function togglePlatform(platform: PromoPlatform, checked: boolean) {
     setInput((prev) => ({
       ...prev,
-      platforms: checked ? [...prev.platforms, platform] : prev.platforms.filter((p) => p !== platform),
+      platforms: checked
+        ? [...prev.platforms, platform]
+        : prev.platforms.filter((p) => p !== platform),
     }));
   }
 
@@ -67,7 +72,9 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
 
   function downloadOutput() {
     if (!output) return;
-    const blob = new Blob([formatPromoKitForExport({ ...input, tone }, output)], { type: "text/plain;charset=utf-8" });
+    const blob = new Blob([formatPromoKitForExport({ ...input, tone }, output)], {
+      type: "text/plain;charset=utf-8",
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -105,6 +112,10 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
 
         if (useAi) {
           try {
+            const cover = coverFile ? await extractCoverContent(coverFile) : null;
+            const interior = interiorFile
+              ? await extractPdfContent(interiorFile, { maxImages: 2, maxTextPages: 4 })
+              : null;
             const response = await generatePromoCopy({
               data: {
                 locale: outputLocale,
@@ -116,6 +127,9 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
                 platforms: input.platforms,
                 tone,
                 creativity,
+                interiorText: interior?.text || undefined,
+                interiorImages: interior?.images,
+                coverImages: cover?.images,
               },
             });
             if (response.ok) {
@@ -125,8 +139,14 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
                 .map((p) => ({ platform: p.platform as PromoPlatform, caption: p.caption }));
               result = {
                 posts: posts.length > 0 ? posts : result.posts,
-                adsHeadlines: response.copy.adsHeadlines.length > 0 ? response.copy.adsHeadlines : result.adsHeadlines,
-                adsBullets: response.copy.adsBullets.length > 0 ? response.copy.adsBullets : result.adsBullets,
+                adsHeadlines:
+                  response.copy.adsHeadlines.length > 0
+                    ? response.copy.adsHeadlines
+                    : result.adsHeadlines,
+                adsBullets:
+                  response.copy.adsBullets.length > 0
+                    ? response.copy.adsBullets
+                    : result.adsBullets,
                 launchEmail: response.copy.launchEmail || result.launchEmail,
               };
               usedAi = true;
@@ -143,7 +163,9 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
         if (!charge.ok) return;
         setOutput(result);
         setAiUsed(usedAi);
-        toast.success(charge.duplicate ? "Generazione completata" : "Generazione completata — 1 credito");
+        toast.success(
+          charge.duplicate ? "Generazione completata" : "Generazione completata — 1 credito",
+        );
       } finally {
         setGenerating(false);
       }
@@ -160,7 +182,8 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
             Social & Ads Promo Kit
           </h3>
           <p className="mt-1 text-xs text-muted-foreground">
-            Post social multi-piattaforma, headline/bullet Amazon Ads ed email di lancio in un click.
+            Post social multi-piattaforma, headline/bullet Amazon Ads ed email di lancio in un
+            click.
           </p>
         </div>
 
@@ -168,12 +191,21 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
 
         <div className="space-y-1.5">
           <Label htmlFor="pr-title">Titolo del libro</Label>
-          <Input id="pr-title" value={input.bookTitle} onChange={(e) => update({ bookTitle: e.target.value })} />
+          <Input
+            id="pr-title"
+            value={input.bookTitle}
+            onChange={(e) => update({ bookTitle: e.target.value })}
+          />
         </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="pr-genre">Genere (per hashtag, opzionale)</Label>
-          <Input id="pr-genre" value={input.genre} onChange={(e) => update({ genre: e.target.value })} placeholder="Es. thriller, self-help, fantasy..." />
+          <Input
+            id="pr-genre"
+            value={input.genre}
+            onChange={(e) => update({ genre: e.target.value })}
+            placeholder="Es. thriller, self-help, fantasy..."
+          />
         </div>
 
         <div className="space-y-1.5">
@@ -189,19 +221,34 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
 
         <div className="space-y-1.5">
           <Label htmlFor="pr-audience">Target / pubblico ideale</Label>
-          <Input id="pr-audience" value={input.audience} onChange={(e) => update({ audience: e.target.value })} placeholder="Es. lettori di narrativa contemporanea" />
+          <Input
+            id="pr-audience"
+            value={input.audience}
+            onChange={(e) => update({ audience: e.target.value })}
+            placeholder="Es. lettori di narrativa contemporanea"
+          />
         </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="pr-cta">Call to action (opzionale)</Label>
-          <Input id="pr-cta" value={input.cta} onChange={(e) => update({ cta: e.target.value })} placeholder="Es. Disponibile ora su Amazon in cartaceo ed eBook." />
+          <Input
+            id="pr-cta"
+            value={input.cta}
+            onChange={(e) => update({ cta: e.target.value })}
+            placeholder="Es. Disponibile ora su Amazon in cartaceo ed eBook."
+          />
         </div>
 
         <div className="space-y-2">
-          <Label className="text-xs tracking-wide uppercase text-muted-foreground">Piattaforme social</Label>
+          <Label className="text-xs tracking-wide uppercase text-muted-foreground">
+            Piattaforme social
+          </Label>
           <div className="grid grid-cols-2 gap-2">
             {PLATFORMS.map((p) => (
-              <label key={p.id} className="flex items-center gap-2 rounded-md border border-border bg-surface p-2.5 text-sm">
+              <label
+                key={p.id}
+                className="flex items-center gap-2 rounded-md border border-border bg-surface p-2.5 text-sm"
+              >
                 <Checkbox
                   checked={input.platforms.includes(p.id)}
                   onCheckedChange={(checked) => togglePlatform(p.id, checked === true)}
@@ -212,14 +259,52 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
           </div>
         </div>
 
+        <div className="space-y-1.5">
+          <Label>Copertina e/o interno del libro (opzionale)</Label>
+          <p className="text-xs text-muted-foreground">
+            Se li carichi, post e email di lancio citano dettagli reali del libro invece di restare
+            generici — non sono obbligatori: senza, il testo si basa comunque sui campi qui sopra.
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            <label
+              htmlFor="pr-cover-file"
+              className="flex cursor-pointer flex-col items-center gap-1.5 rounded-md border-2 border-dashed border-border bg-surface p-3 text-center text-xs text-muted-foreground hover:border-accent"
+            >
+              <Upload className="size-4" />
+              {coverFile ? coverFile.name : "Copertina (PDF o immagine)"}
+              <input
+                id="pr-cover-file"
+                type="file"
+                accept="image/*,.pdf"
+                className="sr-only"
+                onChange={(e) => setCoverFile(e.target.files?.[0] ?? null)}
+              />
+            </label>
+            <label
+              htmlFor="pr-interior-file"
+              className="flex cursor-pointer flex-col items-center gap-1.5 rounded-md border-2 border-dashed border-border bg-surface p-3 text-center text-xs text-muted-foreground hover:border-accent"
+            >
+              <Upload className="size-4" />
+              {interiorFile ? interiorFile.name : "Interno (PDF)"}
+              <input
+                id="pr-interior-file"
+                type="file"
+                accept=".pdf"
+                className="sr-only"
+                onChange={(e) => setInteriorFile(e.target.files?.[0] ?? null)}
+              />
+            </label>
+          </div>
+        </div>
+
         <div className="flex items-start justify-between gap-3 rounded-md border border-border bg-surface p-3">
           <div className="space-y-0.5">
             <Label htmlFor="pr-use-ai" className="text-sm">
               Genera con AI (consigliato)
             </Label>
             <p className="text-xs text-muted-foreground">
-              Testi scritti su misura nella lingua scelta sopra. Se l'AI non è disponibile, viene usato
-              automaticamente un motore interno di riserva (solo italiano).
+              Testi scritti su misura nella lingua scelta sopra. Se l'AI non è disponibile, viene
+              usato automaticamente un motore interno di riserva (solo italiano).
             </p>
           </div>
           <Switch id="pr-use-ai" checked={useAi} onCheckedChange={setUseAi} />
@@ -235,18 +320,24 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
         />
 
         <Button className="w-full" onClick={handleGenerate} disabled={generating}>
-          {generating ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Sparkles className="mr-2 size-4" />}
+          {generating ? (
+            <Loader2 className="mr-2 size-4 animate-spin" />
+          ) : (
+            <Sparkles className="mr-2 size-4" />
+          )}
           Genera — 1 credito
         </Button>
       </div>
 
       <div className="panel space-y-4 p-6">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">Risultato</h3>
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">
+          Risultato
+        </h3>
 
         {!output && (
           <p className="text-sm text-muted-foreground">
-            Compila il form e premi "Genera" per ottenere post social, ads Amazon ed email di lancio pronti da
-            usare.
+            Compila il form e premi "Genera" per ottenere post social, ads Amazon ed email di lancio
+            pronti da usare.
           </p>
         )}
 
@@ -261,19 +352,32 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
               return (
                 <div key={`${post.platform}-${index}`} className="space-y-1.5">
                   <div className="flex items-center justify-between gap-3">
-                    <Label className="text-xs tracking-wide uppercase text-muted-foreground">{label}</Label>
-                    <Button variant="ghost" size="sm" onClick={() => copyToClipboard(post.caption, `Post ${label}`)}>
+                    <Label className="text-xs tracking-wide uppercase text-muted-foreground">
+                      {label}
+                    </Label>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyToClipboard(post.caption, `Post ${label}`)}
+                    >
                       <Copy className="size-4" />
                     </Button>
                   </div>
-                  <Textarea readOnly rows={4} className="text-sm leading-relaxed" value={post.caption} />
+                  <Textarea
+                    readOnly
+                    rows={4}
+                    className="text-sm leading-relaxed"
+                    value={post.caption}
+                  />
                 </div>
               );
             })}
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between gap-3">
-                <Label className="text-xs tracking-wide uppercase text-muted-foreground">Amazon Ads — Headline</Label>
+                <Label className="text-xs tracking-wide uppercase text-muted-foreground">
+                  Amazon Ads — Headline
+                </Label>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -301,7 +405,9 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between gap-3">
-                <Label className="text-xs tracking-wide uppercase text-muted-foreground">Amazon Ads — Bullet</Label>
+                <Label className="text-xs tracking-wide uppercase text-muted-foreground">
+                  Amazon Ads — Bullet
+                </Label>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -329,12 +435,23 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between gap-3">
-                <Label className="text-xs tracking-wide uppercase text-muted-foreground">Email di lancio</Label>
-                <Button variant="ghost" size="sm" onClick={() => copyToClipboard(output.launchEmail, "Email di lancio")}>
+                <Label className="text-xs tracking-wide uppercase text-muted-foreground">
+                  Email di lancio
+                </Label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(output.launchEmail, "Email di lancio")}
+                >
                   <Copy className="size-4" />
                 </Button>
               </div>
-              <Textarea readOnly rows={8} className="font-mono text-xs leading-relaxed" value={output.launchEmail} />
+              <Textarea
+                readOnly
+                rows={8}
+                className="font-mono text-xs leading-relaxed"
+                value={output.launchEmail}
+              />
             </div>
 
             <Button variant="outline" className="w-full" onClick={downloadOutput}>

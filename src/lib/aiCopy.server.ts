@@ -1,7 +1,10 @@
 /**
  * Livello AI (Gemini API diretta, Google) per la generazione dei testi dei tool
- * Pubblicazione, A+ KDPstudio, Blurb, Bio e Promo a partire dai contenuti reali del libro
- * (copertina + pagine interne). Impronta obbligatoria: SEO long-tail, AIDA e PAS.
+ * Pubblicazione, A+ KDPstudio, Blurb, Bio e Promo. Impronta obbligatoria: SEO long-tail, AIDA
+ * e PAS. Per Pubblicazione e A+ copertina/pagine interne sono obbligatorie (il tool non genera
+ * senza); per Blurb, Bio e Promo sono facoltative — se l'autore le allega vengono usate per
+ * rendere il testo specifico su quel libro, altrimenti i tool generano comunque dai soli campi
+ * del form (nessun tool blocca la generazione per mancanza di un file).
  *
  * Modello: Flash-Lite, il livello più economico della famiglia Gemini 3 non in dismissione
  * al momento della scrittura (2026-08). Verificare l'ID esatto in Google AI Studio prima
@@ -28,8 +31,7 @@ export interface SourceContent {
 }
 
 type ContentBlock =
-  | { type: "text"; text: string }
-  | { type: "image_url"; image_url: { url: string } };
+  { type: "text"; text: string } | { type: "image_url"; image_url: { url: string } };
 
 function buildBlocks(prompt: string, source: SourceContent): ContentBlock[] {
   const blocks: ContentBlock[] = [{ type: "text", text: prompt }];
@@ -72,7 +74,13 @@ export function buildStyleDirective(tone?: string, creativity?: number): string 
         : "Usa una scrittura più libera e immaginifica (scene quotidiane, dettagli sensoriali), restando comunque coerente con ciò che le pagine mostrano davvero.";
   return `TONO DI VOCE richiesto: ${toneText}.
 LIVELLO DI CREATIVITÀ: ${level}/10. ${creativityText}
-Mantieni il tono coerente in tutti i testi generati.`;
+Mantieni il tono coerente in tutti i testi generati.
+LUNGHEZZA: per ogni campo con un intervallo o un limite di caratteri indicato più sotto, punta
+SEMPRE alla parte alta di quell'intervallo (o quasi al limite massimo, se è un tetto singolo) —
+mai fermarti al minimo né a una via di mezzo pigra. Un testo completo, denso di dettagli concreti
+e ben argomentato converte meglio di uno breve: usa lo spazio disponibile, non risparmiarlo. Questo
+vale solo finché il testo resta naturale e non diventa ripetitivo o riempitivo — non allungare con
+frasi vuote solo per arrivare al limite.`;
 }
 
 function temperatureFor(creativity?: number): number {
@@ -114,7 +122,8 @@ async function callGateway(
 
   if (!response.ok) {
     const detail = await response.text().catch(() => "");
-    if (response.status === 429) throw new Error("AI temporaneamente occupata: riprova tra qualche secondo.");
+    if (response.status === 429)
+      throw new Error("AI temporaneamente occupata: riprova tra qualche secondo.");
     if (response.status === 402 || response.status === 403)
       throw new Error("AI non disponibile: verifica fatturazione/quota del progetto Gemini.");
     throw new Error(`Errore AI (${response.status}): ${detail.slice(0, 200)}`);
@@ -123,7 +132,10 @@ async function callGateway(
   const data = await response.json();
   const parts: Array<{ text?: string }> = data?.candidates?.[0]?.content?.parts ?? [];
   const content = parts.map((p) => p.text ?? "").join("");
-  const cleaned = content.replace(/^```(?:json)?/i, "").replace(/```$/i, "").trim();
+  const cleaned = content
+    .replace(/^```(?:json)?/i, "")
+    .replace(/```$/i, "")
+    .trim();
   try {
     return JSON.parse(cleaned);
   } catch {
@@ -151,7 +163,6 @@ analizzate: sono la prova che il testo parla di QUESTO libro e non di un libro g
 Non inventare premi, dati di vendita, marchi, autori o personaggi protetti da copyright.
 Rispondi SEMPRE ed ESCLUSIVAMENTE con un oggetto JSON valido, senza testo aggiuntivo.`;
 
-
 export interface AiListingCopy {
   subject?: string | undefined;
   title: string;
@@ -175,7 +186,7 @@ export async function generateListingCopyAi(input: {
   interiorImages?: string[] | undefined;
   coverImages?: string[] | undefined;
 }): Promise<AiListingCopy> {
-  const langName = LOCALE_NAMES[input.locale] ?? LOCALE_NAMES['en']!;
+  const langName = LOCALE_NAMES[input.locale] ?? LOCALE_NAMES["en"]!;
   const prompt = `Genera il listing Amazon KDP nella lingua: ${langName}.
 
 ${buildStyleDirective(input.tone, input.creativity)}
@@ -187,26 +198,33 @@ Dati forniti dall'autore:
 - pagine interne rilevate: ${input.interiorPages || "n/d"}
 
 Analizza copertina e pagine interne allegate. La descrizione deve essere LUNGA e ARTICOLATA
-(1600-2400 caratteri complessivi), scritta con voce umana e riferimenti espliciti a ciò che si vede
-davvero nelle pagine analizzate. Produci JSON con questa forma esatta:
+(3200-4000 caratteri complessivi — il limite tecnico reale del campo descrizione KDP è 4000
+caratteri: avvicinati il più possibile senza superarlo), scritta con voce umana e riferimenti
+espliciti a ciò che si vede davvero nelle pagine analizzate. Produci JSON con questa forma esatta:
 {
   "subject": "soggetto reale dedotto dai contenuti (max 6 parole)",
-  "title": "titolo max 60 caratteri, contiene la keyword principale",
-  "subtitle": "sottotitolo SEO 100-180 caratteri con keyword secondarie",
-  "description": "descrizione lunga di 8-9 paragrafi separati da \\n\\n, 1600-2400 caratteri totali. Struttura: par.1 gancio umano che descrive una scena quotidiana del lettore; par.2 il problema reale; par.3 agitazione (cosa succede se non si risolve, delusioni con libri simili); par.4 presentazione del libro con i dettagli concreti visti nelle pagine; par.5 elenco discorsivo di 3-4 benefici legati a quei contenuti reali; par.6 dettagli tecnici utili (numero di pagine, stampa su un solo lato se visibile, spessore dei tratti, spazi per colorare); par.7 desiderio e piccola proiezione emotiva; par.8 rassicurazione (per chi è adatto, come usarlo); par.9 call to action calda e diretta. Nessun HTML, nessun elenco puntato, nessuna emoji, nessuna ripetizione meccanica della keyword.",
-  "keywords": ["7 keyword long-tail diverse, 3-6 parole ciascuna, minuscole"],
+  "title": "titolo 60-90 caratteri, contiene la keyword principale in modo naturale — MAI keyword stuffing: Amazon sospende le schede con titoli che sembrano una lista di parole chiave",
+  "subtitle": "sottotitolo SEO 170-200 caratteri (limite tecnico reale ~200) con keyword secondarie, sempre naturale e leggibile, mai una lista",
+  "description": "descrizione lunga di 10-11 paragrafi separati da \\n\\n, 3200-4000 caratteri totali. Struttura: par.1 gancio umano che descrive una scena quotidiana del lettore; par.2 il problema reale; par.3 agitazione (cosa succede se non si risolve, delusioni con libri simili); par.4 presentazione del libro con i dettagli concreti visti nelle pagine; par.5 elenco discorsivo di 3-4 benefici legati a quei contenuti reali; par.6 dettagli tecnici utili (numero di pagine, stampa su un solo lato se visibile, spessore dei tratti, spazi per colorare); par.7 per chi non è ancora convinto, cosa distingue questo libro da alternative simili viste sul mercato, sempre in modo onesto e senza nominare marchi/concorrenti; par.8 desiderio e piccola proiezione emotiva; par.9 rassicurazione (per chi è adatto, come usarlo, eventuale garanzia di soddisfazione se pertinente); par.10 una domanda retorica che rilancia il desiderio; par.11 call to action calda e diretta. Nessun HTML, nessun elenco puntato, nessuna emoji, nessuna ripetizione meccanica della keyword, e soprattutto nessun paragrafo di riempimento: ogni paragrafo deve aggiungere un'informazione o un'emozione nuova.",
+  "keywords": ["7 keyword long-tail diverse, ciascuna vicina al limite tecnico di 50 caratteri del campo keyword KDP (non parole singole: frasi di ricerca reali che un acquirente digiterebbe), minuscole"],
   "categories": ["3 categorie BISAC Amazon in formato 'Ramo > Sotto > Sotto'"],
   "insight": "2-3 frasi che riassumono cosa mostrano realmente le pagine analizzate"
 }`;
 
+  const json = await callGateway(
+    COPY_SYSTEM,
+    prompt,
+    {
+      interiorText: input.interiorText,
+      interiorImages: input.interiorImages,
+      coverImages: input.coverImages,
+    },
+    input.creativity,
+  );
 
-  const json = await callGateway(COPY_SYSTEM, prompt, {
-    interiorText: input.interiorText,
-    interiorImages: input.interiorImages,
-    coverImages: input.coverImages,
-  }, input.creativity);
-
-  const keywords = Array.isArray(json.keywords) ? json.keywords.map(String).filter(Boolean).slice(0, 7) : [];
+  const keywords = Array.isArray(json.keywords)
+    ? json.keywords.map(String).filter(Boolean).slice(0, 7)
+    : [];
   const categories = Array.isArray(json.categories)
     ? json.categories.map(String).filter(Boolean).slice(0, 3)
     : undefined;
@@ -243,7 +261,7 @@ export async function generateAplusCopyAi(input: {
   interiorImages?: string[] | undefined;
   coverImages?: string[] | undefined;
 }): Promise<AiAplusCopy> {
-  const langName = LOCALE_NAMES[input.lang] ?? LOCALE_NAMES['en']!;
+  const langName = LOCALE_NAMES[input.lang] ?? LOCALE_NAMES["en"]!;
   const prompt = `Genera i testi dei moduli Contenuto A+ Amazon KDP nella lingua: ${langName}.
 
 ${buildStyleDirective(input.tone, input.creativity)}
@@ -265,6 +283,9 @@ delle pagine o degli spazi, uno il formato/materiali/praticità d'uso) — mai d
 ripetono lo stesso concetto con parole diverse, e mai la stessa frase o chiusura ripetuta in
 più di un elemento.
 
+I limiti di caratteri indicati per ciascun campo sono i limiti tecnici reali dei moduli A+ Amazon:
+avvicinati il più possibile a ciascun limite (non fermarti a metà) senza mai superarlo.
+
 
 Rispondi con JSON di questa forma esatta:
 {
@@ -275,13 +296,19 @@ Rispondi con JSON di questa forma esatta:
   "comp": "istruzioni d'uso / invito all'azione max 200 caratteri"
 }`;
 
-  const json = await callGateway(COPY_SYSTEM, prompt, {
-    interiorText: input.interiorText,
-    interiorImages: input.interiorImages,
-    coverImages: input.coverImages,
-  }, input.creativity);
+  const json = await callGateway(
+    COPY_SYSTEM,
+    prompt,
+    {
+      interiorText: input.interiorText,
+      interiorImages: input.interiorImages,
+      coverImages: input.coverImages,
+    },
+    input.creativity,
+  );
 
-  const str = (v: unknown, fallback = "") => (typeof v === "string" && v.trim() ? v.trim() : fallback);
+  const str = (v: unknown, fallback = "") =>
+    typeof v === "string" && v.trim() ? v.trim() : fallback;
   const grid = Array.isArray(json.grid) ? json.grid.slice(0, 3) : [];
   if (!json.hero || !json.value) throw new Error("Risposta AI incompleta.");
 
@@ -303,7 +330,7 @@ Rispondi con JSON di questa forma esatta:
       text3: str(json.value.text3),
       alt: str(json.value.alt, "Value highlights"),
     },
-    grid: grid.map((item: any, i: number) => ({
+    grid: grid.map((item: { title?: unknown; desc?: unknown }, i: number) => ({
       title: str(item?.title, `Highlight ${i + 1}`),
       desc: str(item?.desc),
     })),
@@ -339,8 +366,16 @@ export async function generateBlurbCopyAi(input: {
   stakes?: string | undefined;
   tone?: string | undefined;
   creativity?: number | undefined;
+  interiorText?: string | undefined;
+  interiorImages?: string[] | undefined;
+  coverImages?: string[] | undefined;
 }): Promise<AiBlurbCopy> {
   const langName = LOCALE_NAMES[input.locale] ?? LOCALE_NAMES["en"]!;
+  const hasSource = !!(
+    input.interiorText ||
+    input.interiorImages?.length ||
+    input.coverImages?.length
+  );
   const prompt = `Genera il testo di vendita per un libro nella lingua: ${langName}.
 
 ${buildStyleDirective(input.tone, input.creativity)}
@@ -352,17 +387,28 @@ Dati forniti dall'autore:
 - ambientazione / contesto: ${input.setting || "(non specificata)"}
 - conflitto centrale / tema chiave: ${input.conflict}
 - posta in gioco: ${input.stakes || "(non specificata, deducila dal conflitto)"}
+${hasSource ? "\nSono allegate anche copertina e/o pagine interne reali del libro: usale per aggiungere dettagli concreti e verificabili (nomi, luoghi, oggetti, atmosfera visiva) che rendano il testo chiaramente su QUESTO libro, non generico. Se le pagine contengono testo narrativo, puoi citarne lo stile/registro senza copiarlo alla lettera." : ""}
 
 Produci JSON con questa forma esatta:
 {
-  "hook": "una riga d'apertura ad effetto, max 160 caratteri",
-  "synopsis": "quarta di copertina / sinossi completa, 3-5 frasi ben costruite, 400-800 caratteri, aderente al genere indicato",
-  "editorialBlurb": "una citazione editoriale in stile recensione professionale, tra virgolette, max 140 caratteri"
+  "hook": "una riga d'apertura ad effetto, 130-160 caratteri",
+  "synopsis": "quarta di copertina / sinossi completa, 5-7 frasi ben costruite, 700-1000 caratteri, aderente al genere indicato",
+  "editorialBlurb": "una citazione editoriale in stile recensione professionale, tra virgolette, 110-140 caratteri"
 }`;
 
-  const json = await callGateway(BLURB_SYSTEM, prompt, {}, input.creativity);
+  const json = await callGateway(
+    BLURB_SYSTEM,
+    prompt,
+    {
+      interiorText: input.interiorText,
+      interiorImages: input.interiorImages,
+      coverImages: input.coverImages,
+    },
+    input.creativity,
+  );
 
-  const str = (v: unknown, fallback = "") => (typeof v === "string" && v.trim() ? v.trim() : fallback);
+  const str = (v: unknown, fallback = "") =>
+    typeof v === "string" && v.trim() ? v.trim() : fallback;
   if (!json.hook || !json.synopsis) throw new Error("Risposta AI incompleta.");
 
   return {
@@ -400,8 +446,16 @@ export async function generateBioCopyAi(input: {
   bookTitle?: string | undefined;
   releaseInfo?: string | undefined;
   links?: string | undefined;
+  interiorText?: string | undefined;
+  interiorImages?: string[] | undefined;
+  coverImages?: string[] | undefined;
 }): Promise<AiBioCopy> {
   const langName = LOCALE_NAMES[input.locale] ?? LOCALE_NAMES["en"]!;
+  const hasSource = !!(
+    input.interiorText ||
+    input.interiorImages?.length ||
+    input.coverImages?.length
+  );
   const prompt = `Genera bio autore e comunicato stampa nella lingua: ${langName}.
 
 ${buildStyleDirective(input.tone, input.creativity)}
@@ -414,18 +468,29 @@ Dati forniti dall'autore:
 - libro da lanciare: ${input.bookTitle || "(non specificato)"}
 - data/info uscita: ${input.releaseInfo || "(non specificata)"}
 - link/social da citare: ${input.links || "(nessuno)"}
+${hasSource ? "\nSono allegate anche copertina e/o pagine interne reali del libro da lanciare: nel comunicato stampa e nella bio lunga, cita 1-2 dettagli concreti visti nel libro per renderlo specifico e credibile, non generico." : ""}
 
 Produci JSON con questa forma esatta:
 {
-  "shortBio": "bio brevissima per social/Twitter-X, max 160 caratteri",
-  "mediumBio": "bio media per Amazon Author Central, 300-500 caratteri",
-  "longBio": "bio lunga per sito/retro copertina, 600-1200 caratteri, include gli elementi personali se forniti",
-  "pressRelease": "comunicato stampa di lancio libro completo, con oggetto, corpo e chiusura, 800-1400 caratteri, include il titolo del libro e le info di uscita se fornite"
+  "shortBio": "bio brevissima per social/Twitter-X, 140-160 caratteri",
+  "mediumBio": "bio media per Amazon Author Central, 450-500 caratteri",
+  "longBio": "bio lunga per sito/retro copertina, 1200-1500 caratteri (il limite tecnico reale della bio Amazon Author Central è circa 1500 caratteri: avvicinati senza superarlo), include gli elementi personali se forniti",
+  "pressRelease": "comunicato stampa di lancio libro completo, con oggetto, corpo e chiusura, 1300-1600 caratteri, include il titolo del libro e le info di uscita se fornite"
 }`;
 
-  const json = await callGateway(BIO_SYSTEM, prompt, {}, input.creativity);
+  const json = await callGateway(
+    BIO_SYSTEM,
+    prompt,
+    {
+      interiorText: input.interiorText,
+      interiorImages: input.interiorImages,
+      coverImages: input.coverImages,
+    },
+    input.creativity,
+  );
 
-  const str = (v: unknown, fallback = "") => (typeof v === "string" && v.trim() ? v.trim() : fallback);
+  const str = (v: unknown, fallback = "") =>
+    typeof v === "string" && v.trim() ? v.trim() : fallback;
   if (!json.shortBio || !json.mediumBio) throw new Error("Risposta AI incompleta.");
 
   return {
@@ -464,9 +529,18 @@ export async function generatePromoCopyAi(input: {
   platforms: string[];
   tone?: string | undefined;
   creativity?: number | undefined;
+  interiorText?: string | undefined;
+  interiorImages?: string[] | undefined;
+  coverImages?: string[] | undefined;
 }): Promise<AiPromoCopy> {
   const langName = LOCALE_NAMES[input.locale] ?? LOCALE_NAMES["en"]!;
-  const platformList = input.platforms.length > 0 ? input.platforms.join(", ") : "instagram, facebook";
+  const platformList =
+    input.platforms.length > 0 ? input.platforms.join(", ") : "instagram, facebook";
+  const hasSource = !!(
+    input.interiorText ||
+    input.interiorImages?.length ||
+    input.coverImages?.length
+  );
   const prompt = `Genera materiale promozionale di lancio libro nella lingua: ${langName}.
 
 ${buildStyleDirective(input.tone, input.creativity)}
@@ -478,25 +552,43 @@ Dati forniti dall'autore:
 - target/pubblico ideale: ${input.audience}
 - call to action: ${input.cta || "(usa una CTA generica di acquisto su Amazon)"}
 - piattaforme richieste: ${platformList}
+${hasSource ? "\nSono allegate anche copertina e/o pagine interne reali del libro: usale per rendere post e email specifici su QUESTO libro (dettagli visivi concreti), non genericamente promozionali." : ""}
 
 Produci JSON con questa forma esatta:
 {
-  "posts": [ { "platform": "uno tra: ${platformList}", "caption": "caption nativa per quella piattaforma, con eventuali hashtag pertinenti, 100-400 caratteri" } — un oggetto per ciascuna piattaforma richiesta ],
-  "adsHeadlines": ["3 headline per Amazon Sponsored Products, max 80 caratteri ciascuna"],
-  "adsBullets": ["3 bullet per Amazon Sponsored Products, max 90 caratteri ciascuno"],
-  "launchEmail": "email di annuncio lancio completa con oggetto e corpo, 500-900 caratteri"
+  "posts": [ { "platform": "uno tra: ${platformList}", "caption": "caption nativa per quella piattaforma, con eventuali hashtag pertinenti, 300-400 caratteri" } — un oggetto per ciascuna piattaforma richiesta ],
+  "adsHeadlines": ["3 headline per Amazon Sponsored Products, 70-80 caratteri ciascuna (limite tecnico reale: 80)"],
+  "adsBullets": ["3 bullet per Amazon Sponsored Products, 75-90 caratteri ciascuno (limite tecnico reale: 90)"],
+  "launchEmail": "email di annuncio lancio completa con oggetto e corpo, 700-1000 caratteri"
 }`;
 
-  const json = await callGateway(PROMO_SYSTEM, prompt, {}, input.creativity);
+  const json = await callGateway(
+    PROMO_SYSTEM,
+    prompt,
+    {
+      interiorText: input.interiorText,
+      interiorImages: input.interiorImages,
+      coverImages: input.coverImages,
+    },
+    input.creativity,
+  );
 
-  const str = (v: unknown, fallback = "") => (typeof v === "string" && v.trim() ? v.trim() : fallback);
+  const str = (v: unknown, fallback = "") =>
+    typeof v === "string" && v.trim() ? v.trim() : fallback;
   const posts = Array.isArray(json.posts)
     ? json.posts
-        .map((p: any) => ({ platform: str(p?.platform), caption: str(p?.caption) }))
+        .map((p: { platform?: unknown; caption?: unknown }) => ({
+          platform: str(p?.platform),
+          caption: str(p?.caption),
+        }))
         .filter((p: { platform: string; caption: string }) => p.platform && p.caption)
     : [];
-  const adsHeadlines = Array.isArray(json.adsHeadlines) ? json.adsHeadlines.map(String).filter(Boolean).slice(0, 3) : [];
-  const adsBullets = Array.isArray(json.adsBullets) ? json.adsBullets.map(String).filter(Boolean).slice(0, 3) : [];
+  const adsHeadlines = Array.isArray(json.adsHeadlines)
+    ? json.adsHeadlines.map(String).filter(Boolean).slice(0, 3)
+    : [];
+  const adsBullets = Array.isArray(json.adsBullets)
+    ? json.adsBullets.map(String).filter(Boolean).slice(0, 3)
+    : [];
 
   if (posts.length === 0 || !json.launchEmail) throw new Error("Risposta AI incompleta.");
 
@@ -541,7 +633,12 @@ Produci JSON con questa forma esatta:
   "reason": "una frase breve (max 140 caratteri) che spiega il motivo del suggerimento"
 }`;
 
-  const json = await callGateway(TRIAGE_SYSTEM, prompt, { interiorImages: [input.imageDataUrl] }, 2);
+  const json = await callGateway(
+    TRIAGE_SYSTEM,
+    prompt,
+    { interiorImages: [input.imageDataUrl] },
+    2,
+  );
 
   const category = json.category;
   if (category !== "promossa" && category !== "rimandata" && category !== "bocciata") {

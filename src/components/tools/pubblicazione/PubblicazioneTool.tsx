@@ -119,10 +119,17 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
     try {
       const result = await analyzeInteriorPdf(file);
       setInteriorAnalysis(result);
-      setInteriorStatus(
-        `Analisi completata: ${result.totalPages} pagine scansionate con successo.`,
-      );
-      setInteriorStatusOk(true);
+      if (!result.scanned || result.errorsFound.length > 0) {
+        setInteriorStatus(
+          result.errorsFound[0] ?? "Il PDF interno non è stato analizzato correttamente.",
+        );
+        setInteriorStatusOk(false);
+      } else {
+        setInteriorStatus(
+          `Analisi completata: ${result.totalPages} pagine scansionate con successo.`,
+        );
+        setInteriorStatusOk(true);
+      }
     } catch (error) {
       console.error(error);
       setInteriorStatus("Errore durante la lettura del PDF interno.");

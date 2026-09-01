@@ -67,6 +67,9 @@ const blurbInput = z.object({
   stakes: z.string().max(400).optional(),
   tone: z.string().max(40).optional(),
   creativity: z.number().int().min(1).max(10).optional(),
+  interiorText: z.string().max(20000).optional(),
+  interiorImages: z.array(dataUrl).max(3).optional(),
+  coverImages: z.array(dataUrl).max(2).optional(),
 });
 
 const bioInput = z.object({
@@ -80,6 +83,9 @@ const bioInput = z.object({
   bookTitle: z.string().max(200).optional(),
   releaseInfo: z.string().max(120).optional(),
   links: z.string().max(300).optional(),
+  interiorText: z.string().max(20000).optional(),
+  interiorImages: z.array(dataUrl).max(3).optional(),
+  coverImages: z.array(dataUrl).max(2).optional(),
 });
 
 const promoInput = z.object({
@@ -92,6 +98,9 @@ const promoInput = z.object({
   platforms: z.array(z.string().max(20)).min(1).max(4),
   tone: z.string().max(40).optional(),
   creativity: z.number().int().min(1).max(10).optional(),
+  interiorText: z.string().max(20000).optional(),
+  interiorImages: z.array(dataUrl).max(3).optional(),
+  coverImages: z.array(dataUrl).max(2).optional(),
 });
 
 export const generateBlurbCopy = createServerFn({ method: "POST" })

@@ -1,10 +1,11 @@
 /**
- * Configurazione centralizzata dei 5 tool.
+ * Configurazione centralizzata degli 8 tool.
  * `creditEvent` documenta l'unico evento che consuma 1 credito.
  * Nessun componente deve duplicare questa configurazione.
  */
 
-export type ToolId = "copertine" | "pubblicazione" | "aplus" | "triage" | "interni" | "blurb" | "bio" | "promo";
+export type ToolId =
+  "copertine" | "pubblicazione" | "aplus" | "triage" | "interni" | "blurb" | "bio" | "promo";
 
 export interface ToolConfig {
   id: ToolId;
@@ -12,7 +13,15 @@ export interface ToolConfig {
   name: string;
   /** Rotta della dashboard (modulo indipendente). */
   route: string;
-  icon: "image" | "file-text" | "sparkles" | "layers" | "layout-grid" | "book-open" | "user" | "megaphone";
+  icon:
+    | "image"
+    | "file-text"
+    | "sparkles"
+    | "layers"
+    | "layout-grid"
+    | "book-open"
+    | "user"
+    | "megaphone";
   description: string;
   benefit: string;
   /** Evento che consuma il credito (etichetta UI). */
@@ -83,7 +92,8 @@ export const TOOLS: ToolConfig[] = [
     icon: "layout-grid",
     description:
       "Impaginatore per gli interni del libro: carica le immagini, imposta formato KDP, margini e bleed, ed esporta un PDF interno unico pronto per la stampa.",
-    benefit: "Un unico PDF interno pronto per KDP, senza passare da altri programmi di impaginazione.",
+    benefit:
+      "Un unico PDF interno pronto per KDP, senza passare da altri programmi di impaginazione.",
     creditEvent: "Ogni PDF interno generato con successo",
     creditAction: "generation_completed",
     cost: 1,
@@ -96,7 +106,8 @@ export const TOOLS: ToolConfig[] = [
     icon: "book-open",
     description:
       "Genera quarta di copertina, sinossi ed editorial blurb per narrativa e saggistica, in qualsiasi genere e tono.",
-    benefit: "Testi di vendita pronti per libri di narrativa e saggistica, non solo coloring e activity book.",
+    benefit:
+      "Testi di vendita pronti per libri di narrativa e saggistica, non solo coloring e activity book.",
     creditEvent: "Ogni generazione completata",
     creditAction: "generation_completed",
     cost: 1,
@@ -109,7 +120,8 @@ export const TOOLS: ToolConfig[] = [
     icon: "user",
     description:
       "Genera bio autore (breve, media, lunga) per Amazon Author Central e siti, più comunicato stampa di lancio libro.",
-    benefit: "Presentati in modo professionale su Amazon, sito e stampa senza scrivere da zero ogni volta.",
+    benefit:
+      "Presentati in modo professionale su Amazon, sito e stampa senza scrivere da zero ogni volta.",
     creditEvent: "Ogni generazione completata",
     creditAction: "generation_completed",
     cost: 1,
@@ -122,7 +134,8 @@ export const TOOLS: ToolConfig[] = [
     icon: "megaphone",
     description:
       "Genera post social multi-piattaforma, headline/bullet per Amazon Ads ed email di lancio per promuovere il libro.",
-    benefit: "Materiale di lancio pronto in pochi secondi, coerente su tutti i canali di promozione.",
+    benefit:
+      "Materiale di lancio pronto in pochi secondi, coerente su tutti i canali di promozione.",
     creditEvent: "Ogni generazione completata",
     creditAction: "generation_completed",
     cost: 1,

@@ -60,6 +60,29 @@ export const getAdminUserDetail = createServerFn({ method: "GET" })
     return detail;
   });
 
+/**
+ * Utilizzo per tool dell'utente: stessa aggregazione di getUsageBreakdown
+ * (credits.functions.ts), mai replicata finora lato admin — un admin poteva
+ * vedere solo il log grezzo delle transazioni, non un riepilogo per tool.
+ */
+export const getAdminUserToolUsage = createServerFn({ method: "GET" })
+  .middleware([requirePermission("users", "read")])
+  .inputValidator((data: unknown) => userIdInput.parse(data))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: usage, error } = await supabaseAdmin
+      .from("usage")
+      .select("tool_id, usage_count")
+      .eq("user_id", data.userId);
+    if (error) throw new Error(error.message);
+
+    const perTool: Record<string, number> = {};
+    for (const row of usage ?? []) {
+      perTool[row.tool_id] = (perTool[row.tool_id] ?? 0) + (row.usage_count ?? 0);
+    }
+    return { perTool };
+  });
+
 const updateProfileInput = z.object({
   userId: z.string().uuid(),
   name: z.string().trim().min(1).max(200),

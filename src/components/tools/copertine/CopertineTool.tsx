@@ -44,7 +44,10 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
         chargeGuard.current = true;
         let charged = false;
         try {
-          const result = await runtime.charge(newOperationId("copertine-export-png"), "Export copertina KDP HD");
+          const result = await runtime.charge(
+            newOperationId("copertine-export-png"),
+            "Export copertina KDP HD",
+          );
           charged = result.ok;
         } finally {
           chargeGuard.current = false;
@@ -62,13 +65,13 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
-          Studio copertine KDP completo: specifiche, dorso calcolato, guide bleed, livelli
-          immagine, tipografia e export stampa 300 DPI.
+          Studio copertine KDP completo: specifiche, dorso calcolato, guide bleed, livelli immagine,
+          tipografia e export stampa 300 DPI.
         </p>
         <Button
           variant="outline"
           size="sm"
-          onClick={() => window.open(STUDIO_URL, "_blank", "noopener")}
+          onClick={() => void frameRef.current?.requestFullscreen()}
         >
           <Maximize2 className="mr-2 size-4" />
           Schermo intero

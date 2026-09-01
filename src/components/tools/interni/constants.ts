@@ -1,6 +1,9 @@
 import type { PageMargins, TrimSizeSpec } from "./types";
 
-/** Stessi formati KDP offerti in Copertine, per coerenza tra i due tool. */
+/**
+ * Formati di trim standard KDP. Copertine non ha un concetto di formato fisso (è un editor a
+ * canvas libero): questo elenco è specifico di Interni, non condiviso/importato da altri tool.
+ */
 export const TRIM_SIZES: TrimSizeSpec[] = [
   { id: "8.5x11", label: '8.5" x 11" (Standard Quaderni/Coloring)', widthIn: 8.5, heightIn: 11 },
   { id: "6x9", label: '6" x 9" (Saggistica/Narrativa)', widthIn: 6, heightIn: 9 },

@@ -29,12 +29,14 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { PLANS } from "@/config/plans";
+import { TOOLS } from "@/config/tools";
 import { listEmailSends, sendManualEmailToUser } from "@/lib/admin/emailSends.functions";
 import {
   changeAdminUserPlan,
   deleteAdminUser,
   generatePasswordResetLink,
   getAdminUserDetail,
+  getAdminUserToolUsage,
   reactivateAdminUser,
   suspendAdminUser,
   updateAdminUserProfile,
@@ -110,6 +112,7 @@ function AdminUserDetailPage() {
   const resetLink = useServerFn(generatePasswordResetLink);
   const fetchEmailSends = useServerFn(listEmailSends);
   const sendManualEmail = useServerFn(sendManualEmailToUser);
+  const fetchToolUsage = useServerFn(getAdminUserToolUsage);
 
   const [nameDraft, setNameDraft] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -122,6 +125,11 @@ function AdminUserDetailPage() {
   const { data, isLoading } = useQuery<UserDetail>({
     queryKey: ["admin-user-detail", id],
     queryFn: async () => (await fetchDetail({ data: { userId: id } })) as unknown as UserDetail,
+  });
+
+  const { data: toolUsage, isLoading: loadingToolUsage } = useQuery({
+    queryKey: ["admin-user-tool-usage", id],
+    queryFn: () => fetchToolUsage({ data: { userId: id } }),
   });
 
   const { data: emailSends, isLoading: loadingEmailSends } = useQuery({
@@ -368,6 +376,32 @@ function AdminUserDetailPage() {
                       {p.amount != null ? `${p.amount} ${p.currency}` : "—"} · {p.status} ·{" "}
                       {new Date(p.created_at).toLocaleDateString("it-IT")}
                     </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Utilizzo per tool</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loadingToolUsage && <Skeleton className="h-16 w-full" />}
+            {!loadingToolUsage &&
+              (!toolUsage || Object.values(toolUsage.perTool).every((n) => n === 0)) && (
+                <p className="text-sm text-muted-foreground">Nessun utilizzo registrato.</p>
+              )}
+            {!loadingToolUsage && toolUsage && (
+              <ul className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
+                {TOOLS.map((tool) => (
+                  <li
+                    key={tool.id}
+                    className="flex items-center justify-between rounded-md border border-border px-2.5 py-1.5"
+                  >
+                    <span className="text-muted-foreground">{tool.name}</span>
+                    <span className="font-medium">{toolUsage.perTool[tool.id] ?? 0}</span>
                   </li>
                 ))}
               </ul>

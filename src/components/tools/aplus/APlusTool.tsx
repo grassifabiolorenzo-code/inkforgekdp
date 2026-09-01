@@ -522,6 +522,11 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
           >
             <Upload className="size-4" />
             {coverFile ? `Caricato: ${coverFile.name}` : "Clicca per caricare la copertina (PDF)"}
+            <span className="font-normal text-[11px] text-muted-foreground/80">
+              Deve essere un PDF con fronte + dorso + retro in un'unica pagina (l'export di stampa
+              di Copertine o KDP): serve per ritagliare fronte e retro nel punto esatto del dorso.
+              Un'immagine singola (es. il PNG di anteprima di Copertine) non è sufficiente.
+            </span>
             <input
               id="a-cover-file"
               type="file"

@@ -1,4 +1,13 @@
-import { ArrowLeft, ArrowRight, ArrowDown, Download, Loader2, Redo2, Sparkles, Undo2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  ArrowDown,
+  Download,
+  Loader2,
+  Redo2,
+  Sparkles,
+  Undo2,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -66,7 +75,9 @@ export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
 
-  const [aiSuggestion, setAiSuggestion] = useState<{ category: Category; reason: string } | null>(null);
+  const [aiSuggestion, setAiSuggestion] = useState<{ category: Category; reason: string } | null>(
+    null,
+  );
   const [aiLoading, setAiLoading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -109,7 +120,9 @@ export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
         toast.error("Impossibile leggere questa immagine.");
         return;
       }
-      const response = await analyzeTriageImage({ data: { locale: outputLocale, imageDataUrl: jpeg } });
+      const response = await analyzeTriageImage({
+        data: { locale: outputLocale, imageDataUrl: jpeg },
+      });
       if (!response.ok) {
         toast.warning(`AI non disponibile: ${response.error}`);
         return;
@@ -161,10 +174,17 @@ export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
 
   function handleAppendFiles(fileList: FileList | null) {
     if (!fileList || fileList.length === 0) return;
-    const validImages = Array.from(fileList).filter((file) => file.type.startsWith("image/"));
+    const allFiles = Array.from(fileList);
+    const validImages = allFiles.filter((file) => file.type.startsWith("image/"));
+    const skipped = allFiles.length - validImages.length;
     if (validImages.length === 0) {
       toast.error("Nessuna immagine valida trovata nei file selezionati.");
       return;
+    }
+    if (skipped > 0) {
+      toast.warning(
+        `${skipped} file ${skipped === 1 ? "ignorato" : "ignorati"} perché non ${skipped === 1 ? "è un'immagine" : "sono immagini"}.`,
+      );
     }
     setQueue((q) => [...q, ...validImages]);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -212,42 +232,44 @@ export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
     if (chargeGuard.current) return;
     chargeGuard.current = true;
     try {
-    if (!runtime.canOperate) {
-      runtime.blockOperation();
-      return;
-    }
+      if (!runtime.canOperate) {
+        runtime.blockOperation();
+        return;
+      }
 
-    // Verifica server-side del piano e dei crediti.
-    if (!(await runtime.ensureAccess())) return;
+      // Verifica server-side del piano e dei crediti.
+      if (!(await runtime.ensureAccess())) return;
 
-    setDownloading(true);
-    const operationId = newOperationId("triage-download");
+      setDownloading(true);
+      const operationId = newOperationId("triage-download");
 
-    try {
-      const result: TriageResult = { promosse, rimandate, bocciate };
-      const blob = await buildTriageZip(result, batchSize, outputLocale);
+      try {
+        const result: TriageResult = { promosse, rimandate, bocciate };
+        const blob = await buildTriageZip(result, batchSize, outputLocale);
 
-      // Credito confermato PRIMA di consegnare il file: se il charge fallisse (limite raggiunto,
-      // abbonamento non attivo, ecc.) nessun download deve partire.
-      const charged = await runtime.charge(operationId, "Download completato delle 3 cartelle");
-      if (!charged.ok) return;
+        // Credito confermato PRIMA di consegnare il file: se il charge fallisse (limite raggiunto,
+        // abbonamento non attivo, ecc.) nessun download deve partire.
+        const charged = await runtime.charge(operationId, "Download completato delle 3 cartelle");
+        if (!charged.ok) return;
 
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "Triage_KDP_Risultati.zip";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "Triage_KDP_Risultati.zip";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
 
-      toast.success(charged.duplicate ? "Download completato" : "Download completato — 1 credito");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Download non riuscito");
+        toast.success(
+          charged.duplicate ? "Download completato" : "Download completato — 1 credito",
+        );
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Download non riuscito");
+      } finally {
+        setDownloading(false);
+      }
     } finally {
-      setDownloading(false);
-    }
-  } finally {
       chargeGuard.current = false;
     }
   }
@@ -270,7 +292,10 @@ export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
     <div className="space-y-6">
       {phase === "upload" && (
         <div className="panel space-y-5 p-6">
-          <OutputLanguageSelect id="triage-output-lang" className="rounded-lg border border-border bg-surface p-4" />
+          <OutputLanguageSelect
+            id="triage-output-lang"
+            className="rounded-lg border border-border bg-surface p-4"
+          />
           <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <Label htmlFor="triage-batch-size" className="text-accent">
@@ -305,8 +330,8 @@ export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
               className="block w-full cursor-pointer rounded-lg border border-dashed border-border bg-surface p-6 text-sm text-muted-foreground"
             />
             <p className="mt-2 text-xs text-muted-foreground">
-              Accumulo multiplo attivo: ripeti la selezione per aggiungere altri file. La revisione è
-              gratuita: il credito viene scalato solo al download finale delle 3 cartelle.
+              Accumulo multiplo attivo: ripeti la selezione per aggiungere altri file. La revisione
+              è gratuita: il credito viene scalato solo al download finale delle 3 cartelle.
             </p>
           </div>
 
@@ -411,7 +436,13 @@ export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
             >
               <Undo2 className="mr-2 size-4" /> Torna indietro (ultima scelta)
             </Button>
-            <Button type="button" variant="outline" size="sm" disabled={aiLoading} onClick={handleAskAi}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={aiLoading}
+              onClick={handleAskAi}
+            >
               {aiLoading ? (
                 <Loader2 className="mr-2 size-4 animate-spin" />
               ) : (
@@ -476,7 +507,8 @@ export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
           <div className="space-y-1 text-sm">
             <p className="text-muted-foreground">Riepilogo selezioni:</p>
             <p className="font-bold text-accent">
-              🟢 Promosse: {promosse.length} (divise in base alla soglia impostata + eventuale Libro_x)
+              🟢 Promosse: {promosse.length} (divise in base alla soglia impostata + eventuale
+              Libro_x)
             </p>
             <p className="font-bold text-amber-500">🟡 Rimandate: {rimandate.length}</p>
             <p className="font-bold text-destructive">🔴 Bocciate: {bocciate.length}</p>
@@ -518,7 +550,7 @@ export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
       </AlertDialog>
     </div>
   );
-  }
+}
 
 // Etichette categoria mantenute per eventuali usi futuri (report, tooltip, ecc.).
 export const TRIAGE_CATEGORY_LABEL = CATEGORY_LABEL;

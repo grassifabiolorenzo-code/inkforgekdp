@@ -128,10 +128,17 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
 
   function handleAddFiles(fileList: FileList | null) {
     if (!fileList || fileList.length === 0) return;
-    const validImages = Array.from(fileList).filter((f) => f.type.startsWith("image/"));
+    const allFiles = Array.from(fileList);
+    const validImages = allFiles.filter((f) => f.type.startsWith("image/"));
+    const skipped = allFiles.length - validImages.length;
     if (validImages.length === 0) {
       toast.error("Nessuna immagine valida trovata nei file selezionati.");
       return;
+    }
+    if (skipped > 0) {
+      toast.warning(
+        `${skipped} file ${skipped === 1 ? "ignorato" : "ignorati"} perché non ${skipped === 1 ? "è un'immagine" : "sono immagini"}.`,
+      );
     }
     const sorted = [...validImages].sort((a, b) =>
       a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }),
