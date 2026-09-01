@@ -305,8 +305,10 @@ export type Database = {
           active_direct_referrals: number;
           applied_lemon_squeezy_variant_id: string | null;
           applied_price: number | null;
-          effective_price: number;
+          base_price: number | null;
+          effective_price: number | null;
           pending_sync: boolean;
+          plan_slug: string | null;
           updated_at: string;
           user_id: string;
         };
@@ -314,8 +316,10 @@ export type Database = {
           active_direct_referrals?: number;
           applied_lemon_squeezy_variant_id?: string | null;
           applied_price?: number | null;
-          effective_price?: number;
+          base_price?: number | null;
+          effective_price?: number | null;
           pending_sync?: boolean;
+          plan_slug?: string | null;
           updated_at?: string;
           user_id: string;
         };
@@ -323,8 +327,10 @@ export type Database = {
           active_direct_referrals?: number;
           applied_lemon_squeezy_variant_id?: string | null;
           applied_price?: number | null;
-          effective_price?: number;
+          base_price?: number | null;
+          effective_price?: number | null;
           pending_sync?: boolean;
+          plan_slug?: string | null;
           updated_at?: string;
           user_id?: string;
         };
@@ -751,7 +757,10 @@ export type Database = {
         Returns: { day: string; new_users: number }[];
       };
       advance_referral_cycle: { Args: { _referrer_id: string }; Returns: Json };
-      calc_pro_price: { Args: { _active_referrals: number }; Returns: number };
+      calc_referral_price: {
+        Args: { _active_referrals: number; _base_price: number };
+        Returns: number;
+      };
       cancel_referral: { Args: { _referred_user_id: string }; Returns: Json };
       check_rate_limit: {
         Args: { _key: string; _max_hits: number; _window_seconds: number };

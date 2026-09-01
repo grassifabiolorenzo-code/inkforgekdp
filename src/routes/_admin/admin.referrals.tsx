@@ -134,7 +134,7 @@ function AdminReferralsPage() {
   return (
     <AdminShell
       title="Programma referral"
-      description="Referral, crediti distribuiti e sconti Pro attivi"
+      description="Referral, crediti distribuiti e sconti sull'abbonamento attivi"
       breadcrumb={["Admin", "Referral"]}
     >
       <div className="mx-auto max-w-7xl space-y-6">
@@ -159,7 +159,7 @@ function AdminReferralsPage() {
               label="Crediti stornati"
               value={kpis.total_credits_clawed_back.toLocaleString("it-IT")}
             />
-            <KpiCard label="Utenti con Pro a €0" value={String(kpis.users_with_pro_free)} />
+            <KpiCard label="Utenti con abbonamento a €0" value={String(kpis.users_with_pro_free)} />
           </div>
         )}
 
@@ -311,7 +311,7 @@ function AdminReferralsPage() {
         open={!!suspendTarget}
         onOpenChange={(v) => !v && setSuspendTarget(null)}
         title="Sospendere questo referral?"
-        description={`Il referral di ${suspendTarget?.email ?? ""} smetterà immediatamente di contare come attivo per il prezzo Pro del referrer. I crediti già erogati non vengono stornati (usa "Segna chargeback" per quello).`}
+        description={`Il referral di ${suspendTarget?.email ?? ""} smetterà immediatamente di contare come attivo per il prezzo scontato del referrer. I crediti già erogati non vengono stornati (usa "Segna chargeback" per quello).`}
         confirmWord="SOSPENDI"
         actionLabel="Sospendi"
         onConfirm={handleSuspend}

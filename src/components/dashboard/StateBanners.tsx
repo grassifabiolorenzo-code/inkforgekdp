@@ -70,8 +70,8 @@ export function InactiveSubscriptionState({ state }: { state?: CreditState | und
         {state?.has_subscription ? "Abbonamento non attivo" : "Nessun abbonamento attivo"}
       </h2>
       <p className="mx-auto max-w-md text-sm text-muted-foreground">
-        Attiva un piano per usare i tool. Tutti i piani includono tutti e 4 gli strumenti: cambia
-        solo il numero di utilizzi mensili.
+        Attiva un piano per usare i tool. Ogni piano include un set di strumenti tra gli 8
+        disponibili, con un numero diverso di utilizzi mensili.
       </p>
       <Button asChild className="bg-gradient-brand text-primary-foreground hover:opacity-90">
         <Link to="/dashboard/subscription">Vedi i piani</Link>

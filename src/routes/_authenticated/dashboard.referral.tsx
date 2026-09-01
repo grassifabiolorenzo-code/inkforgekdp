@@ -10,7 +10,11 @@ import { LoadingState } from "@/components/dashboard/StateBanners";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PRO_REFERRAL_DISCLAIMER, REFERRAL_LEVEL_REWARDS } from "@/config/referral";
+import {
+  REFERRAL_CYCLE_BONUS_CREDITS,
+  REFERRAL_DISCLAIMER,
+  REFERRAL_LEVEL_REWARDS,
+} from "@/config/referral";
 import { getMyReferralDashboard } from "@/lib/referral.functions";
 
 export const Route = createFileRoute("/_authenticated/dashboard/referral")({
@@ -54,7 +58,7 @@ function ReferralPage() {
   return (
     <DashboardShell
       title="Referral"
-      description="Invita altri self-publisher e riduci il costo del tuo Pro"
+      description="Invita altri self-publisher e riduci il costo del tuo abbonamento"
     >
       <div className="mx-auto max-w-4xl space-y-6">
         {isLoading && <LoadingState />}
@@ -74,7 +78,8 @@ function ReferralPage() {
               </div>
               <p className="text-sm text-muted-foreground">
                 Ogni persona che si abbona tramite questo link ottiene il 30% di sconto sul primo
-                mese. Tu ottieni crediti e riduci il costo del tuo Pro.
+                mese. Tu ottieni crediti e riduci il costo del tuo abbonamento, qualunque sia il
+                piano scelto.
               </p>
               <div className="flex gap-2">
                 <Input readOnly value={referralUrl} className="font-mono text-sm" />
@@ -89,46 +94,60 @@ function ReferralPage() {
               </div>
             </div>
 
-            {/* Progressione Pro */}
+            {/* Progressione piano */}
             <div className="panel space-y-4 p-6">
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h2 className="font-semibold">Il tuo Pro</h2>
-                <Badge variant={data.current_price === 0 ? "default" : "secondary"}>
-                  €{data.current_price}/mese
-                </Badge>
-              </div>
-
-              <div>
-                <div className="mb-1.5 flex items-center justify-between text-sm">
-                  <span className="font-medium">
-                    {data.active_direct_referrals} / {data.max_discount_referrals}
-                  </span>
-                  <span className="text-muted-foreground">abbonati paganti attivi</span>
-                </div>
-                <div className="h-2.5 w-full overflow-hidden rounded-full bg-secondary">
-                  <div
-                    className="h-full rounded-full bg-gradient-brand transition-all"
-                    style={{
-                      width: `${Math.min(100, (data.active_direct_referrals / data.max_discount_referrals) * 100)}%`,
-                    }}
-                  />
-                </div>
-              </div>
-
-              {data.next_threshold !== null ? (
-                <p className="text-sm text-muted-foreground">
-                  Porta altri{" "}
-                  <span className="font-semibold text-foreground">
-                    {data.referrals_needed_for_next}
-                  </span>{" "}
-                  abbonati per ridurre il tuo Pro a{" "}
-                  <span className="font-semibold text-foreground">€{data.next_price}/mese</span>.
-                </p>
+              {data.plan_slug === null || data.base_price === null ? (
+                <>
+                  <h2 className="font-semibold">Il tuo abbonamento</h2>
+                  <p className="text-sm text-muted-foreground">
+                    Attiva un piano a pagamento (Starter, Pro o Business) per iniziare a ridurre il
+                    tuo canone mensile in base ai tuoi referral attivi. Gli abbonati che porti e i
+                    crediti guadagnati continuano comunque a essere conteggiati.
+                  </p>
+                </>
               ) : (
-                <p className="text-sm font-medium text-accent">
-                  Hai raggiunto il livello massimo: il tuo Pro costa €0/mese finché mantieni almeno{" "}
-                  {data.max_discount_referrals} abbonati paganti attivi.
-                </p>
+                <>
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <h2 className="font-semibold">Il tuo {data.plan_name}</h2>
+                    <Badge variant={data.current_price === 0 ? "default" : "secondary"}>
+                      €{data.current_price}/mese
+                    </Badge>
+                  </div>
+
+                  <div>
+                    <div className="mb-1.5 flex items-center justify-between text-sm">
+                      <span className="font-medium">
+                        {data.active_direct_referrals} / {data.max_discount_referrals}
+                      </span>
+                      <span className="text-muted-foreground">abbonati paganti attivi</span>
+                    </div>
+                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-secondary">
+                      <div
+                        className="h-full rounded-full bg-gradient-brand transition-all"
+                        style={{
+                          width: `${Math.min(100, (data.active_direct_referrals / (data.max_discount_referrals ?? 1)) * 100)}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {data.next_threshold !== null ? (
+                    <p className="text-sm text-muted-foreground">
+                      Porta altri{" "}
+                      <span className="font-semibold text-foreground">
+                        {data.referrals_needed_for_next}
+                      </span>{" "}
+                      abbonati per ridurre il tuo {data.plan_name} a{" "}
+                      <span className="font-semibold text-foreground">€{data.next_price}/mese</span>
+                      .
+                    </p>
+                  ) : (
+                    <p className="text-sm font-medium text-accent">
+                      Hai raggiunto il livello massimo: il tuo {data.plan_name} costa €0/mese finché
+                      mantieni almeno {data.max_discount_referrals} abbonati paganti attivi.
+                    </p>
+                  )}
+                </>
               )}
             </div>
 
@@ -162,8 +181,9 @@ function ReferralPage() {
                 })}
               </div>
               <p className="text-xs text-muted-foreground">
-                Completa il ciclo (10 abbonati) per un bonus extra di 1.000 crediti. Al termine il
-                ciclo riparte automaticamente dal livello 1.
+                Completa il ciclo ({data.cycle_length} abbonati) per un bonus extra di{" "}
+                {REFERRAL_CYCLE_BONUS_CREDITS.toLocaleString("it-IT")} crediti. Al termine il ciclo
+                riparte automaticamente dal livello 1.
               </p>
             </div>
 
@@ -192,9 +212,9 @@ function ReferralPage() {
             {/* Disclaimer */}
             <details className="panel p-6 text-sm text-muted-foreground">
               <summary className="cursor-pointer font-medium text-foreground">
-                Come funziona lo sconto Pro da referral
+                Come funziona lo sconto da referral
               </summary>
-              <p className="mt-3 whitespace-pre-line">{PRO_REFERRAL_DISCLAIMER}</p>
+              <p className="mt-3 whitespace-pre-line">{REFERRAL_DISCLAIMER}</p>
             </details>
           </>
         )}

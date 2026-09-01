@@ -35,8 +35,8 @@ function TermsPage() {
           <section className="space-y-2">
             <h2 className="text-lg font-semibold text-foreground">1. Servizio</h2>
             <p>
-              InkForgeKdp è una piattaforma in abbonamento che fornisce quattro strumenti per la
-              pubblicazione su Amazon KDP. Tutti i piani includono l'accesso a tutti i tool.
+              InkForgeKdp è una piattaforma in abbonamento che fornisce otto strumenti per la
+              pubblicazione su Amazon KDP. L'accesso ai singoli tool dipende dal piano attivo.
             </p>
           </section>
           <section className="space-y-2">
@@ -52,8 +52,8 @@ function TermsPage() {
             <p>
               Ogni piano include un numero di utilizzi per periodo (Starter 50, Pro 300, Business
               illimitato). Un credito viene consumato soltanto al completamento dell'operazione
-              finale del tool. Le operazioni fallite non vengono addebitate. I crediti non utilizzati
-              non vengono trasferiti al periodo successivo.
+              finale del tool. Le operazioni fallite non vengono addebitate. I crediti non
+              utilizzati non vengono trasferiti al periodo successivo.
             </p>
           </section>
           <section className="space-y-2">
@@ -74,8 +74,8 @@ function TermsPage() {
           <section className="space-y-2">
             <h2 className="text-lg font-semibold text-foreground">6. Cancellazione</h2>
             <p>
-              Puoi cancellare l'abbonamento in qualsiasi momento: manterrai l'accesso fino al termine
-              del periodo già pagato.
+              Puoi cancellare l'abbonamento in qualsiasi momento: manterrai l'accesso fino al
+              termine del periodo già pagato.
             </p>
           </section>
         </div>

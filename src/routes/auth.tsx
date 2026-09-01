@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const title = "Accedi o registrati — InkForgeKdp";
 const description =
-  "Accedi a InkForgeKdp per usare i tool Copertine, Pubblicazione, A+ KDPstudio e Triage.";
+  "Accedi a InkForgeKdp per usare tutti e 8 i tool: Copertine, Pubblicazione, A+ KDPstudio, Triage, Interni, Blurb, Bio e Promo.";
 
 interface AuthSearch {
   mode?: "login" | "signup";
@@ -117,7 +117,7 @@ function AuthPage() {
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {isSignup
-              ? "Un solo account per tutti e 4 i tool."
+              ? "Un solo account per tutti e 8 i tool."
               : "Accedi per continuare a lavorare."}
           </p>
 

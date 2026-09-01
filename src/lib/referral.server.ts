@@ -1,11 +1,12 @@
 import { logger } from "@/lib/logger.server";
 
 /**
- * Applica su Lemon Squeezy il prezzo Pro calcolato dal referral, se e solo se:
- *  - l'utente ha un abbonamento Pro REALMENTE attivo (condizione di
- *    mantenimento: il beneficio non sopravvive alla cancellazione del Pro);
+ * Applica su Lemon Squeezy il prezzo calcolato dal referral, se e solo se:
+ *  - l'utente ha un abbonamento REALMENTE attivo su un qualunque piano
+ *    (Starter/Pro/Business — il beneficio referral non è più limitato a Pro,
+ *    condizione di mantenimento: non sopravvive alla cancellazione);
  *  - il calcolo risulta "da sincronizzare" (pending_sync);
- *  - esiste un variant Lemon Squeezy configurato per quel prezzo esatto.
+ *  - esiste un variant Lemon Squeezy configurato per quel piano+prezzo esatti.
  * Se una di queste condizioni manca, la funzione non fa nulla e non solleva
  * errori: pending_sync resta true e si ritenterà al prossimo evento di
  * billing/referral per lo stesso utente. Questo permette al sistema referral
@@ -20,7 +21,8 @@ export async function syncProReferralPricing(userId: string): Promise<void> {
     .select("*")
     .eq("user_id", userId)
     .maybeSingle();
-  if (!pricing || !pricing.pending_sync) return;
+  if (!pricing || !pricing.pending_sync || pricing.effective_price == null || !pricing.plan_slug)
+    return;
 
   const { data: sub } = await supabaseAdmin
     .from("subscriptions")
@@ -32,21 +34,15 @@ export async function syncProReferralPricing(userId: string): Promise<void> {
   if (!sub?.lemon_squeezy_subscription_id) return;
   if (sub.status !== "active" && sub.status !== "on_trial") return;
 
-  const { data: plan } = await supabaseAdmin
-    .from("plans")
-    .select("slug")
-    .eq("id", sub.plan_id ?? "")
-    .maybeSingle();
-  if (plan?.slug !== "pro") return; // il beneficio referral riguarda solo il piano Pro
-
   const priceKey = String(Math.round(pricing.effective_price));
-  const { readProReferralPriceVariants, updateSubscriptionVariant } =
+  const { readReferralPriceVariants, updateSubscriptionVariant } =
     await import("@/lib/lemon-squeezy.server");
-  const variantId = readProReferralPriceVariants()[priceKey];
+  const variantId = readReferralPriceVariants()[pricing.plan_slug]?.[priceKey];
 
   if (!variantId) {
-    logger.warn("referral: variant Lemon Squeezy non configurato per il prezzo Pro referral", {
+    logger.warn("referral: variant Lemon Squeezy non configurato per il prezzo referral", {
       userId,
+      plan: pricing.plan_slug,
       price: priceKey,
     });
     return;
@@ -68,6 +64,7 @@ export async function syncProReferralPricing(userId: string): Promise<void> {
       targetType: "user",
       targetId: userId,
       metadata: {
+        plan_slug: pricing.plan_slug,
         price: pricing.effective_price,
         active_referrals: pricing.active_direct_referrals,
       },

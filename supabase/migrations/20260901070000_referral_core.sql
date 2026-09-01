@@ -43,17 +43,22 @@ GRANT ALL ON public.referral_config TO service_role;
 ALTER TABLE public.referral_config ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "referral_config_select_all" ON public.referral_config FOR SELECT TO authenticated USING (true);
 
+-- Revisione dei parametri (v2): lo sconto si applica ora al piano REALE di
+-- ciascun utente (Starter/Pro/Business), non solo a Pro — la base dello
+-- sconto è quindi il prezzo del piano corrente dell'utente, letto da
+-- public.plans al momento del calcolo, non più un valore fisso qui. Ritmo
+-- reso più raggiungibile: -1 ogni 5 referral attivi (prima: ogni 10).
 INSERT INTO public.referral_config (key, value) VALUES
   ('cycle_length', '10'),
-  ('cycle_bonus_credits', '1000'),
-  ('pro_base_price', '35'),
-  ('pro_discount_per_step', '1'),
-  ('pro_referrals_per_step', '10'),
-  ('pro_max_discount_referrals', '350'),
+  ('cycle_bonus_credits', '2000'),
+  ('discount_per_step', '1'),
+  ('referrals_per_step', '5'),
   ('new_user_first_month_discount_percent', '30');
 
 -- Crediti per posizione nel ciclo (1..10). Tabella, non CASE hardcoded in SQL:
--- modificabile dall'admin in futuro senza toccare codice o funzioni.
+-- modificabile dall'admin in futuro senza toccare codice o funzioni. Valori
+-- rivisti (v2) per essere più generosi/appetibili rispetto alla versione
+-- iniziale (300..2.000+1.000 bonus, totale 11.300/ciclo).
 CREATE TABLE public.referral_level_rewards (
   level INTEGER PRIMARY KEY CHECK (level BETWEEN 1 AND 10),
   credits INTEGER NOT NULL CHECK (credits >= 0)
@@ -64,8 +69,8 @@ ALTER TABLE public.referral_level_rewards ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "referral_level_rewards_select_all" ON public.referral_level_rewards FOR SELECT TO authenticated USING (true);
 
 INSERT INTO public.referral_level_rewards (level, credits) VALUES
-  (1, 300), (2, 600), (3, 750), (4, 900), (5, 1000),
-  (6, 1050), (7, 1100), (8, 1200), (9, 1400), (10, 2000);
+  (1, 500), (2, 900), (3, 1200), (4, 1500), (5, 1800),
+  (6, 2000), (7, 2200), (8, 2500), (9, 2800), (10, 3500);
 
 -- La relazione referrer↔referred + macchina a stati. UNIQUE su referred_user_id:
 -- un utente ha un solo referrer per sempre (stessa garanzia del trigger sopra,
@@ -123,10 +128,14 @@ CREATE TRIGGER referral_cycles_touch BEFORE UPDATE ON public.referral_cycles FOR
 -- quando il prezzo calcolato differisce da quanto risulta applicato su Lemon
 -- Squeezy (es. perché il variant per quel prezzo non è ancora configurato):
 -- il sistema resta corretto e riprova, non fallisce silenziosamente.
+-- Nome storico ("pro_"), ma dalla v2 si applica al piano REALE dell'utente
+-- (Starter/Pro/Business), non solo a Pro — vedi plan_slug/base_price sotto.
 CREATE TABLE public.pro_referral_pricing (
   user_id UUID PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
+  plan_slug TEXT,
+  base_price NUMERIC(10,2),
   active_direct_referrals INTEGER NOT NULL DEFAULT 0,
-  effective_price NUMERIC(10,2) NOT NULL DEFAULT 35,
+  effective_price NUMERIC(10,2),
   applied_price NUMERIC(10,2),
   applied_lemon_squeezy_variant_id TEXT,
   pending_sync BOOLEAN NOT NULL DEFAULT false,

@@ -40,10 +40,13 @@ $$;
 GRANT EXECUTE ON FUNCTION public.add_purchased_credits(UUID, INTEGER, TEXT, TEXT, TEXT, TEXT) TO service_role;
 
 -- ============================================================================
--- Formula prezzo Pro: max(0, base - floor(referral_attivi / referral_per_step) * sconto_per_step)
--- Legge da referral_config, non hardcoded: modificabile senza toccare codice.
+-- Formula prezzo referral: max(0, prezzo_piano - floor(referral_attivi / referral_per_step) * sconto_per_step)
+-- Generica dalla v2: si applica al prezzo del piano REALE dell'utente
+-- (Starter/Pro/Business), passato come parametro — non più un prezzo fisso.
+-- Legge le soglie da referral_config, non hardcoded: modificabile senza
+-- toccare codice.
 -- ============================================================================
-CREATE OR REPLACE FUNCTION public.calc_pro_price(_active_referrals INTEGER)
+CREATE OR REPLACE FUNCTION public.calc_referral_price(_base_price NUMERIC, _active_referrals INTEGER)
 RETURNS NUMERIC
 LANGUAGE plpgsql
 STABLE
@@ -51,19 +54,17 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-  base NUMERIC;
   step_discount NUMERIC;
   per_step INTEGER;
 BEGIN
-  SELECT (value #>> '{}')::numeric INTO base FROM public.referral_config WHERE key = 'pro_base_price';
-  SELECT (value #>> '{}')::numeric INTO step_discount FROM public.referral_config WHERE key = 'pro_discount_per_step';
-  SELECT (value #>> '{}')::integer INTO per_step FROM public.referral_config WHERE key = 'pro_referrals_per_step';
+  SELECT (value #>> '{}')::numeric INTO step_discount FROM public.referral_config WHERE key = 'discount_per_step';
+  SELECT (value #>> '{}')::integer INTO per_step FROM public.referral_config WHERE key = 'referrals_per_step';
 
-  RETURN GREATEST(0, COALESCE(base, 35) - FLOOR(GREATEST(_active_referrals, 0)::numeric / COALESCE(per_step, 10)) * COALESCE(step_discount, 1));
+  RETURN GREATEST(0, COALESCE(_base_price, 0) - FLOOR(GREATEST(_active_referrals, 0)::numeric / COALESCE(per_step, 5)) * COALESCE(step_discount, 1));
 END;
 $$;
-REVOKE ALL ON FUNCTION public.calc_pro_price(INTEGER) FROM PUBLIC, anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.calc_pro_price(INTEGER) TO service_role, authenticated;
+REVOKE ALL ON FUNCTION public.calc_referral_price(NUMERIC, INTEGER) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.calc_referral_price(NUMERIC, INTEGER) TO service_role, authenticated;
 
 CREATE OR REPLACE FUNCTION public.count_active_direct_referrals(_referrer_id UUID)
 RETURNS INTEGER
@@ -77,10 +78,16 @@ $$;
 REVOKE ALL ON FUNCTION public.count_active_direct_referrals(UUID) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.count_active_direct_referrals(UUID) TO service_role;
 
--- Ricalcola e memorizza il prezzo Pro dell'utente in base agli attivi correnti.
--- pending_sync=true quando il prezzo calcolato differisce da quanto risulta
--- applicato su Lemon Squeezy: il server tenterà l'aggiornamento reale (vedi
--- referral.server.ts) e lo azzererà solo dopo la conferma di successo.
+-- Ricalcola e memorizza il prezzo dell'utente in base agli attivi correnti E
+-- al piano a cui è REALMENTE abbonato in questo momento (Starter/Pro/Business
+-- hanno tutti diritto allo sconto, dalla v2 — non solo Pro). Se l'utente non
+-- ha un abbonamento attivo/in trial, non c'è alcun prezzo da scontare: la riga
+-- viene comunque aggiornata con il conteggio attivi (utile per la dashboard),
+-- ma plan_slug/base_price/effective_price restano NULL e pending_sync resta
+-- false (niente da sincronizzare su Lemon Squeezy). pending_sync=true quando
+-- il prezzo calcolato differisce da quanto risulta applicato: il server
+-- tenterà l'aggiornamento reale (vedi referral.server.ts) e lo azzererà solo
+-- dopo la conferma di successo.
 CREATE OR REPLACE FUNCTION public.recompute_referrer_pricing(_referrer_id UUID)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -89,27 +96,57 @@ SET search_path = public
 AS $$
 DECLARE
   active_count INTEGER;
+  current_plan RECORD;
   new_price NUMERIC;
   prev_price NUMERIC;
+  needs_sync BOOLEAN;
 BEGIN
   active_count := public.count_active_direct_referrals(_referrer_id);
-  new_price := public.calc_pro_price(active_count);
+
+  SELECT pl.slug, pl.price INTO current_plan
+  FROM public.subscriptions s
+  JOIN public.plans pl ON pl.id = s.plan_id
+  WHERE s.user_id = _referrer_id AND s.status IN ('active', 'on_trial')
+  ORDER BY s.updated_at DESC
+  LIMIT 1;
 
   SELECT effective_price INTO prev_price FROM public.pro_referral_pricing WHERE user_id = _referrer_id;
 
-  INSERT INTO public.pro_referral_pricing (user_id, active_direct_referrals, effective_price, pending_sync)
-  VALUES (_referrer_id, active_count, new_price, true)
+  IF current_plan.slug IS NULL THEN
+    -- Nessun piano attivo: nessuno sconto applicabile, ma il conteggio va comunque aggiornato.
+    INSERT INTO public.pro_referral_pricing (user_id, active_direct_referrals, plan_slug, base_price, effective_price, pending_sync)
+    VALUES (_referrer_id, active_count, NULL, NULL, NULL, false)
+    ON CONFLICT (user_id) DO UPDATE SET
+      active_direct_referrals = EXCLUDED.active_direct_referrals,
+      plan_slug = NULL, base_price = NULL, effective_price = NULL, pending_sync = false;
+
+    RETURN jsonb_build_object(
+      'active_direct_referrals', active_count, 'effective_price', NULL,
+      'previous_price', prev_price, 'changed', prev_price IS NOT NULL
+    );
+  END IF;
+
+  new_price := public.calc_referral_price(current_plan.price, active_count);
+  needs_sync := prev_price IS DISTINCT FROM new_price;
+
+  INSERT INTO public.pro_referral_pricing (user_id, active_direct_referrals, plan_slug, base_price, effective_price, pending_sync)
+  VALUES (_referrer_id, active_count, current_plan.slug, current_plan.price, new_price, true)
   ON CONFLICT (user_id) DO UPDATE SET
     active_direct_referrals = EXCLUDED.active_direct_referrals,
+    plan_slug = EXCLUDED.plan_slug,
+    base_price = EXCLUDED.base_price,
     effective_price = EXCLUDED.effective_price,
     pending_sync = (public.pro_referral_pricing.applied_price IS DISTINCT FROM EXCLUDED.effective_price)
+                   OR (public.pro_referral_pricing.plan_slug IS DISTINCT FROM EXCLUDED.plan_slug)
                    OR public.pro_referral_pricing.pending_sync;
 
   RETURN jsonb_build_object(
     'active_direct_referrals', active_count,
+    'plan_slug', current_plan.slug,
+    'base_price', current_plan.price,
     'effective_price', new_price,
     'previous_price', prev_price,
-    'changed', prev_price IS DISTINCT FROM new_price
+    'changed', needs_sync
   );
 END;
 $$;

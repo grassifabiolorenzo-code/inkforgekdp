@@ -71,22 +71,25 @@ export function planSlugForVariant(variantId: string | number | null | undefined
 }
 
 /**
- * Mappa prezzo→variant per il prezzo Pro dinamico del referral ("35" → id
- * variant a €35, "34" → id variant a €34, ... "0" → id variant a €0). Un solo
- * env var JSON invece di 36 variabili separate. Finché non è configurato (o
- * manca il variant per un prezzo specifico), il sistema registra il prezzo
- * calcolato ma NON tenta l'aggiornamento reale su Lemon Squeezy — vedi
- * referral.server.ts: pending_sync resta true e si riprova al prossimo evento,
- * mai un errore bloccante per l'utente.
+ * Mappa piano→prezzo→variant per il prezzo scontato dal referral, ora
+ * applicabile a QUALSIASI piano (Starter/Pro/Business), non solo Pro: prezzi
+ * scontati di piani diversi possono coincidere come intero (es. "15" per
+ * Starter a prezzo pieno e come prezzo scontato di un piano più caro), quindi
+ * serve una mappa annidata per slug di piano, non una piatta prezzo→variant.
+ * Un solo env var JSON invece di decine di variabili separate. Finché non è
+ * configurato (o manca il variant per un prezzo specifico), il sistema
+ * registra il prezzo calcolato ma NON tenta l'aggiornamento reale su Lemon
+ * Squeezy — vedi referral.server.ts: pending_sync resta true e si riprova al
+ * prossimo evento, mai un errore bloccante per l'utente.
  */
-export function readProReferralPriceVariants(): Record<string, string> {
-  const raw = process.env["LEMON_SQUEEZY_PRO_REFERRAL_PRICE_VARIANTS"];
+export function readReferralPriceVariants(): Record<string, Record<string, string>> {
+  const raw = process.env["LEMON_SQUEEZY_REFERRAL_PRICE_VARIANTS"];
   if (!raw) return {};
   try {
-    const parsed = JSON.parse(raw) as Record<string, string>;
+    const parsed = JSON.parse(raw) as Record<string, Record<string, string>>;
     return typeof parsed === "object" && parsed !== null ? parsed : {};
   } catch {
-    console.error("[lemon-squeezy] LEMON_SQUEEZY_PRO_REFERRAL_PRICE_VARIANTS non è un JSON valido");
+    console.error("[lemon-squeezy] LEMON_SQUEEZY_REFERRAL_PRICE_VARIANTS non è un JSON valido");
     return {};
   }
 }

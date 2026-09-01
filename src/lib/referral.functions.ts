@@ -5,12 +5,14 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 export interface ReferralDashboard {
   referral_code: string | null;
   active_direct_referrals: number;
-  current_price: number;
-  base_price: number;
-  max_discount_referrals: number;
+  plan_slug: string | null;
+  plan_name: string | null;
+  current_price: number | null;
+  base_price: number | null;
+  max_discount_referrals: number | null;
   next_threshold: number | null;
   next_price: number | null;
-  referrals_needed_for_next: number;
+  referrals_needed_for_next: number | null;
   current_cycle_number: number;
   current_cycle_progress: number;
   cycle_length: number;

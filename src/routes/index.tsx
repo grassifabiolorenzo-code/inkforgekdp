@@ -44,7 +44,7 @@ function LandingPage() {
               Pronto a pubblicare con <span className="text-gradient">InkForgeKdp</span>?
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-              Attiva il tuo piano in un minuto e inizia subito a usare i quattro tool.
+              Attiva il tuo piano in un minuto e inizia subito a usare tutti e 8 i tool.
             </p>
             <Button
               size="lg"
