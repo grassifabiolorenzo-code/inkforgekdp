@@ -57,6 +57,16 @@ const it = {
   "newsletter.success": "Fatto! Controlla la tua casella di posta.",
   "newsletter.error": "Iscrizione non riuscita. Riprova tra qualche istante.",
 
+  "chat.openLabel": "Apri l'assistente di aiuto",
+  "chat.title": "Assistente InkForgeKdp",
+  "chat.greeting":
+    "Ciao! Sono l'assistente di InkForgeKdp. Chiedimi qualsiasi cosa sui tool, i piani o il tuo account.",
+  "chat.placeholder": "Scrivi un messaggio…",
+  "chat.send": "Invia",
+  "chat.typing": "Sto scrivendo…",
+  "chat.disclaimer": "Le risposte sono generate automaticamente e riguardano solo InkForgeKdp.",
+  "chat.error": "Non riesco a rispondere proprio adesso. Riprova tra poco.",
+
   "dash.dashboard": "Dashboard",
   "dash.tools": "Tool",
   "dash.account": "Account",
@@ -191,6 +201,16 @@ const en: Dictionary = {
   "newsletter.success": "Done! Check your inbox.",
   "newsletter.error": "Sign-up failed. Please try again shortly.",
 
+  "chat.openLabel": "Open the help assistant",
+  "chat.title": "InkForgeKdp Assistant",
+  "chat.greeting":
+    "Hi! I'm the InkForgeKdp assistant. Ask me anything about the tools, plans, or your account.",
+  "chat.placeholder": "Type a message…",
+  "chat.send": "Send",
+  "chat.typing": "Typing…",
+  "chat.disclaimer": "Answers are generated automatically and cover InkForgeKdp only.",
+  "chat.error": "I can't answer right now. Please try again shortly.",
+
   "dash.dashboard": "Dashboard",
   "dash.tools": "Tools",
   "dash.account": "Account",
@@ -321,6 +341,17 @@ const de: Dictionary = {
   "newsletter.success": "Erledigt! Schau in dein Postfach.",
   "newsletter.error": "Anmeldung fehlgeschlagen. Bitte versuche es in Kürze erneut.",
 
+  "chat.openLabel": "Hilfeassistenten öffnen",
+  "chat.title": "InkForgeKdp-Assistent",
+  "chat.greeting":
+    "Hallo! Ich bin der InkForgeKdp-Assistent. Frag mich alles zu den Tools, den Plänen oder deinem Konto.",
+  "chat.placeholder": "Nachricht schreiben…",
+  "chat.send": "Senden",
+  "chat.typing": "Schreibt…",
+  "chat.disclaimer":
+    "Antworten werden automatisch generiert und betreffen ausschließlich InkForgeKdp.",
+  "chat.error": "Ich kann gerade nicht antworten. Bitte versuche es in Kürze erneut.",
+
   "dash.dashboard": "Dashboard",
   "dash.tools": "Tools",
   "dash.account": "Konto",
@@ -448,6 +479,16 @@ const fr: Dictionary = {
     "J'accepte de recevoir des emails promotionnels d'InkForgeKdp. Je peux me désinscrire à tout moment.",
   "newsletter.success": "C'est fait ! Vérifiez votre boîte mail.",
   "newsletter.error": "Inscription impossible. Réessayez dans un instant.",
+
+  "chat.openLabel": "Ouvrir l'assistant d'aide",
+  "chat.title": "Assistant InkForgeKdp",
+  "chat.greeting":
+    "Bonjour ! Je suis l'assistant InkForgeKdp. Posez-moi vos questions sur les outils, les formules ou votre compte.",
+  "chat.placeholder": "Écrivez un message…",
+  "chat.send": "Envoyer",
+  "chat.typing": "En train d'écrire…",
+  "chat.disclaimer": "Les réponses sont générées automatiquement et ne concernent qu'InkForgeKdp.",
+  "chat.error": "Je ne peux pas répondre pour le moment. Réessayez dans un instant.",
 
   "dash.dashboard": "Tableau de bord",
   "dash.tools": "Outils",
@@ -580,6 +621,16 @@ const es: Dictionary = {
   "newsletter.success": "¡Listo! Revisa tu bandeja de entrada.",
   "newsletter.error": "No se pudo completar la suscripción. Inténtalo de nuevo en un momento.",
 
+  "chat.openLabel": "Abrir el asistente de ayuda",
+  "chat.title": "Asistente InkForgeKdp",
+  "chat.greeting":
+    "¡Hola! Soy el asistente de InkForgeKdp. Pregúntame lo que quieras sobre las herramientas, los planes o tu cuenta.",
+  "chat.placeholder": "Escribe un mensaje…",
+  "chat.send": "Enviar",
+  "chat.typing": "Escribiendo…",
+  "chat.disclaimer": "Las respuestas se generan automáticamente y tratan solo sobre InkForgeKdp.",
+  "chat.error": "No puedo responder ahora mismo. Inténtalo de nuevo en un momento.",
+
   "dash.dashboard": "Panel",
   "dash.tools": "Herramientas",
   "dash.account": "Cuenta",
@@ -711,6 +762,16 @@ const nl: Dictionary = {
   "newsletter.success": "Gelukt! Check je inbox.",
   "newsletter.error": "Aanmelden is niet gelukt. Probeer het straks opnieuw.",
 
+  "chat.openLabel": "Hulpassistent openen",
+  "chat.title": "InkForgeKdp-assistent",
+  "chat.greeting":
+    "Hoi! Ik ben de InkForgeKdp-assistent. Vraag me gerust iets over de tools, de abonnementen of je account.",
+  "chat.placeholder": "Typ een bericht…",
+  "chat.send": "Versturen",
+  "chat.typing": "Aan het typen…",
+  "chat.disclaimer": "Antwoorden worden automatisch gegenereerd en gaan alleen over InkForgeKdp.",
+  "chat.error": "Ik kan nu even niet antwoorden. Probeer het straks opnieuw.",
+
   "dash.dashboard": "Dashboard",
   "dash.tools": "Tools",
   "dash.account": "Account",
@@ -837,6 +898,16 @@ const pt: Dictionary = {
     "Aceito receber emails promocionais da InkForgeKdp. Posso cancelar a subscrição a qualquer momento.",
   "newsletter.success": "Feito! Verifica a tua caixa de entrada.",
   "newsletter.error": "Não foi possível concluir a inscrição. Tenta novamente daqui a pouco.",
+
+  "chat.openLabel": "Abrir o assistente de ajuda",
+  "chat.title": "Assistente InkForgeKdp",
+  "chat.greeting":
+    "Olá! Sou o assistente da InkForgeKdp. Pergunta-me o que quiseres sobre as ferramentas, os planos ou a tua conta.",
+  "chat.placeholder": "Escreve uma mensagem…",
+  "chat.send": "Enviar",
+  "chat.typing": "A escrever…",
+  "chat.disclaimer": "As respostas são geradas automaticamente e tratam apenas de InkForgeKdp.",
+  "chat.error": "Não consigo responder agora. Tenta novamente daqui a pouco.",
 
   "dash.dashboard": "Painel",
   "dash.tools": "Ferramentas",

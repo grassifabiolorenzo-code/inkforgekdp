@@ -10,6 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { HelpChatWidgetGate } from "../components/chat/HelpChatWidget";
 import { installClientErrorCapture } from "../lib/client-error-capture";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { captureError } from "../lib/sentry";
@@ -130,6 +131,7 @@ function RootComponent() {
       <I18nProvider>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
+        <HelpChatWidgetGate />
       </I18nProvider>
     </QueryClientProvider>
   );
