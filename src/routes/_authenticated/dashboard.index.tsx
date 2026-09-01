@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Lock } from "lucide-react";
 
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { FirstRunGuide } from "@/components/dashboard/FirstRunGuide";
 import {
   ErrorState,
   InactiveSubscriptionState,
@@ -33,7 +34,9 @@ function DashboardHome() {
   const copyOf = useToolCopy();
 
   const isAllowed = (toolId: string) =>
-    state?.allowed_tools ? state.allowed_tools.includes(toolId) : planAllowsTool(state?.plan?.slug, toolId);
+    state?.allowed_tools
+      ? state.allowed_tools.includes(toolId)
+      : planAllowsTool(state?.plan?.slug, toolId);
 
   return (
     <DashboardShell title={t("dash.dashboard")} description={t("tools.sub")}>
@@ -51,9 +54,12 @@ function DashboardHome() {
         {state && !state.active && <InactiveSubscriptionState state={state} />}
 
         <div>
-          <h2 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">
-            I tuoi tool
-          </h2>
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">
+              I tuoi tool
+            </h2>
+            {account.data?.profile?.id && <FirstRunGuide userId={account.data.profile.id} />}
+          </div>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             {TOOLS.map((tool) => {
               const allowed = !state || isAllowed(tool.id);
@@ -71,7 +77,9 @@ function DashboardHome() {
                           </Badge>
                         )}
                       </div>
-                      <p className="mt-1 text-sm text-muted-foreground">{copyOf(tool.id).description}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {copyOf(tool.id).description}
+                      </p>
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground">
