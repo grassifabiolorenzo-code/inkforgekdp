@@ -369,36 +369,6 @@ export const updateAdminGeneralSettings = createServerFn({ method: "POST" })
 export const getSystemHealth = createServerFn({ method: "GET" })
   .middleware([requirePermission("system", "read")])
   .handler(async () => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { getBillingConfigStatus } = await import("@/lib/lemon-squeezy.server");
-
-    const dbStart = Date.now();
-    const { error: dbError } = await supabaseAdmin.rpc("admin_db_ping");
-    const dbLatencyMs = Date.now() - dbStart;
-
-    const billing = getBillingConfigStatus();
-
-    return {
-      checkedAt: new Date().toISOString(),
-      database: {
-        status: dbError ? "down" : "operational",
-        latencyMs: dbLatencyMs,
-        error: dbError?.message ?? null,
-      },
-      authentication: { status: "operational" as const },
-      paymentProvider: {
-        status: billing.ready ? "operational" : "not_configured",
-        provider: "Lemon Squeezy",
-        configured: billing.ready,
-      },
-      emailProvider: {
-        status: "not_configured" as const,
-        note: "Nessun provider email transazionale collegato: le notifiche vengono solo registrate nei log del server.",
-      },
-      aiText: {
-        status: process.env["GEMINI_API_KEY"] ? "operational" : "not_configured",
-        provider: "Gemini",
-      },
-      environment: process.env["NODE_ENV"] ?? "production",
-    };
+    const { computeSystemHealth } = await import("@/lib/systemHealth.server");
+    return computeSystemHealth();
   });

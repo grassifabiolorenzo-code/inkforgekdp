@@ -18,6 +18,7 @@ import { Route as FaqRouteImport } from './routes/faq'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProvaRouteImport } from './routes/prova'
+import { Route as StatusRouteImport } from './routes/status'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AdminAdminRouteImport } from './routes/_admin/admin'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -90,6 +91,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const ProvaRoute = ProvaRouteImport.update({
   id: '/prova',
   path: '/prova',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatusRoute = StatusRouteImport.update({
+  id: '/status',
+  path: '/status',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -266,6 +272,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/prova': typeof ProvaRoute
+  '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
   '/admin': typeof AdminAdminRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
@@ -305,6 +312,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/prova': typeof ProvaRoute
+  '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
   '/admin/administrators': typeof AdminAdminAdministratorsRoute
   '/admin/analytics': typeof AdminAdminAnalyticsRoute
@@ -345,6 +353,7 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/prova': typeof ProvaRoute
+  '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
   '/_admin/admin': typeof AdminAdminRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
@@ -386,6 +395,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/prova'
+    | '/status'
     | '/terms'
     | '/admin'
     | '/dashboard'
@@ -425,6 +435,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/prova'
+    | '/status'
     | '/terms'
     | '/admin/administrators'
     | '/admin/analytics'
@@ -464,6 +475,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/prova'
+    | '/status'
     | '/terms'
     | '/_admin/admin'
     | '/_authenticated/dashboard'
@@ -506,6 +518,7 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   ProvaRoute: typeof ProvaRoute
+  StatusRoute: typeof StatusRoute
   TermsRoute: typeof TermsRoute
   ApiPublicLemonSqueezyWebhookRoute: typeof ApiPublicLemonSqueezyWebhookRoute
 }
@@ -573,6 +586,13 @@ declare module '@tanstack/react-router' {
       path: '/prova'
       fullPath: '/prova'
       preLoaderRoute: typeof ProvaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/status': {
+      id: '/status'
+      path: '/status'
+      fullPath: '/status'
+      preLoaderRoute: typeof StatusRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -906,6 +926,7 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   ProvaRoute: ProvaRoute,
+  StatusRoute: StatusRoute,
   TermsRoute: TermsRoute,
   ApiPublicLemonSqueezyWebhookRoute: ApiPublicLemonSqueezyWebhookRoute,
 }

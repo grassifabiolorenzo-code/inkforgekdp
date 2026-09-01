@@ -44,6 +44,7 @@ const it = {
   "footer.legal": "Legale",
   "footer.privacy": "Privacy Policy",
   "footer.terms": "Termini e condizioni",
+  "footer.status": "Stato del sistema",
   "footer.rights": "Tutti i diritti riservati.",
 
   "dash.dashboard": "Dashboard",
@@ -108,13 +109,15 @@ const it = {
   "tool.bio.name": "Bio Autore & Kit Stampa",
   "tool.bio.desc":
     "Genera bio autore (breve, media, lunga) per Amazon Author Central e siti, più comunicato stampa di lancio libro.",
-  "tool.bio.benefit": "Presentati in modo professionale su Amazon, sito e stampa senza scrivere da zero ogni volta.",
+  "tool.bio.benefit":
+    "Presentati in modo professionale su Amazon, sito e stampa senza scrivere da zero ogni volta.",
   "tool.bio.event": "Ogni generazione completata",
 
   "tool.promo.name": "Social & Ads Promo Kit",
   "tool.promo.desc":
     "Genera post social multi-piattaforma, headline/bullet per Amazon Ads ed email di lancio per promuovere il libro.",
-  "tool.promo.benefit": "Materiale di lancio pronto in pochi secondi, coerente su tutti i canali di promozione.",
+  "tool.promo.benefit":
+    "Materiale di lancio pronto in pochi secondi, coerente su tutti i canali di promozione.",
   "tool.promo.event": "Ogni generazione completata",
 
   "triage.approved": "Promossa",
@@ -164,6 +167,7 @@ const en: Dictionary = {
   "footer.legal": "Legal",
   "footer.privacy": "Privacy Policy",
   "footer.terms": "Terms and conditions",
+  "footer.status": "System status",
   "footer.rights": "All rights reserved.",
 
   "dash.dashboard": "Dashboard",
@@ -187,7 +191,8 @@ const en: Dictionary = {
   "tool.copertine.name": "Covers",
   "tool.copertine.desc":
     "KDP cover editor with bleed, spine and safety-margin guides, text and typographic effects.",
-  "tool.copertine.benefit": "KDP-ready covers without external software, exported in high resolution.",
+  "tool.copertine.benefit":
+    "KDP-ready covers without external software, exported in high resolution.",
   "tool.copertine.event": "Image export completed",
 
   "tool.pubblicazione.name": "Publishing",
@@ -219,19 +224,22 @@ const en: Dictionary = {
   "tool.blurb.name": "Blurb & Synopsis",
   "tool.blurb.desc":
     "Generate back-cover copy, synopsis and editorial blurb for fiction and non-fiction, in any genre and tone.",
-  "tool.blurb.benefit": "Ready-to-use sales copy for fiction and non-fiction books, not just coloring and activity books.",
+  "tool.blurb.benefit":
+    "Ready-to-use sales copy for fiction and non-fiction books, not just coloring and activity books.",
   "tool.blurb.event": "Each completed generation",
 
   "tool.bio.name": "Author Bio & Press Kit",
   "tool.bio.desc":
     "Generate author bios (short, medium, long) for Amazon Author Central and websites, plus a book launch press release.",
-  "tool.bio.benefit": "Present yourself professionally on Amazon, your website and the press without starting from scratch every time.",
+  "tool.bio.benefit":
+    "Present yourself professionally on Amazon, your website and the press without starting from scratch every time.",
   "tool.bio.event": "Each completed generation",
 
   "tool.promo.name": "Social & Ads Promo Kit",
   "tool.promo.desc":
     "Generate multi-platform social posts, Amazon Ads headlines/bullets and a launch email to promote your book.",
-  "tool.promo.benefit": "Launch material ready in seconds, consistent across every promotion channel.",
+  "tool.promo.benefit":
+    "Launch material ready in seconds, consistent across every promotion channel.",
   "tool.promo.event": "Each completed generation",
 
   "triage.approved": "Approved",
@@ -278,6 +286,7 @@ const de: Dictionary = {
   "footer.legal": "Rechtliches",
   "footer.privacy": "Datenschutz",
   "footer.terms": "AGB",
+  "footer.status": "Systemstatus",
   "footer.rights": "Alle Rechte vorbehalten.",
 
   "dash.dashboard": "Dashboard",
@@ -333,13 +342,15 @@ const de: Dictionary = {
   "tool.blurb.name": "Klappentext & Synopse",
   "tool.blurb.desc":
     "Erstellt Klappentext, Synopse und redaktionellen Blurb für Belletristik und Sachbücher, in jedem Genre und Ton.",
-  "tool.blurb.benefit": "Verkaufstexte für Belletristik und Sachbücher, nicht nur für Malbücher und Activity Books.",
+  "tool.blurb.benefit":
+    "Verkaufstexte für Belletristik und Sachbücher, nicht nur für Malbücher und Activity Books.",
   "tool.blurb.event": "Jede abgeschlossene Generierung",
 
   "tool.bio.name": "Autoren-Bio & Presse-Kit",
   "tool.bio.desc":
     "Erstellt Autoren-Bios (kurz, mittel, lang) für Amazon Author Central und Websites sowie eine Pressemitteilung zum Buchstart.",
-  "tool.bio.benefit": "Präsentiere dich professionell auf Amazon, deiner Website und in der Presse, ohne jedes Mal neu zu schreiben.",
+  "tool.bio.benefit":
+    "Präsentiere dich professionell auf Amazon, deiner Website und in der Presse, ohne jedes Mal neu zu schreiben.",
   "tool.bio.event": "Jede abgeschlossene Generierung",
 
   "tool.promo.name": "Social & Ads Promo-Kit",
@@ -392,6 +403,7 @@ const fr: Dictionary = {
   "footer.legal": "Mentions légales",
   "footer.privacy": "Politique de confidentialité",
   "footer.terms": "Conditions générales",
+  "footer.status": "État du système",
   "footer.rights": "Tous droits réservés.",
 
   "dash.dashboard": "Tableau de bord",
@@ -449,19 +461,22 @@ const fr: Dictionary = {
   "tool.blurb.name": "Quatrième de couverture & Synopsis",
   "tool.blurb.desc":
     "Génère la quatrième de couverture, le synopsis et un blurb éditorial pour la fiction et le documentaire, tout genre et ton.",
-  "tool.blurb.benefit": "Des textes de vente prêts pour les romans et essais, pas seulement pour les coloriages et activity books.",
+  "tool.blurb.benefit":
+    "Des textes de vente prêts pour les romans et essais, pas seulement pour les coloriages et activity books.",
   "tool.blurb.event": "Chaque génération terminée",
 
   "tool.bio.name": "Bio Auteur & Kit Presse",
   "tool.bio.desc":
     "Génère des bios auteur (courte, moyenne, longue) pour Amazon Author Central et les sites web, plus un communiqué de presse de lancement.",
-  "tool.bio.benefit": "Présentez-vous professionnellement sur Amazon, votre site et la presse sans repartir de zéro à chaque fois.",
+  "tool.bio.benefit":
+    "Présentez-vous professionnellement sur Amazon, votre site et la presse sans repartir de zéro à chaque fois.",
   "tool.bio.event": "Chaque génération terminée",
 
   "tool.promo.name": "Kit Promo Réseaux & Ads",
   "tool.promo.desc":
     "Génère des posts multi-plateformes, des titres/puces Amazon Ads et un email de lancement pour promouvoir le livre.",
-  "tool.promo.benefit": "Du matériel de lancement prêt en quelques secondes, cohérent sur tous les canaux de promotion.",
+  "tool.promo.benefit":
+    "Du matériel de lancement prêt en quelques secondes, cohérent sur tous les canaux de promotion.",
   "tool.promo.event": "Chaque génération terminée",
 
   "triage.approved": "Validée",
@@ -508,6 +523,7 @@ const es: Dictionary = {
   "footer.legal": "Legal",
   "footer.privacy": "Política de privacidad",
   "footer.terms": "Términos y condiciones",
+  "footer.status": "Estado del sistema",
   "footer.rights": "Todos los derechos reservados.",
 
   "dash.dashboard": "Panel",
@@ -565,19 +581,22 @@ const es: Dictionary = {
   "tool.blurb.name": "Sinopsis & Contraportada",
   "tool.blurb.desc":
     "Genera contraportada, sinopsis y blurb editorial para narrativa y no ficción, en cualquier género y tono.",
-  "tool.blurb.benefit": "Textos de venta listos para novelas y ensayos, no solo para libros de colorear y actividades.",
+  "tool.blurb.benefit":
+    "Textos de venta listos para novelas y ensayos, no solo para libros de colorear y actividades.",
   "tool.blurb.event": "Cada generación completada",
 
   "tool.bio.name": "Bio de Autor & Kit de Prensa",
   "tool.bio.desc":
     "Genera biografías de autor (corta, media, larga) para Amazon Author Central y webs, además de una nota de prensa de lanzamiento.",
-  "tool.bio.benefit": "Preséntate de forma profesional en Amazon, tu web y la prensa sin empezar de cero cada vez.",
+  "tool.bio.benefit":
+    "Preséntate de forma profesional en Amazon, tu web y la prensa sin empezar de cero cada vez.",
   "tool.bio.event": "Cada generación completada",
 
   "tool.promo.name": "Kit Promo Social & Ads",
   "tool.promo.desc":
     "Genera publicaciones multiplataforma, títulos/puntos para Amazon Ads y un email de lanzamiento para promocionar el libro.",
-  "tool.promo.benefit": "Material de lanzamiento listo en segundos, coherente en todos los canales de promoción.",
+  "tool.promo.benefit":
+    "Material de lanzamiento listo en segundos, coherente en todos los canales de promoción.",
   "tool.promo.event": "Cada generación completada",
 
   "triage.approved": "Aprobada",
@@ -624,6 +643,7 @@ const nl: Dictionary = {
   "footer.legal": "Juridisch",
   "footer.privacy": "Privacybeleid",
   "footer.terms": "Algemene voorwaarden",
+  "footer.status": "Systeemstatus",
   "footer.rights": "Alle rechten voorbehouden.",
 
   "dash.dashboard": "Dashboard",
@@ -647,8 +667,7 @@ const nl: Dictionary = {
   "tool.copertine.name": "Covers",
   "tool.copertine.desc":
     "KDP-covereditor met hulplijnen voor afloop, rug en veilige marges, teksten en typografische effecten.",
-  "tool.copertine.benefit":
-    "KDP-klare covers zonder extra software, met export in hoge resolutie.",
+  "tool.copertine.benefit": "KDP-klare covers zonder extra software, met export in hoge resolutie.",
   "tool.copertine.event": "Export van afbeelding voltooid",
 
   "tool.pubblicazione.name": "Publicatie",
@@ -659,16 +678,14 @@ const nl: Dictionary = {
   "tool.pubblicazione.event": "Elke voltooide generatie",
 
   "tool.aplus.name": "A+ KDPstudio",
-  "tool.aplus.desc":
-    "Meertalige A+ contentbouwer op basis van cover, binnenwerk en merklogo.",
+  "tool.aplus.desc": "Meertalige A+ contentbouwer op basis van cover, binnenwerk en merklogo.",
   "tool.aplus.benefit": "Professionele meertalige A+ content zonder ontwerper.",
   "tool.aplus.event": "Elke voltooide generatie",
 
   "tool.triage.name": "Triage",
   "tool.triage.desc":
     "Snelle beeldanalyse voor KDP: DPI, afmetingen, kwaliteit en automatische sortering.",
-  "tool.triage.benefit":
-    "Filter onbruikbare beelden voor de opmaak en bespaar uren werk.",
+  "tool.triage.benefit": "Filter onbruikbare beelden voor de opmaak en bespaar uren werk.",
   "tool.triage.event": "Download van de 3 mappen voltooid",
 
   "tool.interni.name": "Binnenwerk",
@@ -681,13 +698,15 @@ const nl: Dictionary = {
   "tool.blurb.name": "Blurb & Synopsis",
   "tool.blurb.desc":
     "Genereert flaptekst, synopsis en redactionele blurb voor fictie en non-fictie, in elk genre en elke toon.",
-  "tool.blurb.benefit": "Verkoopteksten voor romans en non-fictie, niet alleen voor kleur- en activiteitenboeken.",
+  "tool.blurb.benefit":
+    "Verkoopteksten voor romans en non-fictie, niet alleen voor kleur- en activiteitenboeken.",
   "tool.blurb.event": "Elke voltooide generatie",
 
   "tool.bio.name": "Auteursbio & Perskit",
   "tool.bio.desc":
     "Genereert auteursbio's (kort, gemiddeld, lang) voor Amazon Author Central en websites, plus een perbericht voor de boeklancering.",
-  "tool.bio.benefit": "Presenteer jezelf professioneel op Amazon, je website en de pers zonder telkens opnieuw te beginnen.",
+  "tool.bio.benefit":
+    "Presenteer jezelf professioneel op Amazon, je website en de pers zonder telkens opnieuw te beginnen.",
   "tool.bio.event": "Elke voltooide generatie",
 
   "tool.promo.name": "Social & Ads Promo-kit",
@@ -740,6 +759,7 @@ const pt: Dictionary = {
   "footer.legal": "Legal",
   "footer.privacy": "Política de Privacidade",
   "footer.terms": "Termos e condições",
+  "footer.status": "Status do sistema",
   "footer.rights": "Todos os direitos reservados.",
 
   "dash.dashboard": "Painel",
@@ -797,19 +817,22 @@ const pt: Dictionary = {
   "tool.blurb.name": "Sinopse & Contracapa",
   "tool.blurb.desc":
     "Gera contracapa, sinopse e blurb editorial para ficção e não-ficção, em qualquer género e tom.",
-  "tool.blurb.benefit": "Textos de venda prontos para romances e ensaios, não só para livros de colorir e atividades.",
+  "tool.blurb.benefit":
+    "Textos de venda prontos para romances e ensaios, não só para livros de colorir e atividades.",
   "tool.blurb.event": "Cada geração concluída",
 
   "tool.bio.name": "Bio de Autor & Kit de Imprensa",
   "tool.bio.desc":
     "Gera biografias de autor (curta, média, longa) para Amazon Author Central e sites, mais um comunicado de imprensa de lançamento.",
-  "tool.bio.benefit": "Apresenta-te de forma profissional na Amazon, no teu site e na imprensa sem começar do zero de cada vez.",
+  "tool.bio.benefit":
+    "Apresenta-te de forma profissional na Amazon, no teu site e na imprensa sem começar do zero de cada vez.",
   "tool.bio.event": "Cada geração concluída",
 
   "tool.promo.name": "Kit Promo Social & Ads",
   "tool.promo.desc":
     "Gera publicações multiplataforma, títulos/bullets para Amazon Ads e um email de lançamento para promover o livro.",
-  "tool.promo.benefit": "Material de lançamento pronto em segundos, consistente em todos os canais de promoção.",
+  "tool.promo.benefit":
+    "Material de lançamento pronto em segundos, consistente em todos os canais de promoção.",
   "tool.promo.event": "Cada geração concluída",
 
   "triage.approved": "Aprovada",

@@ -51,6 +51,9 @@ export function SiteFooter() {
           <Link to="/terms" className="block text-muted-foreground hover:text-foreground">
             {t("footer.terms")}
           </Link>
+          <Link to="/status" className="block text-muted-foreground hover:text-foreground">
+            {t("footer.status")}
+          </Link>
         </div>
       </div>
       <div className="border-t border-border/70 py-6 text-center text-xs text-muted-foreground">
