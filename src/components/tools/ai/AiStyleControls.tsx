@@ -1,5 +1,11 @@
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { AI_TONES, type AiToneId } from "@/components/tools/ai/aiStyle";
 
@@ -25,7 +31,11 @@ export function AiStyleControls({
         <Label htmlFor={`${idPrefix}-tone`} className="text-xs">
           Tono di voce
         </Label>
-        <Select value={tone} onValueChange={(v) => onToneChange(v as AiToneId)} disabled={disabled ?? false}>
+        <Select
+          value={tone}
+          onValueChange={(v) => onToneChange(v as AiToneId)}
+          disabled={disabled ?? false}
+        >
           <SelectTrigger id={`${idPrefix}-tone`}>
             <SelectValue />
           </SelectTrigger>
@@ -48,6 +58,7 @@ export function AiStyleControls({
         </div>
         <Slider
           id={`${idPrefix}-creativity`}
+          aria-label={`Livello di creatività: ${creativity} su 10`}
           min={1}
           max={10}
           step={1}
@@ -56,8 +67,8 @@ export function AiStyleControls({
           onValueChange={(v) => onCreativityChange(v[0] ?? creativity)}
         />
         <p className="text-[11px] text-muted-foreground">
-          Valori bassi restano molto aderenti ai contenuti del PDF; valori alti aggiungono immagini e
-          ritmo più liberi.
+          Valori bassi restano molto aderenti ai contenuti del PDF; valori alti aggiungono immagini
+          e ritmo più liberi.
         </p>
       </div>
     </div>

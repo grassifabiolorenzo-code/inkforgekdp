@@ -240,8 +240,9 @@ function AdminAdministratorsPage() {
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <Label>Email (l'account deve già esistere)</Label>
+              <Label htmlFor="new-admin-email">Email (l'account deve già esistere)</Label>
               <Input
+                id="new-admin-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -249,9 +250,9 @@ function AdminAdministratorsPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Ruolo</Label>
+              <Label htmlFor="new-admin-role">Ruolo</Label>
               <Select value={newRole} onValueChange={(v) => setNewRole(v as AdminRole)}>
-                <SelectTrigger>
+                <SelectTrigger id="new-admin-role">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

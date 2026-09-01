@@ -5,7 +5,13 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import type { ToolRuntime } from "@/components/tools/ToolPageShell";
@@ -59,7 +65,9 @@ export function BlurbTool({ runtime }: { runtime: ToolRuntime }) {
 
   function downloadOutput() {
     if (!output) return;
-    const blob = new Blob([formatBlurbForExport({ ...input, tone }, output)], { type: "text/plain;charset=utf-8" });
+    const blob = new Blob([formatBlurbForExport({ ...input, tone }, output)], {
+      type: "text/plain;charset=utf-8",
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -122,7 +130,9 @@ export function BlurbTool({ runtime }: { runtime: ToolRuntime }) {
         if (!charge.ok) return;
         setOutput(result);
         setAiUsed(usedAi);
-        toast.success(charge.duplicate ? "Generazione completata" : "Generazione completata — 1 credito");
+        toast.success(
+          charge.duplicate ? "Generazione completata" : "Generazione completata — 1 credito",
+        );
       } finally {
         setGenerating(false);
       }
@@ -139,7 +149,8 @@ export function BlurbTool({ runtime }: { runtime: ToolRuntime }) {
             Blurb & Sinossi
           </h3>
           <p className="mt-1 text-xs text-muted-foreground">
-            Per narrativa e saggistica: quarta di copertina, sinossi ed editorial blurb, in qualsiasi genere.
+            Per narrativa e saggistica: quarta di copertina, sinossi ed editorial blurb, in
+            qualsiasi genere.
           </p>
         </div>
 
@@ -147,13 +158,21 @@ export function BlurbTool({ runtime }: { runtime: ToolRuntime }) {
 
         <div className="space-y-1.5">
           <Label htmlFor="b-title">Titolo del libro</Label>
-          <Input id="b-title" value={input.title} onChange={(e) => update({ title: e.target.value })} placeholder="Es. L'ultima notte a Trieste" />
+          <Input
+            id="b-title"
+            value={input.title}
+            onChange={(e) => update({ title: e.target.value })}
+            placeholder="Es. L'ultima notte a Trieste"
+          />
         </div>
 
         <div className="space-y-1.5">
-          <Label>Genere</Label>
-          <Select value={input.genre} onValueChange={(v) => update({ genre: v as BlurbInput["genre"] })}>
-            <SelectTrigger>
+          <Label htmlFor="b-genre">Genere</Label>
+          <Select
+            value={input.genre}
+            onValueChange={(v) => update({ genre: v as BlurbInput["genre"] })}
+          >
+            <SelectTrigger id="b-genre">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -178,7 +197,12 @@ export function BlurbTool({ runtime }: { runtime: ToolRuntime }) {
 
         <div className="space-y-1.5">
           <Label htmlFor="b-setting">Ambientazione / contesto (opzionale)</Label>
-          <Input id="b-setting" value={input.setting} onChange={(e) => update({ setting: e.target.value })} placeholder="Es. una Trieste degli anni '50 avvolta nella nebbia" />
+          <Input
+            id="b-setting"
+            value={input.setting}
+            onChange={(e) => update({ setting: e.target.value })}
+            placeholder="Es. una Trieste degli anni '50 avvolta nella nebbia"
+          />
         </div>
 
         <div className="space-y-1.5">
@@ -208,8 +232,8 @@ export function BlurbTool({ runtime }: { runtime: ToolRuntime }) {
               Genera con AI (consigliato)
             </Label>
             <p className="text-xs text-muted-foreground">
-              Testi scritti su misura nella lingua scelta sopra. Se l'AI non è disponibile, viene usato
-              automaticamente un motore interno di riserva (solo italiano).
+              Testi scritti su misura nella lingua scelta sopra. Se l'AI non è disponibile, viene
+              usato automaticamente un motore interno di riserva (solo italiano).
             </p>
           </div>
           <Switch id="b-use-ai" checked={useAi} onCheckedChange={setUseAi} />
@@ -225,18 +249,24 @@ export function BlurbTool({ runtime }: { runtime: ToolRuntime }) {
         />
 
         <Button className="w-full" onClick={handleGenerate} disabled={generating}>
-          {generating ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Sparkles className="mr-2 size-4" />}
+          {generating ? (
+            <Loader2 className="mr-2 size-4 animate-spin" />
+          ) : (
+            <Sparkles className="mr-2 size-4" />
+          )}
           Genera — 1 credito
         </Button>
       </div>
 
       <div className="panel space-y-4 p-6">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">Risultato</h3>
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">
+          Risultato
+        </h3>
 
         {!output && (
           <p className="text-sm text-muted-foreground">
-            Compila il form e premi "Genera" per ottenere hook, sinossi ed editorial blurb. Ogni generazione produce
-            una variante nuova: puoi rigenerare per confrontare più versioni.
+            Compila il form e premi "Genera" per ottenere hook, sinossi ed editorial blurb. Ogni
+            generazione produce una variante nuova: puoi rigenerare per confrontare più versioni.
           </p>
         )}
 
@@ -248,8 +278,14 @@ export function BlurbTool({ runtime }: { runtime: ToolRuntime }) {
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between gap-3">
-                <Label className="text-xs tracking-wide uppercase text-muted-foreground">Hook / prima riga</Label>
-                <Button variant="ghost" size="sm" onClick={() => copyToClipboard(output.hook, "Hook")}>
+                <Label className="text-xs tracking-wide uppercase text-muted-foreground">
+                  Hook / prima riga
+                </Label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(output.hook, "Hook")}
+                >
                   <Copy className="size-4" />
                 </Button>
               </div>
@@ -261,21 +297,41 @@ export function BlurbTool({ runtime }: { runtime: ToolRuntime }) {
                 <Label className="text-xs tracking-wide uppercase text-muted-foreground">
                   Sinossi / quarta di copertina ({output.synopsis.length} caratteri)
                 </Label>
-                <Button variant="ghost" size="sm" onClick={() => copyToClipboard(output.synopsis, "Sinossi")}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(output.synopsis, "Sinossi")}
+                >
                   <Copy className="size-4" />
                 </Button>
               </div>
-              <Textarea readOnly rows={8} className="text-sm leading-relaxed" value={output.synopsis} />
+              <Textarea
+                readOnly
+                rows={8}
+                className="text-sm leading-relaxed"
+                value={output.synopsis}
+              />
             </div>
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between gap-3">
-                <Label className="text-xs tracking-wide uppercase text-muted-foreground">Editorial blurb</Label>
-                <Button variant="ghost" size="sm" onClick={() => copyToClipboard(output.editorialBlurb, "Editorial blurb")}>
+                <Label className="text-xs tracking-wide uppercase text-muted-foreground">
+                  Editorial blurb
+                </Label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(output.editorialBlurb, "Editorial blurb")}
+                >
                   <Copy className="size-4" />
                 </Button>
               </div>
-              <Textarea readOnly rows={2} className="text-sm italic" value={output.editorialBlurb} />
+              <Textarea
+                readOnly
+                rows={2}
+                className="text-sm italic"
+                value={output.editorialBlurb}
+              />
             </div>
 
             <Button variant="outline" className="w-full" onClick={downloadOutput}>

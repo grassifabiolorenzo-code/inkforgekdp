@@ -72,16 +72,18 @@ function AdminSettingsPage() {
             ) : (
               <>
                 <div className="space-y-1.5">
-                  <Label>Nome del SaaS</Label>
+                  <Label htmlFor="settings-saas-name">Nome del SaaS</Label>
                   <Input
+                    id="settings-saas-name"
                     disabled={!canWrite}
                     value={form.saasName}
                     onChange={(e) => setForm((f) => ({ ...f, saasName: e.target.value }))}
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Email di supporto</Label>
+                  <Label htmlFor="settings-support-email">Email di supporto</Label>
                   <Input
+                    id="settings-support-email"
                     type="email"
                     disabled={!canWrite}
                     value={form.supportEmail}
@@ -89,8 +91,9 @@ function AdminSettingsPage() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>URL pubblico</Label>
+                  <Label htmlFor="settings-public-url">URL pubblico</Label>
                   <Input
+                    id="settings-public-url"
                     type="url"
                     disabled={!canWrite}
                     value={form.publicUrl}

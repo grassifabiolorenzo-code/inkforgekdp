@@ -5,7 +5,13 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
@@ -31,7 +37,6 @@ import { extractCoverContent, extractPdfContent } from "@/components/tools/pdfCo
 import { generateAplusCopy } from "@/lib/aiCopy.functions";
 import { AiStyleControls } from "@/components/tools/ai/AiStyleControls";
 import { DEFAULT_CREATIVITY, DEFAULT_TONE, type AiToneId } from "@/components/tools/ai/aiStyle";
-
 
 /**
  * TOOL — A+1 KDP Studio (modulo indipendente).
@@ -85,12 +90,15 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
   // Copy generato dal motore: consente il ripristino dopo le modifiche manuali.
   const baseValue = useRef<GeneratedModulesText["value"] | null>(null);
 
-  const redrawValue = useCallback(async (value: GeneratedModulesText["value"], style: ValueModuleStyle) => {
-    const canvas = document.getElementById("aplus-value") as HTMLCanvasElement | null;
-    if (!canvas) return;
-    const { drawValueModule } = await import("@/components/tools/aplus/canvasRenderers");
-    drawValueModule(canvas, bgColor, accentColor, value, style);
-  }, [bgColor, accentColor]);
+  const redrawValue = useCallback(
+    async (value: GeneratedModulesText["value"], style: ValueModuleStyle) => {
+      const canvas = document.getElementById("aplus-value") as HTMLCanvasElement | null;
+      if (!canvas) return;
+      const { drawValueModule } = await import("@/components/tools/aplus/canvasRenderers");
+      drawValueModule(canvas, bgColor, accentColor, value, style);
+    },
+    [bgColor, accentColor],
+  );
 
   useEffect(() => {
     if (canvasesReady && texts) void redrawValue(texts.value, valueStyle);
@@ -120,7 +128,9 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
             ...prev,
             grid: {
               ...prev.grid,
-              items: prev.grid.items.map((item, i) => (i === index ? { ...item, [field]: next } : item)),
+              items: prev.grid.items.map((item, i) =>
+                i === index ? { ...item, [field]: next } : item,
+              ),
             },
           }
         : prev,
@@ -131,18 +141,20 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
     setTexts((prev) => (prev ? { ...prev, comp: { ...prev.comp, [field]: next } } : prev));
   }
 
-
-
-
-
   // Sorgenti dell'ultimo rendering hero: permettono di riposizionare il logo senza rigenerare.
   const heroSources = useRef<{
     front: HTMLCanvasElement | HTMLImageElement;
     back: HTMLCanvasElement | HTMLImageElement;
     logo: HTMLCanvasElement | null;
-    drawHero: typeof import("@/components/tools/aplus/canvasRenderers")["drawHero"];
+    drawHero: (typeof import("@/components/tools/aplus/canvasRenderers"))["drawHero"];
   } | null>(null);
-  const logoDrag = useRef<{ startX: number; startY: number; x: number; y: number; ratio: number } | null>(null);
+  const logoDrag = useRef<{
+    startX: number;
+    startY: number;
+    x: number;
+    y: number;
+    ratio: number;
+  } | null>(null);
 
   function redrawHero(offset: { x: number; y: number }, scalePercent: number) {
     const src = heroSources.current;
@@ -188,181 +200,192 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
 
   const chargeGuard = useRef(false);
 
-
   async function handleGenerate() {
     // Guardia sincrona: blocca doppio click/rientranza prima di qualsiasi await.
     if (chargeGuard.current) return;
     chargeGuard.current = true;
     try {
-    if (!coverFile || !interiorFile) {
-      toast.error("Carica sia il PDF di copertina che il PDF interno.");
-      return;
-    }
-    if (!runtime.canOperate) {
-      runtime.blockOperation();
-      return;
-    }
+      if (!coverFile || !interiorFile) {
+        toast.error("Carica sia il PDF di copertina che il PDF interno.");
+        return;
+      }
+      if (!runtime.canOperate) {
+        runtime.blockOperation();
+        return;
+      }
 
-    // Verifica server-side del piano e dei crediti.
-    if (!(await runtime.ensureAccess())) return;
+      // Verifica server-side del piano e dei crediti.
+      if (!(await runtime.ensureAccess())) return;
 
-    setGenerating(true);
-    setStatus(`Rendering A+1 in corso per il mercato [${lang.toUpperCase()}]...`);
-    const operationId = newOperationId("aplus-gen");
+      setGenerating(true);
+      setStatus(`Rendering A+1 in corso per il mercato [${lang.toUpperCase()}]...`);
+      const operationId = newOperationId("aplus-gen");
 
-    try {
-      const [
-        { renderPdfPage, loadLogoFromFile },
-        { drawHero, drawProof, drawValueModule, drawGridSquare, drawCompareHeader },
-      ] = await Promise.all([
-        import("@/components/tools/aplus/pdfEngine"),
-        import("@/components/tools/aplus/canvasRenderers"),
-      ]);
+      try {
+        const [
+          { renderPdfPage, loadLogoFromFile },
+          { drawHero, drawProof, drawValueModule, drawGridSquare, drawCompareHeader },
+        ] = await Promise.all([
+          import("@/components/tools/aplus/pdfEngine"),
+          import("@/components/tools/aplus/canvasRenderers"),
+        ]);
 
-      const logoImg = logoFile ? await loadLogoFromFile(logoFile) : null;
-      const frontCoverImg = await renderPdfPage(coverFile, 1, true, false);
-      const backCoverImg = await renderPdfPage(coverFile, 1, true, true);
+        const logoImg = logoFile ? await loadLogoFromFile(logoFile) : null;
+        const frontCoverImg = await renderPdfPage(coverFile, 1, true, false);
+        const backCoverImg = await renderPdfPage(coverFile, 1, true, true);
 
-      const intImg1 = await renderPdfPage(interiorFile, page1, false);
-      const intImg2 = await renderPdfPage(interiorFile, page2, false);
-      const intImg3 = await renderPdfPage(interiorFile, page3, false);
+        const intImg1 = await renderPdfPage(interiorFile, page1, false);
+        const intImg2 = await renderPdfPage(interiorFile, page2, false);
+        const intImg3 = await renderPdfPage(interiorFile, page3, false);
 
-      const variationIndex = nextCopyVariationIndex();
-      let generatedTexts = generateModulesText({
-        lang,
-        niche,
-        age,
-        pages: [page1, page2, page3],
-        variationIndex,
-      });
+        const variationIndex = nextCopyVariationIndex();
+        let generatedTexts = generateModulesText({
+          lang,
+          niche,
+          age,
+          pages: [page1, page2, page3],
+          variationIndex,
+        });
 
-      let usedAi = false;
-      if (useAi) {
-        try {
-          setStatus("Analisi AI di copertina e pagine interne...");
-          const cover = await extractCoverContent(coverFile);
-          const interior = interiorFile
-            ? await extractPdfContent(interiorFile, {
-                maxImages: 3,
-                maxTextPages: 6,
-                pageIndexes: [page1, page2, page3],
-              })
-            : { text: "", images: [] as string[] };
+        let usedAi = false;
+        if (useAi) {
+          try {
+            setStatus("Analisi AI di copertina e pagine interne...");
+            const cover = await extractCoverContent(coverFile);
+            const interior = interiorFile
+              ? await extractPdfContent(interiorFile, {
+                  maxImages: 3,
+                  maxTextPages: 6,
+                  pageIndexes: [page1, page2, page3],
+                })
+              : { text: "", images: [] as string[] };
 
-          setStatus("Scrittura testi A+ (SEO + AIDA + PAS)...");
-          const response = await generateAplusCopy({
-            data: {
-              lang,
-              niche,
-              age,
-              title,
-              tone,
-              creativity,
-              interiorText: interior.text || undefined,
-              interiorImages: interior.images,
-              coverImages: cover.images,
-            },
-          });
-
-          if (response.ok) {
-            const copy = response.copy;
-            generatedTexts = {
-              ...generatedTexts,
-              hero: {
-                ...generatedTexts.hero,
-                heading: copy.hero.heading || generatedTexts.hero.heading,
-                body: copy.hero.body || generatedTexts.hero.body,
-                alt: copy.hero.alt || generatedTexts.hero.alt,
+            setStatus("Scrittura testi A+ (SEO + AIDA + PAS)...");
+            const response = await generateAplusCopy({
+              data: {
+                lang,
+                niche,
+                age,
+                title,
+                tone,
+                creativity,
+                interiorText: interior.text || undefined,
+                interiorImages: interior.images,
+                coverImages: cover.images,
               },
-              proof: {
-                ...generatedTexts.proof,
-                heading: copy.proof.heading || generatedTexts.proof.heading,
-                body: copy.proof.body || generatedTexts.proof.body,
-                alt: copy.proof.alt || generatedTexts.proof.alt,
-              },
-              value: {
-                title: copy.value.title || generatedTexts.value.title,
-                text1: copy.value.text1 || generatedTexts.value.text1,
-                text2: copy.value.text2 || generatedTexts.value.text2,
-                text3: copy.value.text3 || generatedTexts.value.text3,
-                alt: copy.value.alt || generatedTexts.value.alt,
-              },
-              grid: {
-                ...generatedTexts.grid,
-                items: generatedTexts.grid.items.map((item, i) => ({
-                  title: copy.grid[i]?.title || item.title,
-                  desc: copy.grid[i]?.desc || item.desc,
-                })),
-              },
-              comp: {
-                ...generatedTexts.comp,
-                instructions: copy.comp || generatedTexts.comp.instructions,
-              },
-            };
-            usedAi = true;
-          } else {
-            toast.warning(`AI non disponibile: ${response.error}. Usati i testi del motore interno.`);
+            });
+
+            if (response.ok) {
+              const copy = response.copy;
+              generatedTexts = {
+                ...generatedTexts,
+                hero: {
+                  ...generatedTexts.hero,
+                  heading: copy.hero.heading || generatedTexts.hero.heading,
+                  body: copy.hero.body || generatedTexts.hero.body,
+                  alt: copy.hero.alt || generatedTexts.hero.alt,
+                },
+                proof: {
+                  ...generatedTexts.proof,
+                  heading: copy.proof.heading || generatedTexts.proof.heading,
+                  body: copy.proof.body || generatedTexts.proof.body,
+                  alt: copy.proof.alt || generatedTexts.proof.alt,
+                },
+                value: {
+                  title: copy.value.title || generatedTexts.value.title,
+                  text1: copy.value.text1 || generatedTexts.value.text1,
+                  text2: copy.value.text2 || generatedTexts.value.text2,
+                  text3: copy.value.text3 || generatedTexts.value.text3,
+                  alt: copy.value.alt || generatedTexts.value.alt,
+                },
+                grid: {
+                  ...generatedTexts.grid,
+                  items: generatedTexts.grid.items.map((item, i) => ({
+                    title: copy.grid[i]?.title || item.title,
+                    desc: copy.grid[i]?.desc || item.desc,
+                  })),
+                },
+                comp: {
+                  ...generatedTexts.comp,
+                  instructions: copy.comp || generatedTexts.comp.instructions,
+                },
+              };
+              usedAi = true;
+            } else {
+              toast.warning(
+                `AI non disponibile: ${response.error}. Usati i testi del motore interno.`,
+              );
+            }
+          } catch (aiError) {
+            console.error(aiError);
+            toast.warning("Analisi AI non riuscita: usati i testi del motore interno.");
           }
-        } catch (aiError) {
-          console.error(aiError);
-          toast.warning("Analisi AI non riuscita: usati i testi del motore interno.");
+          setStatus(`Rendering A+1 in corso per il mercato [${lang.toUpperCase()}]...`);
         }
-        setStatus(`Rendering A+1 in corso per il mercato [${lang.toUpperCase()}]...`);
+
+        const heroCanvas = document.getElementById("aplus-hero") as HTMLCanvasElement | null;
+        const proofCanvas = document.getElementById("aplus-proof") as HTMLCanvasElement | null;
+        const valueCanvas = document.getElementById("aplus-value") as HTMLCanvasElement | null;
+        const grid1Canvas = document.getElementById("aplus-grid1") as HTMLCanvasElement | null;
+        const grid2Canvas = document.getElementById("aplus-grid2") as HTMLCanvasElement | null;
+        const grid3Canvas = document.getElementById("aplus-grid3") as HTMLCanvasElement | null;
+        const compCanvas = document.getElementById("aplus-comp") as HTMLCanvasElement | null;
+
+        if (
+          !heroCanvas ||
+          !proofCanvas ||
+          !valueCanvas ||
+          !grid1Canvas ||
+          !grid2Canvas ||
+          !grid3Canvas ||
+          !compCanvas
+        ) {
+          throw new Error("Anteprima canvas non disponibile.");
+        }
+
+        heroSources.current = { front: frontCoverImg, back: backCoverImg, logo: logoImg, drawHero };
+        drawHero(
+          heroCanvas,
+          frontCoverImg,
+          backCoverImg,
+          bgColor,
+          logoImg,
+          logoScale / 100,
+          logoOffset,
+        );
+        drawProof(proofCanvas, intImg1, intImg2, bgColor);
+        drawValueModule(valueCanvas, bgColor, accentColor, generatedTexts.value, valueStyle);
+        baseValue.current = generatedTexts.value;
+
+        drawGridSquare(grid1Canvas, intImg1, bgColor);
+        drawGridSquare(grid2Canvas, intImg2, bgColor);
+        drawGridSquare(grid3Canvas, intImg3, bgColor);
+        drawCompareHeader(compCanvas, frontCoverImg, bgColor);
+
+        // Generazione completata → consumo del credito.
+        const result = await runtime.charge(operationId, "Generazione moduli A+ completata");
+        if (!result.ok) return;
+
+        setTexts(generatedTexts);
+        setAiUsed(usedAi);
+        setCanvasesReady(true);
+        setStatus(
+          usedAi
+            ? `Generazione A+1 completata con testi AI sui contenuti reali [${lang.toUpperCase()}]!`
+            : `Generazione A+1 completata per il mercato [${lang.toUpperCase()}]!`,
+        );
+        toast.success(
+          result.duplicate ? "Generazione completata" : "Generazione completata — 1 credito",
+        );
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Errore durante l'elaborazione dei file.";
+        setStatus(`Errore: ${message}`);
+        toast.error(message);
+      } finally {
+        setGenerating(false);
       }
-
-
-      const heroCanvas = document.getElementById("aplus-hero") as HTMLCanvasElement | null;
-      const proofCanvas = document.getElementById("aplus-proof") as HTMLCanvasElement | null;
-      const valueCanvas = document.getElementById("aplus-value") as HTMLCanvasElement | null;
-      const grid1Canvas = document.getElementById("aplus-grid1") as HTMLCanvasElement | null;
-      const grid2Canvas = document.getElementById("aplus-grid2") as HTMLCanvasElement | null;
-      const grid3Canvas = document.getElementById("aplus-grid3") as HTMLCanvasElement | null;
-      const compCanvas = document.getElementById("aplus-comp") as HTMLCanvasElement | null;
-
-      if (
-        !heroCanvas ||
-        !proofCanvas ||
-        !valueCanvas ||
-        !grid1Canvas ||
-        !grid2Canvas ||
-        !grid3Canvas ||
-        !compCanvas
-      ) {
-        throw new Error("Anteprima canvas non disponibile.");
-      }
-
-      heroSources.current = { front: frontCoverImg, back: backCoverImg, logo: logoImg, drawHero };
-      drawHero(heroCanvas, frontCoverImg, backCoverImg, bgColor, logoImg, logoScale / 100, logoOffset);
-      drawProof(proofCanvas, intImg1, intImg2, bgColor);
-      drawValueModule(valueCanvas, bgColor, accentColor, generatedTexts.value, valueStyle);
-      baseValue.current = generatedTexts.value;
-
-      drawGridSquare(grid1Canvas, intImg1, bgColor);
-      drawGridSquare(grid2Canvas, intImg2, bgColor);
-      drawGridSquare(grid3Canvas, intImg3, bgColor);
-      drawCompareHeader(compCanvas, frontCoverImg, bgColor);
-
-      // Generazione completata → consumo del credito.
-      const result = await runtime.charge(operationId, "Generazione moduli A+ completata");
-      if (!result.ok) return;
-
-      setTexts(generatedTexts);
-      setAiUsed(usedAi);
-      setCanvasesReady(true);
-      setStatus(
-        usedAi
-          ? `Generazione A+1 completata con testi AI sui contenuti reali [${lang.toUpperCase()}]!`
-          : `Generazione A+1 completata per il mercato [${lang.toUpperCase()}]!`,
-      );
-      toast.success(result.duplicate ? "Generazione completata" : "Generazione completata — 1 credito");
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Errore durante l'elaborazione dei file.";
-      setStatus(`Errore: ${message}`);
-      toast.error(message);
     } finally {
-      setGenerating(false);
-    }
-  } finally {
       chargeGuard.current = false;
     }
   }
@@ -458,9 +481,9 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label>Nicchia Editoriale</Label>
+            <Label htmlFor="a-niche">Nicchia Editoriale</Label>
             <Select value={niche} onValueChange={(v) => setNiche(v as NicheId)}>
-              <SelectTrigger>
+              <SelectTrigger id="a-niche">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -476,9 +499,9 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
         </div>
 
         <div className="space-y-1.5">
-          <Label>Target di Età / Pubblico</Label>
+          <Label htmlFor="a-age">Target di Età / Pubblico</Label>
           <Select value={age} onValueChange={(v) => setAge(v as AgeId)}>
-            <SelectTrigger>
+            <SelectTrigger id="a-age">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -492,23 +515,38 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
         </div>
 
         <div className="space-y-1.5">
-          <Label>PDF Copertina Completa</Label>
-          <label className="flex cursor-pointer flex-col items-center gap-2 rounded-md border-2 border-dashed border-border bg-surface p-4 text-center text-xs text-muted-foreground hover:border-accent">
+          <Label htmlFor="a-cover-file">PDF Copertina Completa</Label>
+          <label
+            htmlFor="a-cover-file"
+            className="flex cursor-pointer flex-col items-center gap-2 rounded-md border-2 border-dashed border-border bg-surface p-4 text-center text-xs text-muted-foreground hover:border-accent has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2"
+          >
             <Upload className="size-4" />
             {coverFile ? `Caricato: ${coverFile.name}` : "Clicca per caricare la copertina (PDF)"}
-            <input type="file" accept="application/pdf" className="hidden" onChange={handleFileChange(setCoverFile)} />
+            <input
+              id="a-cover-file"
+              type="file"
+              accept="application/pdf"
+              className="sr-only"
+              onChange={handleFileChange(setCoverFile)}
+            />
           </label>
         </div>
 
         <div className="space-y-1.5">
-          <Label>PDF Interno Libro</Label>
-          <label className="flex cursor-pointer flex-col items-center gap-2 rounded-md border-2 border-dashed border-border bg-surface p-4 text-center text-xs text-muted-foreground hover:border-accent">
+          <Label htmlFor="a-interior-file">PDF Interno Libro</Label>
+          <label
+            htmlFor="a-interior-file"
+            className="flex cursor-pointer flex-col items-center gap-2 rounded-md border-2 border-dashed border-border bg-surface p-4 text-center text-xs text-muted-foreground hover:border-accent has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2"
+          >
             <Upload className="size-4" />
-            {interiorFile ? `Caricato: ${interiorFile.name}` : "Clicca per caricare l'interno (PDF)"}
+            {interiorFile
+              ? `Caricato: ${interiorFile.name}`
+              : "Clicca per caricare l'interno (PDF)"}
             <input
+              id="a-interior-file"
               type="file"
               accept="application/pdf"
-              className="hidden"
+              className="sr-only"
               onChange={handleFileChange(setInteriorFile)}
             />
           </label>
@@ -548,14 +586,18 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
         </div>
 
         <div className="space-y-1.5">
-          <Label>Logo Azienda (JPG / PNG / SVG)</Label>
-          <label className="flex cursor-pointer flex-col items-center gap-2 rounded-md border-2 border-dashed border-border bg-surface p-4 text-center text-xs text-muted-foreground hover:border-accent">
+          <Label htmlFor="a-logo-file">Logo Azienda (JPG / PNG / SVG)</Label>
+          <label
+            htmlFor="a-logo-file"
+            className="flex cursor-pointer flex-col items-center gap-2 rounded-md border-2 border-dashed border-border bg-surface p-4 text-center text-xs text-muted-foreground hover:border-accent has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2"
+          >
             <Upload className="size-4" />
             {logoFile ? `Caricato: ${logoFile.name}` : "Clicca per caricare il logo (opzionale)"}
             <input
+              id="a-logo-file"
               type="file"
               accept="image/jpeg,image/png,image/svg+xml"
-              className="hidden"
+              className="sr-only"
               onChange={handleFileChange(setLogoFile)}
             />
           </label>
@@ -564,6 +606,7 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
         <div className="space-y-1.5">
           <Label>Dimensione Logo Modulo 1: {logoScale}%</Label>
           <Slider
+            aria-label={`Dimensione logo: ${logoScale}%`}
             min={20}
             max={250}
             step={5}
@@ -573,8 +616,11 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
         </div>
 
         <div className="space-y-1.5">
-          <Label>Posizione Logo Modulo 1 (X: {logoOffset.x}px — Y: {logoOffset.y}px)</Label>
+          <Label>
+            Posizione Logo Modulo 1 (X: {logoOffset.x}px — Y: {logoOffset.y}px)
+          </Label>
           <Slider
+            aria-label={`Posizione logo orizzontale: ${logoOffset.x}px`}
             min={-420}
             max={420}
             step={2}
@@ -582,6 +628,7 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
             onValueChange={(v) => setLogoOffset((o) => ({ ...o, x: v[0] ?? 0 }))}
           />
           <Slider
+            aria-label={`Posizione logo verticale: ${logoOffset.y}px`}
             min={-130}
             max={130}
             step={2}
@@ -597,7 +644,6 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
             </Button>
           </div>
         </div>
-
 
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
@@ -667,7 +713,11 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
           onClick={handleExportZip}
           disabled={exporting || !canvasesReady}
         >
-          {exporting ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Download className="mr-2 size-4" />}
+          {exporting ? (
+            <Loader2 className="mr-2 size-4 animate-spin" />
+          ) : (
+            <Download className="mr-2 size-4" />
+          )}
           Scarica tutto in un unico ZIP
         </Button>
 
@@ -685,9 +735,12 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
           Salva tutti i file in una cartella
         </Button>
 
-        <p className="rounded-md border border-border bg-surface p-3 text-xs text-muted-foreground">{status}</p>
+        <p className="rounded-md border border-border bg-surface p-3 text-xs text-muted-foreground">
+          {status}
+        </p>
         <p className="text-xs text-muted-foreground">
-          Una generazione completata = 1 credito. Le generazioni non riuscite non vengono addebitate.
+          Una generazione completata = 1 credito. Le generazioni non riuscite non vengono
+          addebitate.
         </p>
       </div>
 
@@ -699,7 +752,9 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
               size="sm"
               variant="outline"
               disabled={!canvasesReady}
-              onClick={() => downloadCanvas(getModuleCanvases().hero, "Modulo_01_Hero_Banner_970x300.png")}
+              onClick={() =>
+                downloadCanvas(getModuleCanvases().hero, "Modulo_01_Hero_Banner_970x300.png")
+              }
             >
               <Download className="mr-1.5 size-3.5" /> Scarica PNG
             </Button>
@@ -722,7 +777,11 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {texts.hero.title} — testi modificabili
                 </p>
-                <Button size="sm" variant="ghost" onClick={() => copyToClipboard(formatHeroProofText(texts.hero), "Modulo 1")}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => copyToClipboard(formatHeroProofText(texts.hero), "Modulo 1")}
+                >
                   <Copy className="mr-1.5 size-3.5" /> Copia Testi
                 </Button>
               </div>
@@ -762,7 +821,9 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
               size="sm"
               variant="outline"
               disabled={!canvasesReady}
-              onClick={() => downloadCanvas(getModuleCanvases().proof, "Modulo_02_Proof_Banner_970x300.png")}
+              onClick={() =>
+                downloadCanvas(getModuleCanvases().proof, "Modulo_02_Proof_Banner_970x300.png")
+              }
             >
               <Download className="mr-1.5 size-3.5" /> Scarica PNG
             </Button>
@@ -776,7 +837,11 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {texts.proof.title} — testi modificabili
                 </p>
-                <Button size="sm" variant="ghost" onClick={() => copyToClipboard(formatHeroProofText(texts.proof), "Modulo 2")}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => copyToClipboard(formatHeroProofText(texts.proof), "Modulo 2")}
+                >
                   <Copy className="mr-1.5 size-3.5" /> Copia Testi
                 </Button>
               </div>
@@ -809,7 +874,6 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
           )}
         </article>
 
-
         <article className="panel space-y-3 p-6">
           <div className="flex items-center justify-between gap-2">
             <h4 className="text-sm font-semibold">Modulo 3: Value Highlights (970×300 px)</h4>
@@ -817,7 +881,9 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
               size="sm"
               variant="outline"
               disabled={!canvasesReady}
-              onClick={() => downloadCanvas(getModuleCanvases().value, "Modulo_03_Value_Highlights_970x300.png")}
+              onClick={() =>
+                downloadCanvas(getModuleCanvases().value, "Modulo_03_Value_Highlights_970x300.png")
+              }
             >
               <Download className="mr-1.5 size-3.5" /> Scarica PNG
             </Button>
@@ -832,7 +898,11 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
                   Personalizza testi e stile
                 </p>
                 <div className="flex items-center gap-2">
-                  <Button size="sm" variant="ghost" onClick={() => copyToClipboard(formatValueText(texts.value), "Modulo 3")}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => copyToClipboard(formatValueText(texts.value), "Modulo 3")}
+                  >
                     <Copy className="mr-1.5 size-3.5" /> Copia Testi
                   </Button>
                   <Button
@@ -876,6 +946,7 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
                 <div className="space-y-1.5">
                   <Label>Dimensione titolo: {valueStyle.titleSize}px</Label>
                   <Slider
+                    aria-label={`Dimensione titolo: ${valueStyle.titleSize}px`}
                     min={14}
                     max={40}
                     step={1}
@@ -886,6 +957,7 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
                 <div className="space-y-1.5">
                   <Label>Dimensione punti: {valueStyle.itemSize}px</Label>
                   <Slider
+                    aria-label={`Dimensione punti: ${valueStyle.itemSize}px`}
                     min={9}
                     max={26}
                     step={1}
@@ -897,9 +969,15 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <Label>Badge dei punti</Label>
+                  <Label htmlFor="a-value-badge">Badge dei punti</Label>
                   <Select
-                    value={valueStyle.numbered ? "numbers" : valueStyle.marker ? valueStyle.marker : "none"}
+                    value={
+                      valueStyle.numbered
+                        ? "numbers"
+                        : valueStyle.marker
+                          ? valueStyle.marker
+                          : "none"
+                    }
                     onValueChange={(v) =>
                       setValueStyle((s) => ({
                         ...s,
@@ -908,7 +986,7 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
                       }))
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger id="a-value-badge">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -928,7 +1006,9 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
                   <Switch
                     id="a-value-upper"
                     checked={valueStyle.uppercase !== false}
-                    onCheckedChange={(checked) => setValueStyle((s) => ({ ...s, uppercase: checked }))}
+                    onCheckedChange={(checked) =>
+                      setValueStyle((s) => ({ ...s, uppercase: checked }))
+                    }
                   />
                 </div>
               </div>
@@ -949,7 +1029,12 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
         <article className="panel space-y-3 p-6">
           <div className="flex items-center justify-between gap-2">
             <h4 className="text-sm font-semibold">Modulo 4: Feature Grid (3× 300×300 px)</h4>
-            <Button size="sm" variant="outline" disabled={!canvasesReady} onClick={handleDownloadGrid3}>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={!canvasesReady}
+              onClick={handleDownloadGrid3}
+            >
               <Download className="mr-1.5 size-3.5" /> Scarica 3 Asset PNG
             </Button>
           </div>
@@ -1003,7 +1088,9 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
               size="sm"
               variant="outline"
               disabled={!canvasesReady}
-              onClick={() => downloadCanvas(getModuleCanvases().comp, "Modulo_05_Header_Compare_150x300.png")}
+              onClick={() =>
+                downloadCanvas(getModuleCanvases().comp, "Modulo_05_Header_Compare_150x300.png")
+              }
             >
               <Download className="mr-1.5 size-3.5" /> Scarica PNG
             </Button>
@@ -1046,7 +1133,6 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
           )}
         </article>
 
-
         {!texts && (
           <div className="panel p-10 text-center text-sm text-muted-foreground">
             Carica i file e genera per visualizzare le anteprime e i testi multilingua.
@@ -1055,4 +1141,4 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
       </div>
     </div>
   );
-  }
+}

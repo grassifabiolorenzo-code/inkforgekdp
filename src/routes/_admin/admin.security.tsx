@@ -172,8 +172,9 @@ function AdminSecurityPage() {
                 )}
                 <div className="flex items-center gap-2">
                   <div className="flex-1 space-y-1.5">
-                    <Label>Codice a 6 cifre</Label>
+                    <Label htmlFor="mfa-enroll-code">Codice a 6 cifre</Label>
                     <Input
+                      id="mfa-enroll-code"
                       value={code}
                       onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                       placeholder="123456"

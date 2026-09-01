@@ -81,8 +81,9 @@ function MfaChallengePage() {
           </p>
         </div>
         <div className="space-y-1.5 text-left">
-          <Label>Codice</Label>
+          <Label htmlFor="mfa-challenge-code">Codice</Label>
           <Input
+            id="mfa-challenge-code"
             value={code}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
             placeholder="123456"

@@ -5,6 +5,7 @@ import { Info } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { ConfirmDangerDialog } from "@/components/admin/ConfirmDangerDialog";
 import { CreditsCard } from "@/components/dashboard/CreditsCard";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { LoadingState } from "@/components/dashboard/StateBanners";
@@ -44,6 +45,7 @@ function SubscriptionPage() {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [buyingCreditPack, setBuyingCreditPack] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
 
   // Stato configurazione pagamenti letto dal server: disabilita solo il checkout.
   const billingStatus = useQuery({
@@ -54,7 +56,9 @@ function SubscriptionPage() {
   const unavailablePlans = billingStatus.data
     ? (["starter", "pro", "business"] as const).filter(
         (slug) =>
-          !billingStatus.data.apiKey || !billingStatus.data.storeId || !billingStatus.data.variants[slug],
+          !billingStatus.data.apiKey ||
+          !billingStatus.data.storeId ||
+          !billingStatus.data.variants[slug],
       )
     : [];
 
@@ -115,7 +119,6 @@ function SubscriptionPage() {
   }
 
   async function handleCancel() {
-    if (!window.confirm("Confermi la disdetta dell'abbonamento?")) return;
     setBusy(true);
     try {
       const result = await cancel({});
@@ -126,6 +129,7 @@ function SubscriptionPage() {
       toast.error(error instanceof Error ? error.message : "Operazione non riuscita");
     } finally {
       setBusy(false);
+      setCancelOpen(false);
     }
   }
 
@@ -156,14 +160,23 @@ function SubscriptionPage() {
               )}
               <div className="flex flex-wrap gap-2 pt-2">
                 <Button variant="outline" size="sm" onClick={handleManage} disabled={busy}>
-                  Gestisci pagamento
+                  Metodo di pagamento e fatture
                 </Button>
                 {state.active && !state.cancelled_at && (
-                  <Button variant="ghost" size="sm" onClick={handleCancel} disabled={busy}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setCancelOpen(true)}
+                    disabled={busy}
+                  >
                     Disdici
                   </Button>
                 )}
               </div>
+              <p className="text-xs text-muted-foreground">
+                Da "Metodo di pagamento e fatture" puoi anche scaricare le ricevute dei pagamenti
+                passati.
+              </p>
             </div>
           </div>
         )}
@@ -186,6 +199,17 @@ function SubscriptionPage() {
           disabledPlans={unavailablePlans}
         />
       </div>
+
+      <ConfirmDangerDialog
+        open={cancelOpen}
+        onOpenChange={setCancelOpen}
+        title="Disdire l'abbonamento?"
+        description="Resterà attivo fino alla fine del periodo già pagato, poi non si rinnoverà. Potrai riattivarlo in qualsiasi momento prima della scadenza."
+        confirmWord="DISDICI"
+        actionLabel="Disdici abbonamento"
+        onConfirm={handleCancel}
+        pending={busy}
+      />
     </DashboardShell>
   );
 }

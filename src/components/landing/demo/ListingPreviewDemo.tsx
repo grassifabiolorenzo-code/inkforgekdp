@@ -5,7 +5,13 @@ import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   defaultAgeDetails,
   generateListing,
@@ -66,18 +72,24 @@ export function ListingPreviewDemo() {
           Da un soggetto a un <span className="text-gradient">listing pronto</span> in un istante
         </h3>
         <p className="text-sm text-muted-foreground">
-          Nell'app il testo viene scritto analizzando davvero copertina e pagine interne del tuo libro (SEO +
-          AIDA + PAS). Qui sotto un'anteprima istantanea con il motore base, per farti vedere la struttura.
+          Nell'app il testo viene scritto analizzando davvero copertina e pagine interne del tuo
+          libro (SEO + AIDA + PAS). Qui sotto un'anteprima istantanea con il motore base, per farti
+          vedere la struttura.
         </p>
         <div className="space-y-1.5">
           <Label htmlFor="demo-subject">Soggetto del libro</Label>
-          <Input id="demo-subject" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Es. Dinosauri" />
+          <Input
+            id="demo-subject"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            placeholder="Es. Dinosauri"
+          />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label>Tipo di libro</Label>
+            <Label htmlFor="demo-book-type">Tipo di libro</Label>
             <Select value={bookType} onValueChange={(v) => setBookType(v as BookType)}>
-              <SelectTrigger>
+              <SelectTrigger id="demo-book-type">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -90,9 +102,9 @@ export function ListingPreviewDemo() {
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label>Pubblico</Label>
+            <Label htmlFor="demo-audience">Pubblico</Label>
             <Select value={audience} onValueChange={(v) => setAudience(v as Audience)}>
-              <SelectTrigger>
+              <SelectTrigger id="demo-audience">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -134,8 +146,8 @@ export function ListingPreviewDemo() {
           </div>
         </div>
         <div className="flex items-center gap-2 rounded-md border border-dashed border-border bg-surface p-3 text-xs text-muted-foreground">
-          <Lock className="size-3.5 shrink-0" />
-          7 keyword backend e 3 categorie BISAC generate — visibili con un abbonamento attivo.
+          <Lock className="size-3.5 shrink-0" />7 keyword backend e 3 categorie BISAC generate —
+          visibili con un abbonamento attivo.
         </div>
       </div>
     </div>

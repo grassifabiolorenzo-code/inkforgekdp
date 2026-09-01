@@ -119,8 +119,9 @@ function AdminPlansPage() {
               </CardHeader>
               <CardContent className="grid gap-4 sm:grid-cols-4">
                 <div className="space-y-1.5">
-                  <Label>Nome</Label>
+                  <Label htmlFor={`plan-name-${plan.id}`}>Nome</Label>
                   <Input
+                    id={`plan-name-${plan.id}`}
                     value={draft.name}
                     onChange={(e) =>
                       setDrafts((d) => ({
@@ -131,8 +132,9 @@ function AdminPlansPage() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Prezzo (€)</Label>
+                  <Label htmlFor={`plan-price-${plan.id}`}>Prezzo (€)</Label>
                   <Input
+                    id={`plan-price-${plan.id}`}
                     type="number"
                     step="0.01"
                     disabled={!isSuperAdmin}
@@ -146,8 +148,9 @@ function AdminPlansPage() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Limite mensile</Label>
+                  <Label htmlFor={`plan-limit-${plan.id}`}>Limite mensile</Label>
                   <Input
+                    id={`plan-limit-${plan.id}`}
                     type="number"
                     disabled={draft.unlimited}
                     value={draft.monthly_limit ?? ""}
@@ -165,21 +168,27 @@ function AdminPlansPage() {
                 <div className="flex items-end gap-4">
                   <div className="flex items-center gap-2">
                     <Switch
+                      id={`plan-unlimited-${plan.id}`}
                       checked={draft.unlimited}
                       onCheckedChange={(v) =>
                         setDrafts((d) => ({ ...d, [plan.id]: { ...d[plan.id], unlimited: v } }))
                       }
                     />
-                    <Label className="text-xs">Illimitato</Label>
+                    <Label htmlFor={`plan-unlimited-${plan.id}`} className="text-xs">
+                      Illimitato
+                    </Label>
                   </div>
                   <div className="flex items-center gap-2">
                     <Switch
+                      id={`plan-active-${plan.id}`}
                       checked={draft.active}
                       onCheckedChange={(v) =>
                         setDrafts((d) => ({ ...d, [plan.id]: { ...d[plan.id], active: v } }))
                       }
                     />
-                    <Label className="text-xs">Attivo</Label>
+                    <Label htmlFor={`plan-active-${plan.id}`} className="text-xs">
+                      Attivo
+                    </Label>
                   </div>
                 </div>
                 <div className="sm:col-span-4">

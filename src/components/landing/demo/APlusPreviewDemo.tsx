@@ -5,7 +5,13 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { AGES, NICHES } from "@/components/tools/aplus/constants";
 import { generateModulesText } from "@/components/tools/aplus/copyEngine";
 import { drawHero } from "@/components/tools/aplus/canvasRenderers";
@@ -73,7 +79,13 @@ export function APlusPreviewDemo() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const texts = generateModulesText({ lang: "it", niche, age, pages: [1, 2, 3], variationIndex: 0 });
+  const texts = generateModulesText({
+    lang: "it",
+    niche,
+    age,
+    pages: [1, 2, 3],
+    variationIndex: 0,
+  });
   const heroHeading = texts.hero.heading;
   const heroBody = texts.hero.body;
 
@@ -85,7 +97,6 @@ export function APlusPreviewDemo() {
     const cover = uploadedCover ?? buildPlaceholderCover(title, niche);
     drawHero(canvas, cover, cover, "#f8fafc", null);
     applyPreviewWatermark(canvas, "ANTEPRIMA — INKFORGEKDP.COM");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [title, niche, uploadedCover]);
 
   function handleUpload(file: File | null) {
@@ -108,9 +119,9 @@ export function APlusPreviewDemo() {
           Il tuo <span className="text-gradient">banner A+</span> senza aprire un editor grafico
         </h3>
         <p className="text-sm text-muted-foreground">
-          Nell'app il mockup usa la copertina e le pagine interne reali del tuo PDF, e i testi vengono scritti
-          analizzandole davvero. Qui sotto una copertina segnaposto (o carica la tua) per vedere subito il Modulo 1
-          — Hero Banner, 970×300 px.
+          Nell'app il mockup usa la copertina e le pagine interne reali del tuo PDF, e i testi
+          vengono scritti analizzandole davvero. Qui sotto una copertina segnaposto (o carica la
+          tua) per vedere subito il Modulo 1 — Hero Banner, 970×300 px.
         </p>
 
         <div className="space-y-1.5">
@@ -119,9 +130,9 @@ export function APlusPreviewDemo() {
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label>Nicchia</Label>
+            <Label htmlFor="aplus-demo-niche">Nicchia</Label>
             <Select value={niche} onValueChange={(v) => setNiche(v as NicheId)}>
-              <SelectTrigger>
+              <SelectTrigger id="aplus-demo-niche">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -134,9 +145,9 @@ export function APlusPreviewDemo() {
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label>Età target</Label>
+            <Label htmlFor="aplus-demo-age">Età target</Label>
             <Select value={age} onValueChange={(v) => setAge(v as AgeId)}>
-              <SelectTrigger>
+              <SelectTrigger id="aplus-demo-age">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -150,13 +161,19 @@ export function APlusPreviewDemo() {
           </div>
         </div>
 
-        <label className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-border bg-surface px-3 py-2 text-xs text-muted-foreground hover:border-accent">
+        <label
+          htmlFor="aplus-demo-cover-upload"
+          className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-border bg-surface px-3 py-2 text-xs text-muted-foreground hover:border-accent has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2"
+        >
           <Upload className="size-3.5 shrink-0" />
-          {uploadedCover ? "Copertina caricata — clicca per cambiarla" : "Oppure carica una tua immagine di copertina"}
+          {uploadedCover
+            ? "Copertina caricata — clicca per cambiarla"
+            : "Oppure carica una tua immagine di copertina"}
           <input
+            id="aplus-demo-cover-upload"
             type="file"
             accept="image/*"
-            className="hidden"
+            className="sr-only"
             ref={fileInputRef}
             onChange={(e) => handleUpload(e.target.files?.[0] ?? null)}
           />
@@ -174,7 +191,9 @@ export function APlusPreviewDemo() {
           <canvas ref={canvasRef} className="h-auto w-full rounded-md object-contain" />
         </div>
         <div className="panel space-y-2 p-4">
-          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Testo Modulo 1 (Hero)</p>
+          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+            Testo Modulo 1 (Hero)
+          </p>
           <p className="text-sm font-semibold">{heroHeading}</p>
           <div className="relative">
             <p className="text-sm text-muted-foreground">
@@ -186,7 +205,8 @@ export function APlusPreviewDemo() {
           </div>
           <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
             <Lock className="size-3 shrink-0" />
-            Moduli 2-5 (Proof, Value, Griglia, Compare) generati e disponibili con un abbonamento attivo.
+            Moduli 2-5 (Proof, Value, Griglia, Compare) generati e disponibili con un abbonamento
+            attivo.
           </p>
         </div>
       </div>

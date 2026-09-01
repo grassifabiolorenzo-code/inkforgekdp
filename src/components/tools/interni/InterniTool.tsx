@@ -1,18 +1,52 @@
-import { ArrowDown, ArrowUp, BookImage, Download, FilePlus2, ImageDown, Loader2, Trash2 } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  BookImage,
+  Download,
+  FilePlus2,
+  ImageDown,
+  Loader2,
+  Trash2,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { ToolRuntime } from "@/components/tools/ToolPageShell";
 import { newOperationId } from "@/hooks/useAccount";
 
-import { DEFAULT_FILLER_COLOR, DEFAULT_MARGINS, TRIM_SIZES, getTrimSize } from "@/components/tools/interni/constants";
-import { buildInteriorPdf, renderFirstPagePreview, renderSinglePagePreview } from "@/components/tools/interni/interiorPdf";
-import { TEMPLATE_LIBRARY, getTemplateSpec, type TemplateId } from "@/components/tools/interni/templateLibrary";
-import type { FillMode, InteriorPage, PageMargins, PrintMode, TrimSizeId } from "@/components/tools/interni/types";
+import {
+  DEFAULT_FILLER_COLOR,
+  DEFAULT_MARGINS,
+  TRIM_SIZES,
+  getTrimSize,
+} from "@/components/tools/interni/constants";
+import {
+  buildInteriorPdf,
+  renderFirstPagePreview,
+  renderSinglePagePreview,
+} from "@/components/tools/interni/interiorPdf";
+import {
+  TEMPLATE_LIBRARY,
+  getTemplateSpec,
+  type TemplateId,
+} from "@/components/tools/interni/templateLibrary";
+import type {
+  FillMode,
+  InteriorPage,
+  PageMargins,
+  PrintMode,
+  TrimSizeId,
+} from "@/components/tools/interni/types";
 
 const TEMPLATE_CATEGORIES = [...new Set(TEMPLATE_LIBRARY.map((t) => t.category))];
 
@@ -79,7 +113,6 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
   // (evita di far riscaricare un file non aggiornato senza che l'utente se ne accorga).
   useEffect(() => {
     setGeneratedPdf(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pages, trim.widthIn, trim.heightIn, margins, defaultFillMode, printMode, fillerColor]);
 
   function triggerBlobDownload(blob: Blob, filename: string) {
@@ -120,7 +153,13 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
     const spec = getTemplateSpec(selectedTemplateId);
     setPages((prev) => [
       ...prev,
-      { id: nextPageId(), kind: "template", templateId: selectedTemplateId, name: spec?.label ?? "Template", fillModeOverride: "default" },
+      {
+        id: nextPageId(),
+        kind: "template",
+        templateId: selectedTemplateId,
+        name: spec?.label ?? "Template",
+        fillModeOverride: "default",
+      },
     ]);
   }
 
@@ -140,7 +179,10 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
         const canvas = await renderSinglePagePreview(page, docSpec);
 
         // Credito confermato prima di consegnare il file: nessun download se il charge fallisce.
-        const result = await runtime.charge(newOperationId("interni-page-download"), "Download immagine pagina");
+        const result = await runtime.charge(
+          newOperationId("interni-page-download"),
+          "Download immagine pagina",
+        );
         if (!result.ok) return;
 
         const url = canvas.toDataURL("image/png");
@@ -236,15 +278,15 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
             Impaginazione interni KDP
           </h3>
           <p className="mt-1 text-xs text-muted-foreground">
-            Carica le immagini nell'ordine in cui devono comparire, imposta formato e margini, poi genera il PDF
-            interno completo.
+            Carica le immagini nell'ordine in cui devono comparire, imposta formato e margini, poi
+            genera il PDF interno completo.
           </p>
         </div>
 
         <div className="space-y-1.5">
-          <Label>Formato pagina (Trim Size)</Label>
+          <Label htmlFor="interni-trim-size">Formato pagina (Trim Size)</Label>
           <Select value={trimSizeId} onValueChange={(v) => setTrimSizeId(v as TrimSizeId)}>
-            <SelectTrigger>
+            <SelectTrigger id="interni-trim-size">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -264,7 +306,9 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
           </Label>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="space-y-1">
-              <Label htmlFor="m-top" className="text-[11px]">Alto</Label>
+              <Label htmlFor="m-top" className="text-[11px]">
+                Alto
+              </Label>
               <Input
                 id="m-top"
                 type="number"
@@ -276,7 +320,9 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="m-bottom" className="text-[11px]">Basso</Label>
+              <Label htmlFor="m-bottom" className="text-[11px]">
+                Basso
+              </Label>
               <Input
                 id="m-bottom"
                 type="number"
@@ -288,7 +334,9 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="m-inside" className="text-[11px]">Interno (dorso)</Label>
+              <Label htmlFor="m-inside" className="text-[11px]">
+                Interno (dorso)
+              </Label>
               <Input
                 id="m-inside"
                 type="number"
@@ -300,7 +348,9 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="m-outside" className="text-[11px]">Esterno</Label>
+              <Label htmlFor="m-outside" className="text-[11px]">
+                Esterno
+              </Label>
               <Input
                 id="m-outside"
                 type="number"
@@ -313,20 +363,24 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
             </div>
           </div>
           <p className="text-[11px] text-muted-foreground">
-            "Interno" è il lato verso il dorso/rilegatura e viene specchiato automaticamente tra pagine destre e
-            sinistre; di solito conviene tenerlo leggermente più ampio di "Esterno".
+            "Interno" è il lato verso il dorso/rilegatura e viene specchiato automaticamente tra
+            pagine destre e sinistre; di solito conviene tenerlo leggermente più ampio di "Esterno".
           </p>
         </div>
 
         <div className="space-y-1.5">
-          <Label>Stile pagina di default</Label>
+          <Label htmlFor="interni-default-fill">Stile pagina di default</Label>
           <Select value={defaultFillMode} onValueChange={(v) => setDefaultFillMode(v as FillMode)}>
-            <SelectTrigger>
+            <SelectTrigger id="interni-default-fill">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="contain">Con margine (ridimensionamento automatico, nessun ritaglio)</SelectItem>
-              <SelectItem value="cover">Piena pagina (con abbondanza/bleed, ritaglia l'eccesso)</SelectItem>
+              <SelectItem value="contain">
+                Con margine (ridimensionamento automatico, nessun ritaglio)
+              </SelectItem>
+              <SelectItem value="cover">
+                Piena pagina (con abbondanza/bleed, ritaglia l'eccesso)
+              </SelectItem>
             </SelectContent>
           </Select>
           <p className="text-[11px] text-muted-foreground">
@@ -336,25 +390,31 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
 
         {/* Modalità di stampa */}
         <div className="space-y-2 rounded-md border border-border bg-surface p-3">
-          <Label className="text-xs tracking-wide uppercase text-muted-foreground">Modalità di stampa</Label>
+          <Label className="text-xs tracking-wide uppercase text-muted-foreground">
+            Modalità di stampa
+          </Label>
           <Select value={printMode} onValueChange={(v) => setPrintMode(v as PrintMode)}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="continuous">Immagine continua, senza interruzioni</SelectItem>
-              <SelectItem value="singleSidedWithFiller">Solo fronte, retro di riempimento (bianco o colore)</SelectItem>
+              <SelectItem value="singleSidedWithFiller">
+                Solo fronte, retro di riempimento (bianco o colore)
+              </SelectItem>
             </SelectContent>
           </Select>
           {printMode === "singleSidedWithFiller" ? (
             <>
               <p className="text-[11px] text-muted-foreground">
-                Dopo ogni immagine viene inserita automaticamente una pagina di riempimento, per ottenere una
-                stampa di fatto solo fronte (utile per evitare che pennarelli/pastelli passino sul disegno
-                successivo).
+                Dopo ogni immagine viene inserita automaticamente una pagina di riempimento, per
+                ottenere una stampa di fatto solo fronte (utile per evitare che pennarelli/pastelli
+                passino sul disegno successivo).
               </p>
               <div className="flex items-center gap-2">
-                <Label htmlFor="filler-color" className="text-[11px]">Colore riempimento</Label>
+                <Label htmlFor="filler-color" className="text-[11px]">
+                  Colore riempimento
+                </Label>
                 <Input
                   id="filler-color"
                   type="color"
@@ -387,7 +447,8 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
             className="block w-full cursor-pointer rounded-lg border border-dashed border-border bg-surface p-4 text-sm text-muted-foreground"
           />
           <p className="text-[11px] text-muted-foreground">
-            Puoi ripetere la selezione per aggiungere altre immagini: verranno accodate in ordine alfabetico/numerico.
+            Puoi ripetere la selezione per aggiungere altre immagini: verranno accodate in ordine
+            alfabetico/numerico.
           </p>
         </div>
 
@@ -398,11 +459,14 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
             Libreria interni a basso contenuto
           </Label>
           <p className="text-[11px] text-muted-foreground">
-            Pagine pronte (quaderni, planner, attività) generate al momento: nessuna immagine esterna, si adattano
-            automaticamente al formato scelto.
+            Pagine pronte (quaderni, planner, attività) generate al momento: nessuna immagine
+            esterna, si adattano automaticamente al formato scelto.
           </p>
           <div className="flex items-center gap-2">
-            <Select value={selectedTemplateId} onValueChange={(v) => setSelectedTemplateId(v as TemplateId)}>
+            <Select
+              value={selectedTemplateId}
+              onValueChange={(v) => setSelectedTemplateId(v as TemplateId)}
+            >
               <SelectTrigger className="flex-1">
                 <SelectValue />
               </SelectTrigger>
@@ -445,7 +509,9 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
                 key={page.id}
                 className="flex items-center gap-2 rounded-md border border-border bg-surface p-2 text-xs"
               >
-                <span className="w-6 shrink-0 text-center font-mono text-muted-foreground">{index + 1}</span>
+                <span className="w-6 shrink-0 text-center font-mono text-muted-foreground">
+                  {index + 1}
+                </span>
                 <span className="min-w-0 flex-1 truncate">
                   {page.kind === "blank" ? "— Pagina vuota —" : page.name}
                 </span>
@@ -463,7 +529,13 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
                   </SelectContent>
                 </Select>
                 <div className="flex shrink-0 items-center gap-0.5">
-                  <Button variant="ghost" size="sm" className="size-7 p-0" disabled={index === 0} onClick={() => movePage(index, -1)}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="size-7 p-0"
+                    disabled={index === 0}
+                    onClick={() => movePage(index, -1)}
+                  >
                     <ArrowUp className="size-3.5" />
                   </Button>
                   <Button
@@ -475,7 +547,13 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
                   >
                     <ArrowDown className="size-3.5" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="size-7 p-0" onClick={() => insertBlankPageAfter(index)} title="Inserisci pagina vuota dopo">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="size-7 p-0"
+                    onClick={() => insertBlankPageAfter(index)}
+                    title="Inserisci pagina vuota dopo"
+                  >
                     <FilePlus2 className="size-3.5" />
                   </Button>
                   <Button
@@ -506,7 +584,11 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
           </div>
         </div>
 
-        <Button onClick={handleGenerate} disabled={generating || runtime.charging} className="w-full">
+        <Button
+          onClick={handleGenerate}
+          disabled={generating || runtime.charging}
+          className="w-full"
+        >
           {generating || runtime.charging ? (
             <Loader2 className="mr-2 size-4 animate-spin" />
           ) : (
@@ -518,8 +600,8 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
         {generatedPdf && (
           <div className="space-y-2 rounded-md border border-border bg-surface p-3">
             <p className="text-xs text-muted-foreground">
-              PDF generato. Se il download automatico non è partito (o l'hai chiuso per sbaglio), puoi
-              riscaricarlo qui — non consuma un altro credito.
+              PDF generato. Se il download automatico non è partito (o l'hai chiuso per sbaglio),
+              puoi riscaricarlo qui — non consuma un altro credito.
             </p>
             <Button
               type="button"
@@ -544,7 +626,10 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
         </p>
         <div className="flex items-center justify-center overflow-hidden rounded-md border border-border bg-black/60 p-3">
           {pages.length > 0 ? (
-            <canvas ref={previewCanvasRef} className="h-auto max-h-[520px] w-full max-w-full object-contain" />
+            <canvas
+              ref={previewCanvasRef}
+              className="h-auto max-h-[520px] w-full max-w-full object-contain"
+            />
           ) : (
             <p className="p-10 text-center text-xs text-muted-foreground">
               Carica almeno un'immagine per vedere l'anteprima.

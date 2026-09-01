@@ -5,7 +5,13 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { ToolRuntime } from "@/components/tools/ToolPageShell";
 import { OutputLanguageSelect, useOutputLanguage } from "@/components/tools/OutputLanguageSelect";
 import { newOperationId } from "@/hooks/useAccount";
@@ -18,7 +24,10 @@ import {
   generateListing,
   type Listing,
 } from "@/components/tools/pubblicazione/listingLogic";
-import { analyzeInteriorPdf, type InteriorAnalysisResult } from "@/components/tools/pubblicazione/pdfAnalysis";
+import {
+  analyzeInteriorPdf,
+  type InteriorAnalysisResult,
+} from "@/components/tools/pubblicazione/pdfAnalysis";
 import { extractCoverContent, extractPdfContent } from "@/components/tools/pdfContent";
 import { generateListingCopy } from "@/lib/aiCopy.functions";
 import { Switch } from "@/components/ui/switch";
@@ -26,7 +35,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { AiStyleControls } from "@/components/tools/ai/AiStyleControls";
 import { DEFAULT_CREATIVITY, DEFAULT_TONE, type AiToneId } from "@/components/tools/ai/aiStyle";
 import { SeoPanel } from "@/components/tools/pubblicazione/SeoPanel";
-
 
 /**
  * TOOL 2 — Pubblicazione (Amazon KDP International Listing Suite).
@@ -111,7 +119,9 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
     try {
       const result = await analyzeInteriorPdf(file);
       setInteriorAnalysis(result);
-      setInteriorStatus(`Analisi completata: ${result.totalPages} pagine scansionate con successo.`);
+      setInteriorStatus(
+        `Analisi completata: ${result.totalPages} pagine scansionate con successo.`,
+      );
       setInteriorStatusOk(true);
     } catch (error) {
       console.error(error);
@@ -129,96 +139,101 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
     if (chargeGuard.current) return;
     chargeGuard.current = true;
     try {
-    if (!runtime.canOperate) {
-      runtime.blockOperation();
-      return;
-    }
-
-    // Verifica server-side del piano e dei crediti.
-    if (!(await runtime.ensureAccess())) return;
-
-    setGenerating(true);
-    const operationId = newOperationId("pubblicazione-gen");
-
-    try {
-      let result = generateListing({
-        locale: outputLocale,
-        subject,
-        bookType,
-        audience,
-        ageDetails,
-        hasCover: !!coverFile,
-        hasInterior: !!interiorFile,
-        interiorScanned: interiorAnalysis.scanned,
-        interiorPages: interiorAnalysis.totalPages,
-      });
-
-      let insight: string | null = null;
-      let usedAi = false;
-
-      if (useAi && (coverFile || interiorFile)) {
-        try {
-          setAiStep("Analisi AI di copertina e pagine interne...");
-          const cover = coverFile ? await extractCoverContent(coverFile) : null;
-          const interior = interiorFile
-            ? await extractPdfContent(interiorFile, { maxImages: 3, maxTextPages: 6 })
-            : null;
-
-          setAiStep("Scrittura testi SEO + AIDA + PAS...");
-          const response = await generateListingCopy({
-            data: {
-              locale: outputLocale,
-              subject,
-              bookType,
-              audience,
-              ageDetails,
-              interiorPages: interior?.totalPages ?? interiorAnalysis.totalPages,
-              tone,
-              creativity,
-              interiorText: interior?.text || undefined,
-              interiorImages: interior?.images,
-              coverImages: cover?.images,
-            },
-          });
-
-          if (response.ok) {
-            const copy = response.copy;
-            result = {
-              ...result,
-              title: copy.title || result.title,
-              subtitle: copy.subtitle || result.subtitle,
-              description: copy.description || result.description,
-              keywords: copy.keywords.length >= 3 ? copy.keywords.slice(0, 7) : result.keywords,
-              categories:
-                copy.categories && copy.categories.length === 3 ? copy.categories : result.categories,
-            };
-            insight = copy.insight ?? null;
-            usedAi = true;
-          } else {
-            toast.warning(`AI non disponibile: ${response.error}. Usati i testi del motore interno.`);
-          }
-        } catch (aiError) {
-          console.error(aiError);
-          toast.warning("Analisi AI non riuscita: usati i testi del motore interno.");
-        } finally {
-          setAiStep(null);
-        }
+      if (!runtime.canOperate) {
+        runtime.blockOperation();
+        return;
       }
 
-      // Generazione completata → consumo del credito.
-      const charge = await runtime.charge(operationId, "Generazione listing KDP completata");
-      if (!charge.ok) return;
-      setListing(result);
-      setAiInsight(insight);
-      setAiUsed(usedAi);
-      toast.success(charge.duplicate ? "Generazione completata" : "Generazione completata — 1 credito");
+      // Verifica server-side del piano e dei crediti.
+      if (!(await runtime.ensureAccess())) return;
 
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Generazione non riuscita");
+      setGenerating(true);
+      const operationId = newOperationId("pubblicazione-gen");
+
+      try {
+        let result = generateListing({
+          locale: outputLocale,
+          subject,
+          bookType,
+          audience,
+          ageDetails,
+          hasCover: !!coverFile,
+          hasInterior: !!interiorFile,
+          interiorScanned: interiorAnalysis.scanned,
+          interiorPages: interiorAnalysis.totalPages,
+        });
+
+        let insight: string | null = null;
+        let usedAi = false;
+
+        if (useAi && (coverFile || interiorFile)) {
+          try {
+            setAiStep("Analisi AI di copertina e pagine interne...");
+            const cover = coverFile ? await extractCoverContent(coverFile) : null;
+            const interior = interiorFile
+              ? await extractPdfContent(interiorFile, { maxImages: 3, maxTextPages: 6 })
+              : null;
+
+            setAiStep("Scrittura testi SEO + AIDA + PAS...");
+            const response = await generateListingCopy({
+              data: {
+                locale: outputLocale,
+                subject,
+                bookType,
+                audience,
+                ageDetails,
+                interiorPages: interior?.totalPages ?? interiorAnalysis.totalPages,
+                tone,
+                creativity,
+                interiorText: interior?.text || undefined,
+                interiorImages: interior?.images,
+                coverImages: cover?.images,
+              },
+            });
+
+            if (response.ok) {
+              const copy = response.copy;
+              result = {
+                ...result,
+                title: copy.title || result.title,
+                subtitle: copy.subtitle || result.subtitle,
+                description: copy.description || result.description,
+                keywords: copy.keywords.length >= 3 ? copy.keywords.slice(0, 7) : result.keywords,
+                categories:
+                  copy.categories && copy.categories.length === 3
+                    ? copy.categories
+                    : result.categories,
+              };
+              insight = copy.insight ?? null;
+              usedAi = true;
+            } else {
+              toast.warning(
+                `AI non disponibile: ${response.error}. Usati i testi del motore interno.`,
+              );
+            }
+          } catch (aiError) {
+            console.error(aiError);
+            toast.warning("Analisi AI non riuscita: usati i testi del motore interno.");
+          } finally {
+            setAiStep(null);
+          }
+        }
+
+        // Generazione completata → consumo del credito.
+        const charge = await runtime.charge(operationId, "Generazione listing KDP completata");
+        if (!charge.ok) return;
+        setListing(result);
+        setAiInsight(insight);
+        setAiUsed(usedAi);
+        toast.success(
+          charge.duplicate ? "Generazione completata" : "Generazione completata — 1 credito",
+        );
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Generazione non riuscita");
+      } finally {
+        setGenerating(false);
+      }
     } finally {
-      setGenerating(false);
-    }
-  } finally {
       chargeGuard.current = false;
     }
   }
@@ -246,7 +261,6 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
     toast.success(`${label} copiato negli appunti`);
   }
 
-
   function downloadListing() {
     if (!listing) return;
     const blob = new Blob([formatListingForExport(listing)], { type: "text/plain;charset=utf-8" });
@@ -272,7 +286,6 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
 
         <OutputLanguageSelect id="p-output-lang" />
 
-
         <div className="space-y-1.5">
           <Label htmlFor="p-subject">Soggetto / Personaggio</Label>
           <Input
@@ -284,9 +297,9 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
         </div>
 
         <div className="space-y-1.5">
-          <Label>Formato / tipo di libro</Label>
+          <Label htmlFor="p-book-type">Formato / tipo di libro</Label>
           <Select value={bookType} onValueChange={(v) => setBookType(v as BookType)}>
-            <SelectTrigger>
+            <SelectTrigger id="p-book-type">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -300,9 +313,9 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
         </div>
 
         <div className="space-y-1.5">
-          <Label>Pubblico di riferimento</Label>
+          <Label htmlFor="p-audience">Pubblico di riferimento</Label>
           <Select value={audience} onValueChange={(v) => handleAudienceChange(v as Audience)}>
-            <SelectTrigger>
+            <SelectTrigger id="p-audience">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -321,11 +334,20 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
         </div>
 
         <div className="space-y-1.5">
-          <Label>Copertina (PDF/PNG)</Label>
-          <label className="flex cursor-pointer flex-col items-center gap-2 rounded-md border-2 border-dashed border-border bg-surface p-4 text-center text-xs text-muted-foreground hover:border-accent">
+          <Label htmlFor="p-cover-file">Copertina (PDF/PNG)</Label>
+          <label
+            htmlFor="p-cover-file"
+            className="flex cursor-pointer flex-col items-center gap-2 rounded-md border-2 border-dashed border-border bg-surface p-4 text-center text-xs text-muted-foreground hover:border-accent has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2"
+          >
             <Upload className="size-4" />
             {coverFile ? `Caricata: ${coverFile.name}` : "Clicca per caricare la copertina"}
-            <input type="file" accept="image/*,.pdf" className="hidden" onChange={handleCoverChange} />
+            <input
+              id="p-cover-file"
+              type="file"
+              accept="image/*,.pdf"
+              className="sr-only"
+              onChange={handleCoverChange}
+            />
           </label>
           {coverPreview && (
             <img
@@ -337,11 +359,24 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
         </div>
 
         <div className="space-y-1.5">
-          <Label>File interno (PDF)</Label>
-          <label className="flex cursor-pointer flex-col items-center gap-2 rounded-md border-2 border-dashed border-border bg-surface p-4 text-center text-xs text-muted-foreground hover:border-accent">
-            {analyzingInterior ? <Loader2 className="size-4 animate-spin" /> : <ImageIcon className="size-4" />}
+          <Label htmlFor="p-interior-file">File interno (PDF)</Label>
+          <label
+            htmlFor="p-interior-file"
+            className="flex cursor-pointer flex-col items-center gap-2 rounded-md border-2 border-dashed border-border bg-surface p-4 text-center text-xs text-muted-foreground hover:border-accent has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2"
+          >
+            {analyzingInterior ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <ImageIcon className="size-4" />
+            )}
             {interiorFile ? `Caricato: ${interiorFile.name}` : "Clicca per caricare il PDF interno"}
-            <input type="file" accept=".pdf" className="hidden" onChange={handleInteriorChange} />
+            <input
+              id="p-interior-file"
+              type="file"
+              accept=".pdf"
+              className="sr-only"
+              onChange={handleInteriorChange}
+            />
           </label>
           {interiorStatus && (
             <p
@@ -396,7 +431,6 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
           Ogni generazione completata consuma 1 credito. Le generazioni non riuscite non vengono
           addebitate.
         </p>
-
       </div>
 
       <div className="space-y-4">
@@ -440,21 +474,27 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
               </p>
             )}
 
-
             <SeoPanel listing={listing} subject={subject} onApplyKeyword={applySuggestedKeyword} />
 
             <article className="panel space-y-4 p-6">
               <p className="text-xs text-muted-foreground">
-                Tutti i testi sono modificabili: le modifiche vengono usate sia dai pulsanti Copia sia
-                dall&apos;esportazione .txt.
+                Tutti i testi sono modificabili: le modifiche vengono usate sia dai pulsanti Copia
+                sia dall&apos;esportazione .txt.
               </p>
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between gap-3">
-                  <Label htmlFor="p-out-title" className="text-xs tracking-wide uppercase text-muted-foreground">
+                  <Label
+                    htmlFor="p-out-title"
+                    className="text-xs tracking-wide uppercase text-muted-foreground"
+                  >
                     Titolo ({listing.title.length} caratteri)
                   </Label>
-                  <Button variant="ghost" size="sm" onClick={() => copyToClipboard(listing.title, "Titolo")}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyToClipboard(listing.title, "Titolo")}
+                  >
                     <Copy className="size-4" />
                   </Button>
                 </div>
@@ -467,10 +507,17 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between gap-3">
-                  <Label htmlFor="p-out-subtitle" className="text-xs tracking-wide uppercase text-muted-foreground">
+                  <Label
+                    htmlFor="p-out-subtitle"
+                    className="text-xs tracking-wide uppercase text-muted-foreground"
+                  >
                     Sottotitolo ({listing.subtitle.length} caratteri)
                   </Label>
-                  <Button variant="ghost" size="sm" onClick={() => copyToClipboard(listing.subtitle, "Sottotitolo")}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyToClipboard(listing.subtitle, "Sottotitolo")}
+                  >
                     <Copy className="size-4" />
                   </Button>
                 </div>
@@ -484,7 +531,10 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between gap-3">
-                  <Label htmlFor="p-out-desc" className="text-xs tracking-wide uppercase text-muted-foreground">
+                  <Label
+                    htmlFor="p-out-desc"
+                    className="text-xs tracking-wide uppercase text-muted-foreground"
+                  >
                     Descrizione (PAS + AIDA — {listing.description.length} caratteri)
                   </Label>
                   <Button
@@ -511,13 +561,17 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
                 <div className="mt-2 space-y-1.5">
                   {listing.keywords.map((kw, index) => (
                     <div key={`kw-${index}`} className="flex items-center gap-2">
-                      <span className="w-16 shrink-0 text-[11px] text-muted-foreground">Box {index + 1}</span>
+                      <span className="w-16 shrink-0 text-[11px] text-muted-foreground">
+                        Box {index + 1}
+                      </span>
                       <Input
                         value={kw}
                         className="h-9 text-xs"
                         onChange={(e) =>
                           updateListing({
-                            keywords: listing.keywords.map((k, i) => (i === index ? e.target.value : k)),
+                            keywords: listing.keywords.map((k, i) =>
+                              i === index ? e.target.value : k,
+                            ),
                           })
                         }
                       />
@@ -555,7 +609,9 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
                       className="h-9 text-xs"
                       onChange={(e) =>
                         updateListing({
-                          categories: listing.categories.map((c, i) => (i === index ? e.target.value : c)),
+                          categories: listing.categories.map((c, i) =>
+                            i === index ? e.target.value : c,
+                          ),
                         })
                       }
                     />
@@ -568,10 +624,9 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
                 Esporta listing (.txt)
               </Button>
             </article>
-
           </>
         )}
       </div>
     </div>
   );
-  }
+}

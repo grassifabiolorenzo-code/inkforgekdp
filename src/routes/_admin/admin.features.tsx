@@ -166,7 +166,12 @@ function AdminFeaturesPage() {
                 <Button variant="ghost" size="sm" onClick={() => openEdit(flag)}>
                   Modifica
                 </Button>
-                <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(flag)}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setDeleteTarget(flag)}
+                  aria-label={`Elimina la flag ${flag.name}`}
+                >
                   <Trash2 className="size-4 text-destructive" />
                 </Button>
               </div>
@@ -193,8 +198,9 @@ function AdminFeaturesPage() {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Chiave</Label>
+                <Label htmlFor="flag-key">Chiave</Label>
                 <Input
+                  id="flag-key"
                   disabled={!!editing}
                   placeholder="ADVANCED_ANALYTICS"
                   value={form.key}
@@ -202,33 +208,37 @@ function AdminFeaturesPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Nome</Label>
+                <Label htmlFor="flag-name">Nome</Label>
                 <Input
+                  id="flag-name"
                   value={form.name}
                   onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                 />
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label>Descrizione</Label>
+              <Label htmlFor="flag-description">Descrizione</Label>
               <Textarea
+                id="flag-description"
                 value={form.description}
                 onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
               />
             </div>
             <div className="flex items-center gap-2">
               <Switch
+                id="flag-enabled"
                 checked={form.enabled}
                 onCheckedChange={(v) => setForm((f) => ({ ...f, enabled: v }))}
               />
-              <Label>Abilitata</Label>
+              <Label htmlFor="flag-enabled">Abilitata</Label>
             </div>
             <div className="flex items-center gap-2">
               <Switch
+                id="flag-enabled-for-all"
                 checked={form.enabledForAll}
                 onCheckedChange={(v) => setForm((f) => ({ ...f, enabledForAll: v }))}
               />
-              <Label>Disponibile per tutti gli utenti</Label>
+              <Label htmlFor="flag-enabled-for-all">Disponibile per tutti gli utenti</Label>
             </div>
             {!form.enabledForAll && (
               <div className="space-y-1.5">
