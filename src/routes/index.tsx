@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { FaqSection } from "@/components/landing/FaqSection";
 import { Hero } from "@/components/landing/Hero";
+import { NewsletterSection } from "@/components/landing/NewsletterSection";
 import { SiteFooter } from "@/components/landing/SiteFooter";
 import { SiteNav } from "@/components/landing/SiteNav";
 import { ToolsSection } from "@/components/landing/ToolsSection";
@@ -37,6 +38,7 @@ function LandingPage() {
         <PricingSection />
         <ComparisonTable />
         <FaqSection />
+        <NewsletterSection />
 
         <section className="mx-auto max-w-4xl px-4 pb-24">
           <div className="panel-highlight glow-green p-10 text-center">

@@ -20,6 +20,7 @@ export const ADMIN_RESOURCES = [
   "system",
   "administrators",
   "referrals",
+  "marketing",
 ] as const;
 export type AdminResource = (typeof ADMIN_RESOURCES)[number];
 
@@ -47,6 +48,7 @@ const MATRIX: Matrix = {
     system: ["read"],
     administrators: ["read", "write", "delete"],
     referrals: ["read", "write", "delete"],
+    marketing: ["read", "write", "delete"],
   },
   admin: {
     users: ["read", "write"],
@@ -59,6 +61,7 @@ const MATRIX: Matrix = {
     audit_logs: ["read"],
     system: ["read"],
     referrals: ["read", "write"],
+    marketing: ["read", "write", "delete"],
   },
   support: {
     users: ["read", "write"],
@@ -69,6 +72,7 @@ const MATRIX: Matrix = {
     analytics: ["read"],
     audit_logs: ["read"],
     referrals: ["read"],
+    marketing: ["read"],
   },
   viewer: {
     users: ["read"],
@@ -80,6 +84,7 @@ const MATRIX: Matrix = {
     audit_logs: ["read"],
     system: ["read"],
     referrals: ["read"],
+    marketing: ["read"],
   },
 };
 

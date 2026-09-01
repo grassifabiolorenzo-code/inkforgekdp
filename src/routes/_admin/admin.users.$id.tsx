@@ -10,7 +10,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -19,7 +27,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 import { PLANS } from "@/config/plans";
+import { listEmailSends, sendManualEmailToUser } from "@/lib/admin/emailSends.functions";
 import {
   changeAdminUserPlan,
   deleteAdminUser,
@@ -98,15 +108,42 @@ function AdminUserDetailPage() {
   const reactivate = useServerFn(reactivateAdminUser);
   const deleteUser = useServerFn(deleteAdminUser);
   const resetLink = useServerFn(generatePasswordResetLink);
+  const fetchEmailSends = useServerFn(listEmailSends);
+  const sendManualEmail = useServerFn(sendManualEmailToUser);
 
   const [nameDraft, setNameDraft] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [resetLinkValue, setResetLinkValue] = useState<string | null>(null);
+  const [composeOpen, setComposeOpen] = useState(false);
+  const [composeSubject, setComposeSubject] = useState("");
+  const [composeHtml, setComposeHtml] = useState("");
+  const [sendingEmail, setSendingEmail] = useState(false);
 
   const { data, isLoading } = useQuery<UserDetail>({
     queryKey: ["admin-user-detail", id],
     queryFn: async () => (await fetchDetail({ data: { userId: id } })) as unknown as UserDetail,
   });
+
+  const { data: emailSends, isLoading: loadingEmailSends } = useQuery({
+    queryKey: ["admin-user-email-sends", id],
+    queryFn: () => fetchEmailSends({ data: { recipientUserId: id } }),
+  });
+
+  async function handleSendManualEmail() {
+    setSendingEmail(true);
+    try {
+      await sendManualEmail({ data: { userId: id, subject: composeSubject, html: composeHtml } });
+      toast.success("Email inviata (o messa in coda se il provider non è ancora collegato)");
+      setComposeOpen(false);
+      setComposeSubject("");
+      setComposeHtml("");
+      void queryClient.invalidateQueries({ queryKey: ["admin-user-email-sends", id] });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Invio non riuscito");
+    } finally {
+      setSendingEmail(false);
+    }
+  }
 
   function invalidate() {
     void queryClient.invalidateQueries({ queryKey: ["admin-user-detail", id] });
@@ -242,6 +279,9 @@ function AdminUserDetailPage() {
               <Button variant="outline" size="sm" onClick={handleResetLink}>
                 Genera link reset password
               </Button>
+              <Button variant="outline" size="sm" onClick={() => setComposeOpen(true)}>
+                Invia email
+              </Button>
               <Button variant="destructive" size="sm" onClick={() => setDeleteOpen(true)}>
                 Elimina utente
               </Button>
@@ -356,6 +396,50 @@ function AdminUserDetailPage() {
             )}
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Corrispondenza email</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loadingEmailSends && <Skeleton className="h-24 w-full" />}
+            {!loadingEmailSends && (emailSends?.sends.length ?? 0) === 0 && (
+              <p className="text-sm text-muted-foreground">Nessuna email inviata finora.</p>
+            )}
+            {!loadingEmailSends && (emailSends?.sends.length ?? 0) > 0 && (
+              <ul className="divide-y divide-border text-sm">
+                {emailSends!.sends.map((s) => (
+                  <li key={s.id} className="flex items-center justify-between gap-4 py-2">
+                    <div className="min-w-0">
+                      <p className="truncate">{s.subject}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {s.kind === "manual"
+                          ? "Corrispondenza diretta"
+                          : s.kind === "transactional"
+                            ? (s.event ?? "Transazionale")
+                            : "Promozionale"}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
+                      <Badge
+                        variant={
+                          s.status === "sent"
+                            ? "default"
+                            : s.status === "failed"
+                              ? "destructive"
+                              : "outline"
+                        }
+                      >
+                        {s.status}
+                      </Badge>
+                      {new Date(s.created_at).toLocaleString("it-IT")}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       <ConfirmDangerDialog
@@ -367,6 +451,40 @@ function AdminUserDetailPage() {
         actionLabel="Elimina definitivamente"
         onConfirm={handleDelete}
       />
+
+      <Dialog open={composeOpen} onOpenChange={setComposeOpen}>
+        <DialogContent className="max-h-[85vh] max-w-xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Invia email a {data.profile.email}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label>Oggetto</Label>
+              <Input value={composeSubject} onChange={(e) => setComposeSubject(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Corpo (HTML)</Label>
+              <Textarea
+                rows={8}
+                value={composeHtml}
+                onChange={(e) => setComposeHtml(e.target.value)}
+                className="font-mono text-xs"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setComposeOpen(false)}>
+              Annulla
+            </Button>
+            <Button
+              onClick={handleSendManualEmail}
+              disabled={sendingEmail || !composeSubject.trim() || !composeHtml.trim()}
+            >
+              {sendingEmail ? "Invio…" : "Invia"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminShell>
   );
 }

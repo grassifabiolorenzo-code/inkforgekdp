@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Download } from "lucide-react";
 import { useState } from "react";
@@ -7,8 +8,10 @@ import { toast } from "sonner";
 import { ConfirmDangerDialog } from "@/components/admin/ConfirmDangerDialog";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { accountQueryKey, useAccount } from "@/hooks/useAccount";
 import { signOut } from "@/hooks/useAuth";
-import { deleteMyAccount, exportMyData } from "@/lib/privacy.functions";
+import { deleteMyAccount, exportMyData, updateMyEmailPreferences } from "@/lib/privacy.functions";
 
 export const Route = createFileRoute("/_authenticated/dashboard/settings")({
   head: () => ({
@@ -23,11 +26,30 @@ export const Route = createFileRoute("/_authenticated/dashboard/settings")({
 
 function SettingsPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { data: account } = useAccount();
   const exportData = useServerFn(exportMyData);
   const deleteAccount = useServerFn(deleteMyAccount);
+  const updateEmailPreferences = useServerFn(updateMyEmailPreferences);
   const [exporting, setExporting] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [savingPreferences, setSavingPreferences] = useState(false);
+
+  async function handleMarketingOptOutChange(optOut: boolean) {
+    setSavingPreferences(true);
+    try {
+      await updateEmailPreferences({ data: { marketingOptOut: optOut } });
+      void queryClient.invalidateQueries({ queryKey: accountQueryKey });
+      toast.success(
+        optOut ? "Disiscritto dalle email promozionali" : "Iscritto alle email promozionali",
+      );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Operazione non riuscita");
+    } finally {
+      setSavingPreferences(false);
+    }
+  }
 
   async function handleExport() {
     setExporting(true);
@@ -92,6 +114,24 @@ function SettingsPage() {
           >
             Esci
           </Button>
+        </div>
+
+        <div className="panel space-y-3 p-6">
+          <h2 className="font-semibold">Preferenze email</h2>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm text-foreground">Email promozionali</p>
+              <p className="text-sm text-muted-foreground">
+                Novità sui tool, consigli e offerte. Le email relative al tuo abbonamento (fatture,
+                avvisi di pagamento) vengono sempre inviate a prescindere da questa preferenza.
+              </p>
+            </div>
+            <Switch
+              checked={!(account?.profile?.marketing_opt_out ?? false)}
+              onCheckedChange={(checked) => handleMarketingOptOutChange(!checked)}
+              disabled={savingPreferences || !account}
+            />
+          </div>
         </div>
 
         <div className="panel space-y-3 p-6">

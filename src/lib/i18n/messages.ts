@@ -47,6 +47,16 @@ const it = {
   "footer.status": "Stato del sistema",
   "footer.rights": "Tutti i diritti riservati.",
 
+  "newsletter.title": "Resta aggiornato",
+  "newsletter.subtitle":
+    "Novità sui tool, consigli per pubblicare su Amazon KDP e qualche offerta riservata a chi è in lista. Niente spam, puoi disiscriverti quando vuoi.",
+  "newsletter.placeholder": "La tua email",
+  "newsletter.cta": "Iscrivimi",
+  "newsletter.consent":
+    "Acconsento a ricevere email promozionali da InkForgeKdp. Posso disiscrivermi in qualsiasi momento.",
+  "newsletter.success": "Fatto! Controlla la tua casella di posta.",
+  "newsletter.error": "Iscrizione non riuscita. Riprova tra qualche istante.",
+
   "dash.dashboard": "Dashboard",
   "dash.tools": "Tool",
   "dash.account": "Account",
@@ -171,6 +181,16 @@ const en: Dictionary = {
   "footer.status": "System status",
   "footer.rights": "All rights reserved.",
 
+  "newsletter.title": "Stay in the loop",
+  "newsletter.subtitle":
+    "Tool updates, tips for publishing on Amazon KDP, and the occasional offer for our list. No spam, unsubscribe anytime.",
+  "newsletter.placeholder": "Your email",
+  "newsletter.cta": "Subscribe",
+  "newsletter.consent":
+    "I agree to receive promotional emails from InkForgeKdp. I can unsubscribe at any time.",
+  "newsletter.success": "Done! Check your inbox.",
+  "newsletter.error": "Sign-up failed. Please try again shortly.",
+
   "dash.dashboard": "Dashboard",
   "dash.tools": "Tools",
   "dash.account": "Account",
@@ -291,6 +311,16 @@ const de: Dictionary = {
   "footer.status": "Systemstatus",
   "footer.rights": "Alle Rechte vorbehalten.",
 
+  "newsletter.title": "Bleib auf dem Laufenden",
+  "newsletter.subtitle":
+    "Neuigkeiten zu den Tools, Tipps zur Veröffentlichung auf Amazon KDP und gelegentliche Angebote für unsere Liste. Kein Spam, jederzeit abbestellbar.",
+  "newsletter.placeholder": "Deine E-Mail",
+  "newsletter.cta": "Anmelden",
+  "newsletter.consent":
+    "Ich bin einverstanden, Werbe-E-Mails von InkForgeKdp zu erhalten. Ich kann mich jederzeit abmelden.",
+  "newsletter.success": "Erledigt! Schau in dein Postfach.",
+  "newsletter.error": "Anmeldung fehlgeschlagen. Bitte versuche es in Kürze erneut.",
+
   "dash.dashboard": "Dashboard",
   "dash.tools": "Tools",
   "dash.account": "Konto",
@@ -408,6 +438,16 @@ const fr: Dictionary = {
   "footer.terms": "Conditions générales",
   "footer.status": "État du système",
   "footer.rights": "Tous droits réservés.",
+
+  "newsletter.title": "Restez informé",
+  "newsletter.subtitle":
+    "Actualités sur les outils, conseils pour publier sur Amazon KDP et quelques offres réservées à notre liste. Pas de spam, désinscription à tout moment.",
+  "newsletter.placeholder": "Votre email",
+  "newsletter.cta": "M'inscrire",
+  "newsletter.consent":
+    "J'accepte de recevoir des emails promotionnels d'InkForgeKdp. Je peux me désinscrire à tout moment.",
+  "newsletter.success": "C'est fait ! Vérifiez votre boîte mail.",
+  "newsletter.error": "Inscription impossible. Réessayez dans un instant.",
 
   "dash.dashboard": "Tableau de bord",
   "dash.tools": "Outils",
@@ -530,6 +570,16 @@ const es: Dictionary = {
   "footer.status": "Estado del sistema",
   "footer.rights": "Todos los derechos reservados.",
 
+  "newsletter.title": "Mantente al día",
+  "newsletter.subtitle":
+    "Novedades sobre las herramientas, consejos para publicar en Amazon KDP y alguna oferta reservada a nuestra lista. Sin spam, puedes darte de baja cuando quieras.",
+  "newsletter.placeholder": "Tu email",
+  "newsletter.cta": "Suscribirme",
+  "newsletter.consent":
+    "Acepto recibir emails promocionales de InkForgeKdp. Puedo darme de baja en cualquier momento.",
+  "newsletter.success": "¡Listo! Revisa tu bandeja de entrada.",
+  "newsletter.error": "No se pudo completar la suscripción. Inténtalo de nuevo en un momento.",
+
   "dash.dashboard": "Panel",
   "dash.tools": "Herramientas",
   "dash.account": "Cuenta",
@@ -651,6 +701,16 @@ const nl: Dictionary = {
   "footer.status": "Systeemstatus",
   "footer.rights": "Alle rechten voorbehouden.",
 
+  "newsletter.title": "Blijf op de hoogte",
+  "newsletter.subtitle":
+    "Nieuws over de tools, tips voor publiceren op Amazon KDP en af en toe een aanbieding voor onze lijst. Geen spam, je kunt je altijd afmelden.",
+  "newsletter.placeholder": "Jouw e-mailadres",
+  "newsletter.cta": "Aanmelden",
+  "newsletter.consent":
+    "Ik ga akkoord met het ontvangen van promotionele e-mails van InkForgeKdp. Ik kan me op elk moment afmelden.",
+  "newsletter.success": "Gelukt! Check je inbox.",
+  "newsletter.error": "Aanmelden is niet gelukt. Probeer het straks opnieuw.",
+
   "dash.dashboard": "Dashboard",
   "dash.tools": "Tools",
   "dash.account": "Account",
@@ -767,6 +827,16 @@ const pt: Dictionary = {
   "footer.terms": "Termos e condições",
   "footer.status": "Status do sistema",
   "footer.rights": "Todos os direitos reservados.",
+
+  "newsletter.title": "Fique por dentro",
+  "newsletter.subtitle":
+    "Novidades sobre as ferramentas, dicas para publicar na Amazon KDP e alguma oferta reservada à nossa lista. Sem spam, podes cancelar quando quiseres.",
+  "newsletter.placeholder": "O teu email",
+  "newsletter.cta": "Inscrever-me",
+  "newsletter.consent":
+    "Aceito receber emails promocionais da InkForgeKdp. Posso cancelar a subscrição a qualquer momento.",
+  "newsletter.success": "Feito! Verifica a tua caixa de entrada.",
+  "newsletter.error": "Não foi possível concluir a inscrição. Tenta novamente daqui a pouco.",
 
   "dash.dashboard": "Painel",
   "dash.tools": "Ferramentas",

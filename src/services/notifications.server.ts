@@ -1,9 +1,11 @@
 import { logger } from "@/lib/logger.server";
 
 /**
- * Architettura notifiche/email — predisposizione.
- * I singoli provider (Resend, SMTP, ecc.) potranno essere collegati qui
- * senza modificare la logica di business che emette gli eventi.
+ * Punto di ingresso unico per gli eventi di ciclo vita: scrive sempre il log
+ * e, per il sottoinsieme rilevante, il campanello admin; l'invio email vero e
+ * proprio passa da src/lib/email/send.server.ts (sendTransactionalEmail), che
+ * a sua volta resta "in coda/non inviato" finché non è collegato un provider
+ * reale — vedi src/lib/email/provider.server.ts.
  */
 
 export type NotificationEvent =
@@ -14,7 +16,8 @@ export type NotificationEvent =
   | "payment_refunded"
   | "subscription_cancelled"
   | "limit_reached"
-  | "renewal_upcoming";
+  | "renewal_upcoming"
+  | "lead_captured";
 
 export interface NotificationPayload {
   event: NotificationEvent;
@@ -32,13 +35,27 @@ const ADMIN_RELEVANT_EVENTS: Partial<
   payment_refunded: { title: "Pagamento rimborsato", severity: "warning" },
   subscription_cancelled: { title: "Abbonamento cancellato", severity: "warning" },
   renewal_upcoming: { title: "Rinnovo/trial in scadenza", severity: "info" },
+  lead_captured: { title: "Nuovo contatto dalla landing", severity: "info" },
 };
+
+/** Eventi che generano una vera email transazionale (vedi email_templates.category='transactional'). */
+const EMAIL_EVENTS = new Set<NotificationEvent>([
+  "welcome",
+  "subscription_confirmed",
+  "payment_success",
+  "payment_failed",
+  "payment_refunded",
+  "subscription_cancelled",
+  "limit_reached",
+  "renewal_upcoming",
+]);
 
 /**
  * Punto di ingresso unico. Registra sempre l'evento nei log; per il sottoinsieme rilevante
  * all'admin, scrive anche una riga in admin_notifications (letta dal back office — vedi
- * lib/admin/notifications.functions.ts). L'invio email vero e proprio non è ancora collegato a
- * un provider: qui si registra solo l'evento, senza fingere che una mail sia stata spedita.
+ * lib/admin/notifications.functions.ts); per gli eventi di ciclo vita, avvia anche l'invio
+ * dell'email transazionale corrispondente (resta "in coda/non inviata" finché non è collegato
+ * un provider — mai un errore che risalga al chiamante).
  */
 export async function dispatchNotification(payload: NotificationPayload): Promise<void> {
   logger.info("notification: dispatched", {
@@ -46,6 +63,16 @@ export async function dispatchNotification(payload: NotificationPayload): Promis
     userId: payload.userId ?? null,
     email: payload.email ?? null,
   });
+
+  if (EMAIL_EVENTS.has(payload.event)) {
+    const { sendTransactionalEmail } = await import("@/lib/email/send.server");
+    await sendTransactionalEmail({
+      event: payload.event,
+      userId: payload.userId ?? null,
+      email: payload.email ?? null,
+      data: payload.data,
+    });
+  }
 
   const adminEvent = ADMIN_RELEVANT_EVENTS[payload.event];
   if (!adminEvent) return;

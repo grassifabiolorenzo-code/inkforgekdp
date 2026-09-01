@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { enforceRateLimit } from "@/lib/rateLimit.server";
@@ -61,6 +62,26 @@ export const deleteMyAccount = createServerFn({ method: "POST" })
       result: error ? "failure" : "success",
     });
 
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+const emailPreferencesInput = z.object({ marketingOptOut: z.boolean() });
+
+/**
+ * Preferenze email del chiamante: disiscrizione dalle promozionali senza
+ * toccare le transazionali (ricevute, avvisi di pagamento), sempre dovute.
+ * Stesso schema self-service di exportMyData/deleteMyAccount: solo auth, mai
+ * un target diverso dal chiamante.
+ */
+export const updateMyEmailPreferences = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => emailPreferencesInput.parse(data))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("profiles")
+      .update({ marketing_opt_out: data.marketingOptOut })
+      .eq("id", context.userId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

@@ -160,6 +160,169 @@ export type Database = {
           },
         ];
       };
+      email_campaigns: {
+        Row: {
+          audience: string;
+          body_html: string;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          name: string;
+          recipients_failed: number;
+          recipients_sent: number;
+          recipients_total: number;
+          scheduled_at: string | null;
+          sent_at: string | null;
+          status: string;
+          subject: string;
+          updated_at: string;
+        };
+        Insert: {
+          audience: string;
+          body_html: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          name: string;
+          recipients_failed?: number;
+          recipients_sent?: number;
+          recipients_total?: number;
+          scheduled_at?: string | null;
+          sent_at?: string | null;
+          status?: string;
+          subject: string;
+          updated_at?: string;
+        };
+        Update: {
+          audience?: string;
+          body_html?: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          name?: string;
+          recipients_failed?: number;
+          recipients_sent?: number;
+          recipients_total?: number;
+          scheduled_at?: string | null;
+          sent_at?: string | null;
+          status?: string;
+          subject?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      email_sends: {
+        Row: {
+          campaign_id: string | null;
+          created_at: string;
+          error: string | null;
+          event: string | null;
+          id: string;
+          kind: string;
+          recipient_email: string;
+          recipient_lead_id: string | null;
+          recipient_user_id: string | null;
+          sent_at: string | null;
+          sent_by: string | null;
+          status: string;
+          subject: string;
+          template_id: string | null;
+        };
+        Insert: {
+          campaign_id?: string | null;
+          created_at?: string;
+          error?: string | null;
+          event?: string | null;
+          id?: string;
+          kind: string;
+          recipient_email: string;
+          recipient_lead_id?: string | null;
+          recipient_user_id?: string | null;
+          sent_at?: string | null;
+          sent_by?: string | null;
+          status?: string;
+          subject: string;
+          template_id?: string | null;
+        };
+        Update: {
+          campaign_id?: string | null;
+          created_at?: string;
+          error?: string | null;
+          event?: string | null;
+          id?: string;
+          kind?: string;
+          recipient_email?: string;
+          recipient_lead_id?: string | null;
+          recipient_user_id?: string | null;
+          sent_at?: string | null;
+          sent_by?: string | null;
+          status?: string;
+          subject?: string;
+          template_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "email_sends_campaign_id_fkey";
+            columns: ["campaign_id"];
+            isOneToOne: false;
+            referencedRelation: "email_campaigns";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "email_sends_recipient_lead_id_fkey";
+            columns: ["recipient_lead_id"];
+            isOneToOne: false;
+            referencedRelation: "leads";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "email_sends_template_id_fkey";
+            columns: ["template_id"];
+            isOneToOne: false;
+            referencedRelation: "email_templates";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      email_templates: {
+        Row: {
+          body_html: string;
+          category: string;
+          created_at: string;
+          id: string;
+          is_active: boolean;
+          key: string;
+          locale: string;
+          name: string;
+          subject: string;
+          updated_at: string;
+        };
+        Insert: {
+          body_html: string;
+          category: string;
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          key: string;
+          locale?: string;
+          name: string;
+          subject: string;
+          updated_at?: string;
+        };
+        Update: {
+          body_html?: string;
+          category?: string;
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          key?: string;
+          locale?: string;
+          name?: string;
+          subject?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       feature_flags: {
         Row: {
           created_at: string;
@@ -195,6 +358,51 @@ export type Database = {
           id?: string;
           key?: string;
           name?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      leads: {
+        Row: {
+          consented_at: string | null;
+          converted_user_id: string | null;
+          created_at: string;
+          email: string;
+          id: string;
+          locale: string | null;
+          marketing_consent: boolean;
+          name: string | null;
+          source: string;
+          status: string;
+          unsubscribe_token: string;
+          updated_at: string;
+        };
+        Insert: {
+          consented_at?: string | null;
+          converted_user_id?: string | null;
+          created_at?: string;
+          email: string;
+          id?: string;
+          locale?: string | null;
+          marketing_consent?: boolean;
+          name?: string | null;
+          source?: string;
+          status?: string;
+          unsubscribe_token?: string;
+          updated_at?: string;
+        };
+        Update: {
+          consented_at?: string | null;
+          converted_user_id?: string | null;
+          created_at?: string;
+          email?: string;
+          id?: string;
+          locale?: string | null;
+          marketing_consent?: boolean;
+          name?: string | null;
+          source?: string;
+          status?: string;
+          unsubscribe_token?: string;
           updated_at?: string;
         };
         Relationships: [];
@@ -342,7 +550,9 @@ export type Database = {
           bonus_credits_remaining: number;
           created_at: string;
           email: string | null;
+          email_unsubscribe_token: string;
           id: string;
+          marketing_opt_out: boolean;
           name: string | null;
           referral_code: string | null;
           referred_by_user_id: string | null;
@@ -355,7 +565,9 @@ export type Database = {
           bonus_credits_remaining?: number;
           created_at?: string;
           email?: string | null;
+          email_unsubscribe_token?: string;
           id: string;
+          marketing_opt_out?: boolean;
           name?: string | null;
           referral_code?: string | null;
           referred_by_user_id?: string | null;
@@ -368,7 +580,9 @@ export type Database = {
           bonus_credits_remaining?: number;
           created_at?: string;
           email?: string | null;
+          email_unsubscribe_token?: string;
           id?: string;
+          marketing_opt_out?: boolean;
           name?: string | null;
           referral_code?: string | null;
           referred_by_user_id?: string | null;
@@ -631,6 +845,66 @@ export type Database = {
       admin_dashboard_kpis: { Args: never; Returns: Json };
       admin_db_ping: { Args: never; Returns: Json };
       admin_find_user_id_by_email: { Args: { _email: string }; Returns: string };
+      admin_email_kpis: { Args: never; Returns: Json };
+      admin_list_email_campaigns: {
+        Args: { _limit?: number; _offset?: number; _status?: string };
+        Returns: {
+          audience: string;
+          created_at: string;
+          id: string;
+          name: string;
+          recipients_failed: number;
+          recipients_sent: number;
+          recipients_total: number;
+          scheduled_at: string | null;
+          sent_at: string | null;
+          status: string;
+          subject: string;
+          total_count: number;
+        }[];
+      };
+      admin_list_email_sends: {
+        Args: {
+          _campaign_id?: string;
+          _limit?: number;
+          _offset?: number;
+          _recipient_email?: string;
+          _recipient_user_id?: string;
+        };
+        Returns: {
+          campaign_id: string | null;
+          created_at: string;
+          error: string | null;
+          event: string | null;
+          id: string;
+          kind: string;
+          recipient_email: string;
+          recipient_lead_id: string | null;
+          recipient_user_id: string | null;
+          sent_at: string | null;
+          sent_by: string | null;
+          status: string;
+          subject: string;
+          template_id: string | null;
+          total_count: number;
+        }[];
+      };
+      admin_list_leads: {
+        Args: { _limit?: number; _offset?: number; _search?: string; _status?: string };
+        Returns: {
+          consented_at: string | null;
+          converted_user_id: string | null;
+          created_at: string;
+          email: string;
+          id: string;
+          locale: string | null;
+          marketing_consent: boolean;
+          name: string | null;
+          source: string;
+          status: string;
+          total_count: number;
+        }[];
+      };
       admin_list_referrals: {
         Args: { _limit?: number; _offset?: number; _search?: string; _status?: string };
         Returns: {
@@ -762,6 +1036,23 @@ export type Database = {
         Returns: number;
       };
       cancel_referral: { Args: { _referred_user_id: string }; Returns: Json };
+      capture_lead: {
+        Args: { _email: string; _locale?: string; _name?: string; _source?: string };
+        Returns: {
+          consented_at: string | null;
+          converted_user_id: string | null;
+          created_at: string;
+          email: string;
+          id: string;
+          locale: string | null;
+          marketing_consent: boolean;
+          name: string | null;
+          source: string;
+          status: string;
+          unsubscribe_token: string;
+          updated_at: string;
+        };
+      };
       check_rate_limit: {
         Args: { _key: string; _max_hits: number; _window_seconds: number };
         Returns: boolean;
@@ -788,10 +1079,12 @@ export type Database = {
         Args: { _key: string; _plan_slug?: string; _user_id?: string };
         Returns: boolean;
       };
+      link_lead_to_user: { Args: { _email: string; _user_id: string }; Returns: undefined };
       mark_pro_pricing_synced: {
         Args: { _applied_price: number; _user_id: string; _variant_id: string };
         Returns: undefined;
       };
+      process_unsubscribe: { Args: { _token: string }; Returns: string };
       recompute_referrer_pricing: { Args: { _referrer_id: string }; Returns: Json };
       refund_referral: { Args: { _new_status: string; _referred_user_id: string }; Returns: Json };
       register_referral: {

@@ -23,11 +23,15 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AdminAdminRouteImport } from './routes/_admin/admin'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as RCodeRouteImport } from './routes/r.$code'
+import { Route as UnsubscribeTokenRouteImport } from './routes/unsubscribe.$token'
 import { Route as AdminAdminIndexRouteImport } from './routes/_admin/admin.index'
 import { Route as AdminAdminAdministratorsRouteImport } from './routes/_admin/admin.administrators'
 import { Route as AdminAdminAnalyticsRouteImport } from './routes/_admin/admin.analytics'
 import { Route as AdminAdminAuditLogsRouteImport } from './routes/_admin/admin.audit-logs'
+import { Route as AdminAdminCampaignsRouteImport } from './routes/_admin/admin.campaigns'
+import { Route as AdminAdminEmailTemplatesRouteImport } from './routes/_admin/admin.email-templates'
 import { Route as AdminAdminFeaturesRouteImport } from './routes/_admin/admin.features'
+import { Route as AdminAdminLeadsRouteImport } from './routes/_admin/admin.leads'
 import { Route as AdminAdminPaymentsRouteImport } from './routes/_admin/admin.payments'
 import { Route as AdminAdminPlansRouteImport } from './routes/_admin/admin.plans'
 import { Route as AdminAdminReferralsRouteImport } from './routes/_admin/admin.referrals'
@@ -121,6 +125,11 @@ const RCodeRoute = RCodeRouteImport.update({
   path: '/r/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UnsubscribeTokenRoute = UnsubscribeTokenRouteImport.update({
+  id: '/unsubscribe/$token',
+  path: '/unsubscribe/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAdminIndexRoute = AdminAdminIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -142,9 +151,25 @@ const AdminAdminAuditLogsRoute = AdminAdminAuditLogsRouteImport.update({
   path: '/audit-logs',
   getParentRoute: () => AdminAdminRoute,
 } as any)
+const AdminAdminCampaignsRoute = AdminAdminCampaignsRouteImport.update({
+  id: '/campaigns',
+  path: '/campaigns',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminEmailTemplatesRoute =
+  AdminAdminEmailTemplatesRouteImport.update({
+    id: '/email-templates',
+    path: '/email-templates',
+    getParentRoute: () => AdminAdminRoute,
+  } as any)
 const AdminAdminFeaturesRoute = AdminAdminFeaturesRouteImport.update({
   id: '/features',
   path: '/features',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminLeadsRoute = AdminAdminLeadsRouteImport.update({
+  id: '/leads',
+  path: '/leads',
   getParentRoute: () => AdminAdminRoute,
 } as any)
 const AdminAdminPaymentsRoute = AdminAdminPaymentsRouteImport.update({
@@ -296,10 +321,14 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminAdminRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/r/$code': typeof RCodeRoute
+  '/unsubscribe/$token': typeof UnsubscribeTokenRoute
   '/admin/administrators': typeof AdminAdminAdministratorsRoute
   '/admin/analytics': typeof AdminAdminAnalyticsRoute
   '/admin/audit-logs': typeof AdminAdminAuditLogsRoute
+  '/admin/campaigns': typeof AdminAdminCampaignsRoute
+  '/admin/email-templates': typeof AdminAdminEmailTemplatesRoute
   '/admin/features': typeof AdminAdminFeaturesRoute
+  '/admin/leads': typeof AdminAdminLeadsRoute
   '/admin/payments': typeof AdminAdminPaymentsRoute
   '/admin/plans': typeof AdminAdminPlansRoute
   '/admin/referrals': typeof AdminAdminReferralsRoute
@@ -337,10 +366,14 @@ export interface FileRoutesByTo {
   '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
   '/r/$code': typeof RCodeRoute
+  '/unsubscribe/$token': typeof UnsubscribeTokenRoute
   '/admin/administrators': typeof AdminAdminAdministratorsRoute
   '/admin/analytics': typeof AdminAdminAnalyticsRoute
   '/admin/audit-logs': typeof AdminAdminAuditLogsRoute
+  '/admin/campaigns': typeof AdminAdminCampaignsRoute
+  '/admin/email-templates': typeof AdminAdminEmailTemplatesRoute
   '/admin/features': typeof AdminAdminFeaturesRoute
+  '/admin/leads': typeof AdminAdminLeadsRoute
   '/admin/payments': typeof AdminAdminPaymentsRoute
   '/admin/plans': typeof AdminAdminPlansRoute
   '/admin/referrals': typeof AdminAdminReferralsRoute
@@ -383,10 +416,14 @@ export interface FileRoutesById {
   '/_admin/admin': typeof AdminAdminRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/r/$code': typeof RCodeRoute
+  '/unsubscribe/$token': typeof UnsubscribeTokenRoute
   '/_admin/admin/administrators': typeof AdminAdminAdministratorsRoute
   '/_admin/admin/analytics': typeof AdminAdminAnalyticsRoute
   '/_admin/admin/audit-logs': typeof AdminAdminAuditLogsRoute
+  '/_admin/admin/campaigns': typeof AdminAdminCampaignsRoute
+  '/_admin/admin/email-templates': typeof AdminAdminEmailTemplatesRoute
   '/_admin/admin/features': typeof AdminAdminFeaturesRoute
+  '/_admin/admin/leads': typeof AdminAdminLeadsRoute
   '/_admin/admin/payments': typeof AdminAdminPaymentsRoute
   '/_admin/admin/plans': typeof AdminAdminPlansRoute
   '/_admin/admin/referrals': typeof AdminAdminReferralsRoute
@@ -428,10 +465,14 @@ export interface FileRouteTypes {
     | '/admin'
     | '/dashboard'
     | '/r/$code'
+    | '/unsubscribe/$token'
     | '/admin/administrators'
     | '/admin/analytics'
     | '/admin/audit-logs'
+    | '/admin/campaigns'
+    | '/admin/email-templates'
     | '/admin/features'
+    | '/admin/leads'
     | '/admin/payments'
     | '/admin/plans'
     | '/admin/referrals'
@@ -469,10 +510,14 @@ export interface FileRouteTypes {
     | '/status'
     | '/terms'
     | '/r/$code'
+    | '/unsubscribe/$token'
     | '/admin/administrators'
     | '/admin/analytics'
     | '/admin/audit-logs'
+    | '/admin/campaigns'
+    | '/admin/email-templates'
     | '/admin/features'
+    | '/admin/leads'
     | '/admin/payments'
     | '/admin/plans'
     | '/admin/referrals'
@@ -514,10 +559,14 @@ export interface FileRouteTypes {
     | '/_admin/admin'
     | '/_authenticated/dashboard'
     | '/r/$code'
+    | '/unsubscribe/$token'
     | '/_admin/admin/administrators'
     | '/_admin/admin/analytics'
     | '/_admin/admin/audit-logs'
+    | '/_admin/admin/campaigns'
+    | '/_admin/admin/email-templates'
     | '/_admin/admin/features'
+    | '/_admin/admin/leads'
     | '/_admin/admin/payments'
     | '/_admin/admin/plans'
     | '/_admin/admin/referrals'
@@ -558,6 +607,7 @@ export interface RootRouteChildren {
   StatusRoute: typeof StatusRoute
   TermsRoute: typeof TermsRoute
   RCodeRoute: typeof RCodeRoute
+  UnsubscribeTokenRoute: typeof UnsubscribeTokenRoute
   ApiPublicLemonSqueezyWebhookRoute: typeof ApiPublicLemonSqueezyWebhookRoute
 }
 
@@ -661,6 +711,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/unsubscribe/$token': {
+      id: '/unsubscribe/$token'
+      path: '/unsubscribe/$token'
+      fullPath: '/unsubscribe/$token'
+      preLoaderRoute: typeof UnsubscribeTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_admin/admin/': {
       id: '/_admin/admin/'
       path: '/'
@@ -689,11 +746,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminAuditLogsRouteImport
       parentRoute: typeof AdminAdminRoute
     }
+    '/_admin/admin/campaigns': {
+      id: '/_admin/admin/campaigns'
+      path: '/campaigns'
+      fullPath: '/admin/campaigns'
+      preLoaderRoute: typeof AdminAdminCampaignsRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/email-templates': {
+      id: '/_admin/admin/email-templates'
+      path: '/email-templates'
+      fullPath: '/admin/email-templates'
+      preLoaderRoute: typeof AdminAdminEmailTemplatesRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
     '/_admin/admin/features': {
       id: '/_admin/admin/features'
       path: '/features'
       fullPath: '/admin/features'
       preLoaderRoute: typeof AdminAdminFeaturesRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/leads': {
+      id: '/_admin/admin/leads'
+      path: '/leads'
+      fullPath: '/admin/leads'
+      preLoaderRoute: typeof AdminAdminLeadsRouteImport
       parentRoute: typeof AdminAdminRoute
     }
     '/_admin/admin/payments': {
@@ -883,7 +961,10 @@ interface AdminAdminRouteChildren {
   AdminAdminAdministratorsRoute: typeof AdminAdminAdministratorsRoute
   AdminAdminAnalyticsRoute: typeof AdminAdminAnalyticsRoute
   AdminAdminAuditLogsRoute: typeof AdminAdminAuditLogsRoute
+  AdminAdminCampaignsRoute: typeof AdminAdminCampaignsRoute
+  AdminAdminEmailTemplatesRoute: typeof AdminAdminEmailTemplatesRoute
   AdminAdminFeaturesRoute: typeof AdminAdminFeaturesRoute
+  AdminAdminLeadsRoute: typeof AdminAdminLeadsRoute
   AdminAdminPaymentsRoute: typeof AdminAdminPaymentsRoute
   AdminAdminPlansRoute: typeof AdminAdminPlansRoute
   AdminAdminReferralsRoute: typeof AdminAdminReferralsRoute
@@ -899,7 +980,10 @@ const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminAdministratorsRoute: AdminAdminAdministratorsRoute,
   AdminAdminAnalyticsRoute: AdminAdminAnalyticsRoute,
   AdminAdminAuditLogsRoute: AdminAdminAuditLogsRoute,
+  AdminAdminCampaignsRoute: AdminAdminCampaignsRoute,
+  AdminAdminEmailTemplatesRoute: AdminAdminEmailTemplatesRoute,
   AdminAdminFeaturesRoute: AdminAdminFeaturesRoute,
+  AdminAdminLeadsRoute: AdminAdminLeadsRoute,
   AdminAdminPaymentsRoute: AdminAdminPaymentsRoute,
   AdminAdminPlansRoute: AdminAdminPlansRoute,
   AdminAdminReferralsRoute: AdminAdminReferralsRoute,
@@ -992,6 +1076,7 @@ const rootRouteChildren: RootRouteChildren = {
   StatusRoute: StatusRoute,
   TermsRoute: TermsRoute,
   RCodeRoute: RCodeRoute,
+  UnsubscribeTokenRoute: UnsubscribeTokenRoute,
   ApiPublicLemonSqueezyWebhookRoute: ApiPublicLemonSqueezyWebhookRoute,
 }
 export const routeTree = rootRouteImport

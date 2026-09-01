@@ -141,12 +141,13 @@ function AdminSettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">Email</CardTitle>
-            <CardDescription>Provider email transazionale.</CardDescription>
+            <CardDescription>Provider email transazionale e marketing.</CardDescription>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">
-            Nessun provider email transazionale collegato: le notifiche vengono registrate nei log
-            del server e nel campanello admin, ma non inviate via email finché non viene integrato
-            un provider (es. Resend).
+            Corrispondenza, modelli e campagne sono gestibili da Admin → Marketing (Lead, Modelli
+            email, Campagne). Nessun provider è ancora collegato per l'invio reale: ogni email resta
+            comunque tracciata come "in coda" in attesa di un provider (Resend o altro) — vedi
+            src/lib/email/provider.server.ts, l'unico file da modificare per collegarlo.
           </CardContent>
         </Card>
       </div>
