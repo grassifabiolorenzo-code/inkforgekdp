@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteRouteImport } from './routes/_admin/route'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AdminMfaChallengeRouteImport } from './routes/admin-mfa-challenge'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as PricingRouteImport } from './routes/pricing'
@@ -27,6 +28,7 @@ import { Route as AdminAdminAuditLogsRouteImport } from './routes/_admin/admin.a
 import { Route as AdminAdminFeaturesRouteImport } from './routes/_admin/admin.features'
 import { Route as AdminAdminPaymentsRouteImport } from './routes/_admin/admin.payments'
 import { Route as AdminAdminPlansRouteImport } from './routes/_admin/admin.plans'
+import { Route as AdminAdminSecurityRouteImport } from './routes/_admin/admin.security'
 import { Route as AdminAdminSettingsRouteImport } from './routes/_admin/admin.settings'
 import { Route as AdminAdminSubscriptionsRouteImport } from './routes/_admin/admin.subscriptions'
 import { Route as AdminAdminSystemRouteImport } from './routes/_admin/admin.system'
@@ -58,6 +60,11 @@ const AdminRouteRoute = AdminRouteRouteImport.update({
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminMfaChallengeRoute = AdminMfaChallengeRouteImport.update({
+  id: '/admin-mfa-challenge',
+  path: '/admin-mfa-challenge',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -134,6 +141,11 @@ const AdminAdminPaymentsRoute = AdminAdminPaymentsRouteImport.update({
 const AdminAdminPlansRoute = AdminAdminPlansRouteImport.update({
   id: '/plans',
   path: '/plans',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminSecurityRoute = AdminAdminSecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
   getParentRoute: () => AdminAdminRoute,
 } as any)
 const AdminAdminSettingsRoute = AdminAdminSettingsRouteImport.update({
@@ -248,6 +260,7 @@ const ApiPublicLemonSqueezyWebhookRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin-mfa-challenge': typeof AdminMfaChallengeRoute
   '/auth': typeof AuthRoute
   '/faq': typeof FaqRoute
   '/pricing': typeof PricingRoute
@@ -262,6 +275,7 @@ export interface FileRoutesByFullPath {
   '/admin/features': typeof AdminAdminFeaturesRoute
   '/admin/payments': typeof AdminAdminPaymentsRoute
   '/admin/plans': typeof AdminAdminPlansRoute
+  '/admin/security': typeof AdminAdminSecurityRoute
   '/admin/settings': typeof AdminAdminSettingsRoute
   '/admin/subscriptions': typeof AdminAdminSubscriptionsRoute
   '/admin/system': typeof AdminAdminSystemRoute
@@ -285,6 +299,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin-mfa-challenge': typeof AdminMfaChallengeRoute
   '/auth': typeof AuthRoute
   '/faq': typeof FaqRoute
   '/pricing': typeof PricingRoute
@@ -297,6 +312,7 @@ export interface FileRoutesByTo {
   '/admin/features': typeof AdminAdminFeaturesRoute
   '/admin/payments': typeof AdminAdminPaymentsRoute
   '/admin/plans': typeof AdminAdminPlansRoute
+  '/admin/security': typeof AdminAdminSecurityRoute
   '/admin/settings': typeof AdminAdminSettingsRoute
   '/admin/subscriptions': typeof AdminAdminSubscriptionsRoute
   '/admin/system': typeof AdminAdminSystemRoute
@@ -323,6 +339,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_admin': typeof AdminRouteRouteWithChildren
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/admin-mfa-challenge': typeof AdminMfaChallengeRoute
   '/auth': typeof AuthRoute
   '/faq': typeof FaqRoute
   '/pricing': typeof PricingRoute
@@ -337,6 +354,7 @@ export interface FileRoutesById {
   '/_admin/admin/features': typeof AdminAdminFeaturesRoute
   '/_admin/admin/payments': typeof AdminAdminPaymentsRoute
   '/_admin/admin/plans': typeof AdminAdminPlansRoute
+  '/_admin/admin/security': typeof AdminAdminSecurityRoute
   '/_admin/admin/settings': typeof AdminAdminSettingsRoute
   '/_admin/admin/subscriptions': typeof AdminAdminSubscriptionsRoute
   '/_admin/admin/system': typeof AdminAdminSystemRoute
@@ -362,6 +380,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin-mfa-challenge'
     | '/auth'
     | '/faq'
     | '/pricing'
@@ -376,6 +395,7 @@ export interface FileRouteTypes {
     | '/admin/features'
     | '/admin/payments'
     | '/admin/plans'
+    | '/admin/security'
     | '/admin/settings'
     | '/admin/subscriptions'
     | '/admin/system'
@@ -399,6 +419,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin-mfa-challenge'
     | '/auth'
     | '/faq'
     | '/pricing'
@@ -411,6 +432,7 @@ export interface FileRouteTypes {
     | '/admin/features'
     | '/admin/payments'
     | '/admin/plans'
+    | '/admin/security'
     | '/admin/settings'
     | '/admin/subscriptions'
     | '/admin/system'
@@ -436,6 +458,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_admin'
     | '/_authenticated'
+    | '/admin-mfa-challenge'
     | '/auth'
     | '/faq'
     | '/pricing'
@@ -450,6 +473,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/features'
     | '/_admin/admin/payments'
     | '/_admin/admin/plans'
+    | '/_admin/admin/security'
     | '/_admin/admin/settings'
     | '/_admin/admin/subscriptions'
     | '/_admin/admin/system'
@@ -476,6 +500,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AdminMfaChallengeRoute: typeof AdminMfaChallengeRoute
   AuthRoute: typeof AuthRoute
   FaqRoute: typeof FaqRoute
   PricingRoute: typeof PricingRoute
@@ -506,6 +531,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-mfa-challenge': {
+      id: '/admin-mfa-challenge'
+      path: '/admin-mfa-challenge'
+      fullPath: '/admin-mfa-challenge'
+      preLoaderRoute: typeof AdminMfaChallengeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -611,6 +643,13 @@ declare module '@tanstack/react-router' {
       path: '/plans'
       fullPath: '/admin/plans'
       preLoaderRoute: typeof AdminAdminPlansRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/security': {
+      id: '/_admin/admin/security'
+      path: '/security'
+      fullPath: '/admin/security'
+      preLoaderRoute: typeof AdminAdminSecurityRouteImport
       parentRoute: typeof AdminAdminRoute
     }
     '/_admin/admin/settings': {
@@ -768,6 +807,7 @@ interface AdminAdminRouteChildren {
   AdminAdminFeaturesRoute: typeof AdminAdminFeaturesRoute
   AdminAdminPaymentsRoute: typeof AdminAdminPaymentsRoute
   AdminAdminPlansRoute: typeof AdminAdminPlansRoute
+  AdminAdminSecurityRoute: typeof AdminAdminSecurityRoute
   AdminAdminSettingsRoute: typeof AdminAdminSettingsRoute
   AdminAdminSubscriptionsRoute: typeof AdminAdminSubscriptionsRoute
   AdminAdminSystemRoute: typeof AdminAdminSystemRoute
@@ -782,6 +822,7 @@ const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminFeaturesRoute: AdminAdminFeaturesRoute,
   AdminAdminPaymentsRoute: AdminAdminPaymentsRoute,
   AdminAdminPlansRoute: AdminAdminPlansRoute,
+  AdminAdminSecurityRoute: AdminAdminSecurityRoute,
   AdminAdminSettingsRoute: AdminAdminSettingsRoute,
   AdminAdminSubscriptionsRoute: AdminAdminSubscriptionsRoute,
   AdminAdminSystemRoute: AdminAdminSystemRoute,
@@ -859,6 +900,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRouteRoute: AdminRouteRouteWithChildren,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AdminMfaChallengeRoute: AdminMfaChallengeRoute,
   AuthRoute: AuthRoute,
   FaqRoute: FaqRoute,
   PricingRoute: PricingRoute,

@@ -15,6 +15,7 @@ import {
   Search,
   Settings,
   Shield,
+  ShieldCheck,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -42,6 +43,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { signOut } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { ROLE_LABELS, can, type AdminResource, type AdminRole } from "@/lib/adminRbac";
 import { getMyAdminIdentity } from "@/lib/admin/dashboard.functions";
 import {
@@ -55,7 +57,8 @@ interface NavItem {
   to: string;
   label: string;
   icon: LucideIcon;
-  resource: AdminResource;
+  /** Se assente, la voce è sempre visibile (impostazioni personali, non un permesso legato a un ruolo). */
+  resource?: AdminResource;
 }
 
 const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
@@ -103,6 +106,7 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
     items: [
       { to: "/admin/settings", label: "Impostazioni", icon: Settings, resource: "settings" },
       { to: "/admin/system", label: "Stato sistema", icon: AlertTriangle, resource: "system" },
+      { to: "/admin/security", label: "Sicurezza", icon: ShieldCheck },
     ],
   },
 ];
@@ -130,7 +134,9 @@ function NavLinks({
   return (
     <nav className="flex flex-1 flex-col gap-6 overflow-y-auto px-3 py-4">
       {NAV_SECTIONS.map((section) => {
-        const items = section.items.filter((item) => !role || can(role, item.resource, "read"));
+        const items = section.items.filter(
+          (item) => !item.resource || !role || can(role, item.resource, "read"),
+        );
         if (items.length === 0) return null;
         return (
           <div key={section.title} className="space-y-1">
@@ -335,6 +341,32 @@ function GlobalSearch() {
   );
 }
 
+function MfaNudgeBanner({ pathname }: { pathname: string }) {
+  const { data: hasFactor, isLoading } = useQuery({
+    queryKey: ["admin-mfa-factors-check"],
+    queryFn: async () => {
+      const { data, error } = await supabase.auth.mfa.listFactors();
+      if (error) return true; // In dubbio non disturbare: il blocco reale è server-side su requireStepUpMfa.
+      return (data?.totp ?? []).some((f) => f.status === "verified");
+    },
+    staleTime: 60_000,
+  });
+
+  if (isLoading || hasFactor || pathname === "/admin/security") return null;
+
+  return (
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-400">
+      <span>
+        La verifica in due passaggi non è attiva sul tuo account. Alcune azioni (gestione
+        amministratori, eliminazione utenti) resteranno bloccate finché non la attivi.
+      </span>
+      <Link to="/admin/security" className="shrink-0 font-medium underline underline-offset-2">
+        Attiva ora
+      </Link>
+    </div>
+  );
+}
+
 export function AdminShell({
   title,
   description,
@@ -436,7 +468,10 @@ export function AdminShell({
           </div>
         </header>
 
-        <main className="flex-1 px-4 py-6 lg:px-8">{children}</main>
+        <main className="flex-1 px-4 py-6 lg:px-8">
+          <MfaNudgeBanner pathname={location.pathname} />
+          {children}
+        </main>
       </div>
     </div>
   );

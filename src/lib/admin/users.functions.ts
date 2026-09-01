@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import { requirePermission } from "@/lib/admin/adminMiddleware";
+import { requirePermission, requireStepUpMfa } from "@/lib/admin/adminMiddleware";
 
 /** Ban "permanente": Supabase Admin API non ha un valore letterale "per sempre", si usa una durata molto lunga. */
 const PERMANENT_BAN_DURATION = "876000h";
@@ -197,7 +197,7 @@ export const reactivateAdminUser = createServerFn({ method: "POST" })
  * conservare lo storico contabile e di sicurezza (user_id passa a NULL, ON DELETE SET NULL).
  */
 export const deleteAdminUser = createServerFn({ method: "POST" })
-  .middleware([requirePermission("users", "delete")])
+  .middleware([requireStepUpMfa("users", "delete")])
   .inputValidator((data: unknown) => userIdInput.parse(data))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

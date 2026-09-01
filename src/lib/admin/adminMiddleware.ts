@@ -73,3 +73,26 @@ export function requirePermission(resource: AdminResource, action: AdminAction) 
       return next({ context });
     });
 }
+
+/**
+ * Richiede una sessione aal2 (verifica in due passaggi completata), senza
+ * eccezioni. A differenza del guard client-side in `_admin/route.tsx` — che
+ * concede un periodo di grazia a chi non ha ancora attivato il 2FA — qui non
+ * c'è periodo di grazia: da usare solo per le azioni più pericolose e
+ * irreversibili (gestione di altri amministratori, eliminazione di un
+ * account utente), dove vale la pena bloccare anche il primissimo utilizzo
+ * finché il chiamante non ha attivato il 2FA su /admin/security.
+ */
+export function requireStepUpMfa(resource: AdminResource, action: AdminAction) {
+  return createMiddleware({ type: "function" })
+    .middleware([requirePermission(resource, action)])
+    .server(async ({ next, context }) => {
+      const aal = (context.claims as { aal?: string }).aal;
+      if (aal !== "aal2") {
+        throw new Error(
+          "FORBIDDEN: questa azione richiede la verifica in due passaggi (2FA) attiva. Attivala in Admin → Sicurezza.",
+        );
+      }
+      return next({ context });
+    });
+}

@@ -575,6 +575,8 @@ export type Database = {
         Args: { _key: string; _max_hits: number; _window_seconds: number };
         Returns: boolean;
       };
+      cleanup_old_admin_notifications: { Args: never; Returns: undefined };
+      cleanup_old_audit_logs: { Args: never; Returns: undefined };
       cleanup_rate_limit_hits: { Args: never; Returns: undefined };
       consume_credit: {
         Args: { _description?: string; _operation_id: string; _tool_id: string };

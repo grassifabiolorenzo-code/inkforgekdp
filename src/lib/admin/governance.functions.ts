@@ -1,13 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import { requirePermission } from "@/lib/admin/adminMiddleware";
+import { requirePermission, requireStepUpMfa } from "@/lib/admin/adminMiddleware";
 import { ADMIN_ROLES } from "@/lib/adminRbac";
 
 /* -------------------------------------------------------------------------- */
 /* AMMINISTRATORI — solo SUPER_ADMIN (vedi adminRbac.ts: "administrators" è   */
 /* concesso solo al ruolo super_admin). Protezioni anti privilege-escalation: */
 /* - un ADMIN non può nemmeno chiamare questi endpoint (permesso mancante);   */
+/* - le mutazioni richiedono sessione aal2 (2FA), senza periodo di grazia;    */
 /* - non si può degradare/sospendere l'ultimo super_admin rimasto;           */
 /* - l'email di bootstrap (SUPER_ADMIN_EMAIL) non può essere rimossa/degradata */
 /*   da altri super admin: resta sempre il proprietario del SaaS.            */
@@ -38,7 +39,7 @@ export const listAdministrators = createServerFn({ method: "GET" })
 const addAdminInput = z.object({ email: z.string().email(), role: z.enum(ADMIN_ROLES) });
 
 export const addAdministrator = createServerFn({ method: "POST" })
-  .middleware([requirePermission("administrators", "write")])
+  .middleware([requireStepUpMfa("administrators", "write")])
   .inputValidator((data: unknown) => addAdminInput.parse(data))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -114,7 +115,7 @@ async function assertNotBootstrapSuperAdmin(
 const updateAdminRoleInput = z.object({ userId: z.string().uuid(), role: z.enum(ADMIN_ROLES) });
 
 export const updateAdministratorRole = createServerFn({ method: "POST" })
-  .middleware([requirePermission("administrators", "write")])
+  .middleware([requireStepUpMfa("administrators", "write")])
   .inputValidator((data: unknown) => updateAdminRoleInput.parse(data))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -142,7 +143,7 @@ export const updateAdministratorRole = createServerFn({ method: "POST" })
   });
 
 export const suspendAdministrator = createServerFn({ method: "POST" })
-  .middleware([requirePermission("administrators", "write")])
+  .middleware([requireStepUpMfa("administrators", "write")])
   .inputValidator((data: unknown) => adminUserIdInput.parse(data))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -169,7 +170,7 @@ export const suspendAdministrator = createServerFn({ method: "POST" })
   });
 
 export const removeAdministrator = createServerFn({ method: "POST" })
-  .middleware([requirePermission("administrators", "delete")])
+  .middleware([requireStepUpMfa("administrators", "delete")])
   .inputValidator((data: unknown) => adminUserIdInput.parse(data))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
