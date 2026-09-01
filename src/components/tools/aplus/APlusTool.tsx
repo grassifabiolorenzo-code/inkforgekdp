@@ -17,6 +17,8 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import type { ToolRuntime } from "@/components/tools/ToolPageShell";
 import { newOperationId } from "@/hooks/useAccount";
+import { useBookProject } from "@/hooks/useBookProject";
+import { BookProjectPicker } from "@/components/tools/BookProjectPicker";
 
 import { AGES, NICHES } from "@/components/tools/aplus/constants";
 import { OutputLanguageSelect, useOutputLanguage } from "@/components/tools/OutputLanguageSelect";
@@ -49,6 +51,7 @@ import { DEFAULT_CREATIVITY, DEFAULT_TONE, type AiToneId } from "@/components/to
 const APLUS_OUTPUT_LOCALES = ["it", "en", "de", "fr", "es"] as const;
 
 export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
+  const bookProject = useBookProject();
   const [title, setTitle] = useState("");
   const [niche, setNiche] = useState<NicheId>("coloring");
   // La lingua dei contenuti A+ segue il selettore globale (5 mercati supportati).
@@ -512,6 +515,24 @@ export function APlusTool({ runtime }: { runtime: ToolRuntime }) {
               ))}
             </SelectContent>
           </Select>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label>Progetto libro (opzionale)</Label>
+          <p className="text-xs text-muted-foreground">
+            Riusa copertina/interno già caricati in un altro tool, o carica nuovi file qui sotto.
+            Assicurati che la copertina del progetto sia un PDF fronte+dorso+retro: A+ non può
+            ritagliare correttamente un'immagine singola.
+          </p>
+          <BookProjectPicker
+            bookProject={bookProject}
+            currentCoverFile={coverFile}
+            currentInteriorFile={interiorFile}
+            onFilesLoaded={({ cover, interior }) => {
+              setCoverFile(cover);
+              setInteriorFile(interior);
+            }}
+          />
         </div>
 
         <div className="space-y-1.5">

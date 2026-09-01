@@ -11,8 +11,10 @@ da `service_role` (già garantito da `pg_cron`, che gira come superuser).
 | `cleanup_old_audit_logs()` | Elimina `audit_logs` più vecchi di 1 anno | Giornaliera, notte |
 | `cleanup_old_admin_notifications()` | Elimina `admin_notifications` più vecchie di 90 giorni | Giornaliera, notte |
 | `cleanup_rate_limit_hits()` | Elimina le righe di `rate_limit_hits` scadute | Ogni ora |
+| `cleanup_expired_book_projects()` | Elimina i `book_projects` scaduti (6h da ultimo utilizzo) e i relativi file su Storage | Ogni ora |
 
-(Definite in `20260901050000_retention_cleanup.sql` e `20260901040000_rate_limiting.sql`.)
+(Definite in `20260901050000_retention_cleanup.sql`, `20260901040000_rate_limiting.sql` e
+`20260902000000_book_projects.sql`.)
 
 ## Come attivarle
 
@@ -38,11 +40,18 @@ da `service_role` (già garantito da `pg_cron`, che gira come superuser).
      '0 * * * *',
      $$ select public.cleanup_rate_limit_hits(); $$
    );
+
+   select cron.schedule(
+     'cleanup-book-projects-hourly',
+     '30 * * * *',
+     $$ select public.cleanup_expired_book_projects(); $$
+   );
    ```
 
-4. Verifica che siano attivi: `select * from cron.job;` deve mostrare le 3 righe con `active = true`.
+4. Verifica che siano attivi: `select * from cron.job;` deve mostrare le 4 righe con `active = true`.
 5. Per disattivare/rimuovere una schedulazione in futuro: `select cron.unschedule('cleanup-audit-logs-daily');` (idem per le altre).
 
 Finché questo passaggio non viene fatto, le funzioni esistono e funzionano se richiamate a mano,
-ma nessuno le richiama automaticamente: `audit_logs`, `admin_notifications` e `rate_limit_hits`
-continuano a crescere senza limite.
+ma nessuno le richiama automaticamente: `audit_logs`, `admin_notifications`, `rate_limit_hits` e
+`book_projects` continuano a crescere senza limite (per `book_projects` questo significa anche
+file orfani su Storage mai ripuliti).

@@ -113,6 +113,42 @@ export type Database = {
         };
         Relationships: [];
       };
+      book_projects: {
+        Row: {
+          cover_mime: string | null;
+          cover_path: string | null;
+          created_at: string;
+          expires_at: string;
+          id: string;
+          interior_path: string | null;
+          name: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          cover_mime?: string | null;
+          cover_path?: string | null;
+          created_at?: string;
+          expires_at?: string;
+          id?: string;
+          interior_path?: string | null;
+          name: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          cover_mime?: string | null;
+          cover_path?: string | null;
+          created_at?: string;
+          expires_at?: string;
+          id?: string;
+          interior_path?: string | null;
+          name?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       credit_transactions: {
         Row: {
           amount: number;
@@ -1057,6 +1093,7 @@ export type Database = {
         Args: { _key: string; _max_hits: number; _window_seconds: number };
         Returns: boolean;
       };
+      cleanup_expired_book_projects: { Args: never; Returns: undefined };
       cleanup_old_admin_notifications: { Args: never; Returns: undefined };
       cleanup_old_audit_logs: { Args: never; Returns: undefined };
       cleanup_rate_limit_hits: { Args: never; Returns: undefined };

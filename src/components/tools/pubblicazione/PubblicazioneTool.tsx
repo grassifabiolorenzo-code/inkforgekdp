@@ -15,6 +15,8 @@ import {
 import type { ToolRuntime } from "@/components/tools/ToolPageShell";
 import { OutputLanguageSelect, useOutputLanguage } from "@/components/tools/OutputLanguageSelect";
 import { newOperationId } from "@/hooks/useAccount";
+import { useBookProject } from "@/hooks/useBookProject";
+import { BookProjectPicker } from "@/components/tools/BookProjectPicker";
 
 import {
   type Audience,
@@ -59,6 +61,7 @@ const AUDIENCES: { id: Audience; label: string }[] = [
 
 export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
   const outputLocale = useOutputLanguage();
+  const bookProject = useBookProject();
   const [subject, setSubject] = useState("");
   const [bookType, setBookType] = useState<BookType>("coloring");
   const [audience, setAudience] = useState<Audience>("toddlers");
@@ -92,8 +95,7 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
     setAgeDetails(defaultAgeDetails(value));
   }
 
-  function handleCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0] ?? null;
+  function applyCoverFile(file: File | null) {
     setCoverFile(file);
     if (!file) {
       setCoverPreview(null);
@@ -104,8 +106,11 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
     reader.readAsDataURL(file);
   }
 
-  async function handleInteriorChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0] ?? null;
+  function handleCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
+    applyCoverFile(e.target.files?.[0] ?? null);
+  }
+
+  async function applyInteriorFile(file: File | null) {
     setInteriorFile(file);
     setInteriorAnalysis({ scanned: false, totalPages: 0, errorsFound: [] });
     if (!file) {
@@ -137,6 +142,10 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
     } finally {
       setAnalyzingInterior(false);
     }
+  }
+
+  async function handleInteriorChange(e: React.ChangeEvent<HTMLInputElement>) {
+    await applyInteriorFile(e.target.files?.[0] ?? null);
   }
 
   const chargeGuard = useRef(false);
@@ -338,6 +347,22 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
         <div className="space-y-1.5">
           <Label htmlFor="p-age">Sotto-target specifico</Label>
           <Input id="p-age" value={ageDetails} onChange={(e) => setAgeDetails(e.target.value)} />
+        </div>
+
+        <div className="space-y-1.5">
+          <Label>Progetto libro (opzionale)</Label>
+          <p className="text-xs text-muted-foreground">
+            Riusa copertina/interno già caricati in un altro tool, o carica nuovi file qui sotto.
+          </p>
+          <BookProjectPicker
+            bookProject={bookProject}
+            currentCoverFile={coverFile}
+            currentInteriorFile={interiorFile}
+            onFilesLoaded={({ cover, interior }) => {
+              applyCoverFile(cover);
+              void applyInteriorFile(interior);
+            }}
+          />
         </div>
 
         <div className="space-y-1.5">

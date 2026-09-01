@@ -9,8 +9,10 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import type { ToolRuntime } from "@/components/tools/ToolPageShell";
 import { newOperationId } from "@/hooks/useAccount";
+import { useBookProject } from "@/hooks/useBookProject";
 import { OutputLanguageSelect, useOutputLanguage } from "@/components/tools/OutputLanguageSelect";
 import { AiStyleControls } from "@/components/tools/ai/AiStyleControls";
+import { BookProjectPicker } from "@/components/tools/BookProjectPicker";
 import { DEFAULT_CREATIVITY, DEFAULT_TONE } from "@/components/tools/ai/aiStyle";
 import { generateBioCopy } from "@/lib/aiCopy.functions";
 import { extractCoverContent, extractPdfContent } from "@/components/tools/pdfContent";
@@ -30,6 +32,7 @@ import {
  */
 export function BioTool({ runtime }: { runtime: ToolRuntime }) {
   const outputLocale = useOutputLanguage();
+  const bookProject = useBookProject();
   const [input, setInput] = useState<Omit<BioInput, "tone">>({
     authorName: "",
     niche: "",
@@ -229,6 +232,22 @@ export function BioTool({ runtime }: { runtime: ToolRuntime }) {
             value={input.links}
             onChange={(e) => update({ links: e.target.value })}
             placeholder="Es. www.marcobianchi.it — @marcobianchi.autore"
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <Label>Progetto libro (opzionale)</Label>
+          <p className="text-xs text-muted-foreground">
+            Riusa copertina/interno già caricati in un altro tool, o carica nuovi file qui sotto.
+          </p>
+          <BookProjectPicker
+            bookProject={bookProject}
+            currentCoverFile={coverFile}
+            currentInteriorFile={interiorFile}
+            onFilesLoaded={({ cover, interior }) => {
+              setCoverFile(cover);
+              setInteriorFile(interior);
+            }}
           />
         </div>
 

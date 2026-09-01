@@ -2,6 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import {
   BarChart3,
   CreditCard,
+  FolderOpen,
   Gift,
   LayoutDashboard,
   LogOut,
@@ -40,6 +41,7 @@ const accountNav: NavItem[] = [
   { to: "/dashboard/subscription", labelKey: "dash.subscription", icon: CreditCard },
   { to: "/dashboard/referral", labelKey: "dash.referral", icon: Gift },
   { to: "/dashboard/profile", labelKey: "dash.profile", icon: User },
+  { to: "/dashboard/projects", labelKey: "dash.projects", icon: FolderOpen },
   { to: "/dashboard/settings", labelKey: "dash.settings", icon: Settings },
 ];
 

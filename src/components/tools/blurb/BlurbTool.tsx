@@ -16,8 +16,10 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import type { ToolRuntime } from "@/components/tools/ToolPageShell";
 import { newOperationId } from "@/hooks/useAccount";
+import { useBookProject } from "@/hooks/useBookProject";
 import { OutputLanguageSelect, useOutputLanguage } from "@/components/tools/OutputLanguageSelect";
 import { AiStyleControls } from "@/components/tools/ai/AiStyleControls";
+import { BookProjectPicker } from "@/components/tools/BookProjectPicker";
 import { DEFAULT_CREATIVITY, DEFAULT_TONE } from "@/components/tools/ai/aiStyle";
 import { generateBlurbCopy } from "@/lib/aiCopy.functions";
 import { extractCoverContent, extractPdfContent } from "@/components/tools/pdfContent";
@@ -38,6 +40,7 @@ import {
  */
 export function BlurbTool({ runtime }: { runtime: ToolRuntime }) {
   const outputLocale = useOutputLanguage();
+  const bookProject = useBookProject();
   const [input, setInput] = useState<Omit<BlurbInput, "tone">>({
     title: "",
     genre: "narrativa",
@@ -233,6 +236,22 @@ export function BlurbTool({ runtime }: { runtime: ToolRuntime }) {
             value={input.stakes}
             onChange={(e) => update({ stakes: e.target.value })}
             placeholder="Es. l'eredità di famiglia e la verità su suo padre"
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <Label>Progetto libro (opzionale)</Label>
+          <p className="text-xs text-muted-foreground">
+            Riusa copertina/interno già caricati in un altro tool, o carica nuovi file qui sotto.
+          </p>
+          <BookProjectPicker
+            bookProject={bookProject}
+            currentCoverFile={coverFile}
+            currentInteriorFile={interiorFile}
+            onFilesLoaded={({ cover, interior }) => {
+              setCoverFile(cover);
+              setInteriorFile(interior);
+            }}
           />
         </div>
 

@@ -23,6 +23,8 @@ import {
 } from "@/components/ui/select";
 import type { ToolRuntime } from "@/components/tools/ToolPageShell";
 import { newOperationId } from "@/hooks/useAccount";
+import { useBookProject } from "@/hooks/useBookProject";
+import { BookProjectPicker } from "@/components/tools/BookProjectPicker";
 
 import {
   DEFAULT_FILLER_COLOR,
@@ -60,6 +62,7 @@ const nextPageId = () => `page-${Date.now().toString(36)}-${(pageUid += 1)}`;
  * unico PDF interno pronto per la stampa. 1 credito per ogni PDF generato con successo.
  */
 export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
+  const bookProject = useBookProject();
   const [pages, setPages] = useState<InteriorPage[]>([]);
   const [trimSizeId, setTrimSizeId] = useState<TrimSizeId>("8.5x11");
   const [margins, setMargins] = useState<PageMargins>(DEFAULT_MARGINS);
@@ -618,6 +621,27 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
             >
               <Download className="mr-2 size-4" /> Scarica di nuovo il PDF generato
             </Button>
+          </div>
+        )}
+
+        {generatedPdf && (
+          <div className="space-y-1.5">
+            <Label>Salva come interno di un progetto libro (opzionale)</Label>
+            <p className="text-xs text-muted-foreground">
+              Rende questo PDF disponibile agli altri tool (Pubblicazione, A+, Blurb, Bio, Promo)
+              senza doverlo ricaricare.
+            </p>
+            <BookProjectPicker
+              bookProject={bookProject}
+              currentCoverFile={null}
+              currentInteriorFile={
+                new File([generatedPdf.blob], generatedPdf.filename, { type: "application/pdf" })
+              }
+              onFilesLoaded={() => {
+                // Qui il picker serve solo a scegliere/creare il progetto di destinazione:
+                // gli eventuali file già presenti nel progetto selezionato non servono a Interni.
+              }}
+            />
           </div>
         )}
       </div>
