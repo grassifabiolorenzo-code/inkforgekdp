@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { SiteFooter } from "@/components/landing/SiteFooter";
 import { SiteNav } from "@/components/landing/SiteNav";
+import { canonicalUrl } from "@/config/site";
 
 const title = "Privacy Policy — InkForgeKdp";
 const description =
@@ -15,10 +16,12 @@ export const Route = createFileRoute("/privacy")({
       { property: "og:title", content: title },
       { property: "og:description", content: description },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: canonicalUrl("/privacy") },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:image", content: "/brand/logo.png" },
       { name: "twitter:image", content: "/brand/logo.png" },
     ],
+    links: [{ rel: "canonical", href: canonicalUrl("/privacy") }],
   }),
   component: PrivacyPage,
 });

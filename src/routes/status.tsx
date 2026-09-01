@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/landing/SiteFooter";
 import { SiteNav } from "@/components/landing/SiteNav";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { canonicalUrl } from "@/config/site";
 import { getPublicStatus } from "@/lib/status.functions";
 
 const title = "Stato del sistema — InkForgeKdp";
@@ -21,10 +22,12 @@ export const Route = createFileRoute("/status")({
       { property: "og:title", content: title },
       { property: "og:description", content: description },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: canonicalUrl("/status") },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:image", content: "/brand/logo.png" },
       { name: "twitter:image", content: "/brand/logo.png" },
     ],
+    links: [{ rel: "canonical", href: canonicalUrl("/status") }],
   }),
   component: StatusPage,
 });

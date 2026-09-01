@@ -5,6 +5,8 @@ import { SiteFooter } from "@/components/landing/SiteFooter";
 import { SiteNav } from "@/components/landing/SiteNav";
 import { ComparisonTable } from "@/components/pricing/ComparisonTable";
 import { PricingSection } from "@/components/pricing/PricingSection";
+import { canonicalUrl } from "@/config/site";
+import { softwareApplicationSchema } from "@/lib/structuredData";
 
 const title = "Prezzi e piani — InkForgeKdp";
 const description =
@@ -18,9 +20,14 @@ export const Route = createFileRoute("/pricing")({
       { property: "og:title", content: title },
       { property: "og:description", content: description },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: canonicalUrl("/pricing") },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:image", content: "/brand/logo.png" },
       { name: "twitter:image", content: "/brand/logo.png" },
+    ],
+    links: [{ rel: "canonical", href: canonicalUrl("/pricing") }],
+    scripts: [
+      { type: "application/ld+json", children: JSON.stringify(softwareApplicationSchema()) },
     ],
   }),
   component: PricingPage,

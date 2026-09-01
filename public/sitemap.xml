@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   Sostituisci https://app.inkforgekdp.com con il dominio reale non appena
-  confermato (vedi PUBLIC_APP_URL in .env.example) — questo è lo stesso
-  dominio d'esempio usato lì. Solo le pagine pubbliche indicizzabili: la
+  confermato — stesso placeholder usato in src/config/site.ts (SITE_URL, da
+  cui derivano canonical/og:url/dati strutturati) e nell'esempio di
+  PUBLIC_APP_URL in .env.example. Solo le pagine pubbliche indicizzabili: la
   dashboard, l'admin e /auth restano escluse di proposito.
 -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
