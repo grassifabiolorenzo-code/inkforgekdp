@@ -2,6 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import {
   BarChart3,
   CreditCard,
+  Gift,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -37,6 +38,7 @@ const mainNav: NavItem[] = [
 const accountNav: NavItem[] = [
   { to: "/dashboard/usage", labelKey: "dash.usage", icon: BarChart3 },
   { to: "/dashboard/subscription", labelKey: "dash.subscription", icon: CreditCard },
+  { to: "/dashboard/referral", labelKey: "dash.referral", icon: Gift },
   { to: "/dashboard/profile", labelKey: "dash.profile", icon: User },
   { to: "/dashboard/settings", labelKey: "dash.settings", icon: Settings },
 ];
@@ -167,9 +169,7 @@ export function DashboardShell({
 
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-base font-semibold">{title}</h1>
-            {description && (
-              <p className="truncate text-xs text-muted-foreground">{description}</p>
-            )}
+            {description && <p className="truncate text-xs text-muted-foreground">{description}</p>}
           </div>
           <div className={cn("flex items-center gap-2")}>
             {actions}

@@ -7,6 +7,7 @@ import {
   ClipboardList,
   CreditCard,
   Flag,
+  Gift,
   LayoutDashboard,
   LineChart,
   LogOut,
@@ -80,6 +81,7 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
         resource: "subscriptions",
       },
       { to: "/admin/payments", label: "Pagamenti", icon: CreditCard, resource: "payments" },
+      { to: "/admin/referrals", label: "Referral", icon: Gift, resource: "referrals" },
     ],
   },
   {

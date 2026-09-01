@@ -48,6 +48,19 @@ describe("adminRbac.can", () => {
       expect(can(role, "users", "delete")).toBe(role === "super_admin");
     }
   });
+
+  it("ogni ruolo admin può almeno leggere i referral (visibilità minima sul programma)", () => {
+    for (const role of ADMIN_ROLES) {
+      expect(can(role, "referrals", "read")).toBe(true);
+    }
+  });
+
+  it("solo admin e super_admin possono agire sui referral (sospendere, segnare chargeback)", () => {
+    expect(can("viewer", "referrals", "write")).toBe(false);
+    expect(can("support", "referrals", "write")).toBe(false);
+    expect(can("admin", "referrals", "write")).toBe(true);
+    expect(can("super_admin", "referrals", "write")).toBe(true);
+  });
 });
 
 describe("adminRbac.canAssignRole", () => {

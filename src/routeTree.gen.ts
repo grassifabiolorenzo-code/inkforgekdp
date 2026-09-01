@@ -22,6 +22,7 @@ import { Route as StatusRouteImport } from './routes/status'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AdminAdminRouteImport } from './routes/_admin/admin'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as RCodeRouteImport } from './routes/r.$code'
 import { Route as AdminAdminIndexRouteImport } from './routes/_admin/admin.index'
 import { Route as AdminAdminAdministratorsRouteImport } from './routes/_admin/admin.administrators'
 import { Route as AdminAdminAnalyticsRouteImport } from './routes/_admin/admin.analytics'
@@ -29,6 +30,7 @@ import { Route as AdminAdminAuditLogsRouteImport } from './routes/_admin/admin.a
 import { Route as AdminAdminFeaturesRouteImport } from './routes/_admin/admin.features'
 import { Route as AdminAdminPaymentsRouteImport } from './routes/_admin/admin.payments'
 import { Route as AdminAdminPlansRouteImport } from './routes/_admin/admin.plans'
+import { Route as AdminAdminReferralsRouteImport } from './routes/_admin/admin.referrals'
 import { Route as AdminAdminSecurityRouteImport } from './routes/_admin/admin.security'
 import { Route as AdminAdminSettingsRouteImport } from './routes/_admin/admin.settings'
 import { Route as AdminAdminSubscriptionsRouteImport } from './routes/_admin/admin.subscriptions'
@@ -36,6 +38,7 @@ import { Route as AdminAdminSystemRouteImport } from './routes/_admin/admin.syst
 import { Route as AdminAdminUsersRouteImport } from './routes/_admin/admin.users'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
 import { Route as AuthenticatedDashboardProfileRouteImport } from './routes/_authenticated/dashboard.profile'
+import { Route as AuthenticatedDashboardReferralRouteImport } from './routes/_authenticated/dashboard.referral'
 import { Route as AuthenticatedDashboardSettingsRouteImport } from './routes/_authenticated/dashboard.settings'
 import { Route as AuthenticatedDashboardSubscriptionRouteImport } from './routes/_authenticated/dashboard.subscription'
 import { Route as AuthenticatedDashboardTool1RouteImport } from './routes/_authenticated/dashboard.tool-1'
@@ -113,6 +116,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const RCodeRoute = RCodeRouteImport.update({
+  id: '/r/$code',
+  path: '/r/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAdminIndexRoute = AdminAdminIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -147,6 +155,11 @@ const AdminAdminPaymentsRoute = AdminAdminPaymentsRouteImport.update({
 const AdminAdminPlansRoute = AdminAdminPlansRouteImport.update({
   id: '/plans',
   path: '/plans',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminReferralsRoute = AdminAdminReferralsRouteImport.update({
+  id: '/referrals',
+  path: '/referrals',
   getParentRoute: () => AdminAdminRoute,
 } as any)
 const AdminAdminSecurityRoute = AdminAdminSecurityRouteImport.update({
@@ -184,6 +197,12 @@ const AuthenticatedDashboardProfileRoute =
   AuthenticatedDashboardProfileRouteImport.update({
     id: '/profile',
     path: '/profile',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const AuthenticatedDashboardReferralRoute =
+  AuthenticatedDashboardReferralRouteImport.update({
+    id: '/referral',
+    path: '/referral',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
 const AuthenticatedDashboardSettingsRoute =
@@ -276,18 +295,21 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/admin': typeof AdminAdminRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/r/$code': typeof RCodeRoute
   '/admin/administrators': typeof AdminAdminAdministratorsRoute
   '/admin/analytics': typeof AdminAdminAnalyticsRoute
   '/admin/audit-logs': typeof AdminAdminAuditLogsRoute
   '/admin/features': typeof AdminAdminFeaturesRoute
   '/admin/payments': typeof AdminAdminPaymentsRoute
   '/admin/plans': typeof AdminAdminPlansRoute
+  '/admin/referrals': typeof AdminAdminReferralsRoute
   '/admin/security': typeof AdminAdminSecurityRoute
   '/admin/settings': typeof AdminAdminSettingsRoute
   '/admin/subscriptions': typeof AdminAdminSubscriptionsRoute
   '/admin/system': typeof AdminAdminSystemRoute
   '/admin/users': typeof AdminAdminUsersRouteWithChildren
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
+  '/dashboard/referral': typeof AuthenticatedDashboardReferralRoute
   '/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
   '/dashboard/subscription': typeof AuthenticatedDashboardSubscriptionRoute
   '/dashboard/tool-1': typeof AuthenticatedDashboardTool1Route
@@ -314,18 +336,21 @@ export interface FileRoutesByTo {
   '/prova': typeof ProvaRoute
   '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
+  '/r/$code': typeof RCodeRoute
   '/admin/administrators': typeof AdminAdminAdministratorsRoute
   '/admin/analytics': typeof AdminAdminAnalyticsRoute
   '/admin/audit-logs': typeof AdminAdminAuditLogsRoute
   '/admin/features': typeof AdminAdminFeaturesRoute
   '/admin/payments': typeof AdminAdminPaymentsRoute
   '/admin/plans': typeof AdminAdminPlansRoute
+  '/admin/referrals': typeof AdminAdminReferralsRoute
   '/admin/security': typeof AdminAdminSecurityRoute
   '/admin/settings': typeof AdminAdminSettingsRoute
   '/admin/subscriptions': typeof AdminAdminSubscriptionsRoute
   '/admin/system': typeof AdminAdminSystemRoute
   '/admin/users': typeof AdminAdminUsersRouteWithChildren
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
+  '/dashboard/referral': typeof AuthenticatedDashboardReferralRoute
   '/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
   '/dashboard/subscription': typeof AuthenticatedDashboardSubscriptionRoute
   '/dashboard/tool-1': typeof AuthenticatedDashboardTool1Route
@@ -357,18 +382,21 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/_admin/admin': typeof AdminAdminRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/r/$code': typeof RCodeRoute
   '/_admin/admin/administrators': typeof AdminAdminAdministratorsRoute
   '/_admin/admin/analytics': typeof AdminAdminAnalyticsRoute
   '/_admin/admin/audit-logs': typeof AdminAdminAuditLogsRoute
   '/_admin/admin/features': typeof AdminAdminFeaturesRoute
   '/_admin/admin/payments': typeof AdminAdminPaymentsRoute
   '/_admin/admin/plans': typeof AdminAdminPlansRoute
+  '/_admin/admin/referrals': typeof AdminAdminReferralsRoute
   '/_admin/admin/security': typeof AdminAdminSecurityRoute
   '/_admin/admin/settings': typeof AdminAdminSettingsRoute
   '/_admin/admin/subscriptions': typeof AdminAdminSubscriptionsRoute
   '/_admin/admin/system': typeof AdminAdminSystemRoute
   '/_admin/admin/users': typeof AdminAdminUsersRouteWithChildren
   '/_authenticated/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
+  '/_authenticated/dashboard/referral': typeof AuthenticatedDashboardReferralRoute
   '/_authenticated/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
   '/_authenticated/dashboard/subscription': typeof AuthenticatedDashboardSubscriptionRoute
   '/_authenticated/dashboard/tool-1': typeof AuthenticatedDashboardTool1Route
@@ -399,18 +427,21 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin'
     | '/dashboard'
+    | '/r/$code'
     | '/admin/administrators'
     | '/admin/analytics'
     | '/admin/audit-logs'
     | '/admin/features'
     | '/admin/payments'
     | '/admin/plans'
+    | '/admin/referrals'
     | '/admin/security'
     | '/admin/settings'
     | '/admin/subscriptions'
     | '/admin/system'
     | '/admin/users'
     | '/dashboard/profile'
+    | '/dashboard/referral'
     | '/dashboard/settings'
     | '/dashboard/subscription'
     | '/dashboard/tool-1'
@@ -437,18 +468,21 @@ export interface FileRouteTypes {
     | '/prova'
     | '/status'
     | '/terms'
+    | '/r/$code'
     | '/admin/administrators'
     | '/admin/analytics'
     | '/admin/audit-logs'
     | '/admin/features'
     | '/admin/payments'
     | '/admin/plans'
+    | '/admin/referrals'
     | '/admin/security'
     | '/admin/settings'
     | '/admin/subscriptions'
     | '/admin/system'
     | '/admin/users'
     | '/dashboard/profile'
+    | '/dashboard/referral'
     | '/dashboard/settings'
     | '/dashboard/subscription'
     | '/dashboard/tool-1'
@@ -479,18 +513,21 @@ export interface FileRouteTypes {
     | '/terms'
     | '/_admin/admin'
     | '/_authenticated/dashboard'
+    | '/r/$code'
     | '/_admin/admin/administrators'
     | '/_admin/admin/analytics'
     | '/_admin/admin/audit-logs'
     | '/_admin/admin/features'
     | '/_admin/admin/payments'
     | '/_admin/admin/plans'
+    | '/_admin/admin/referrals'
     | '/_admin/admin/security'
     | '/_admin/admin/settings'
     | '/_admin/admin/subscriptions'
     | '/_admin/admin/system'
     | '/_admin/admin/users'
     | '/_authenticated/dashboard/profile'
+    | '/_authenticated/dashboard/referral'
     | '/_authenticated/dashboard/settings'
     | '/_authenticated/dashboard/subscription'
     | '/_authenticated/dashboard/tool-1'
@@ -520,6 +557,7 @@ export interface RootRouteChildren {
   ProvaRoute: typeof ProvaRoute
   StatusRoute: typeof StatusRoute
   TermsRoute: typeof TermsRoute
+  RCodeRoute: typeof RCodeRoute
   ApiPublicLemonSqueezyWebhookRoute: typeof ApiPublicLemonSqueezyWebhookRoute
 }
 
@@ -616,6 +654,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/r/$code': {
+      id: '/r/$code'
+      path: '/r/$code'
+      fullPath: '/r/$code'
+      preLoaderRoute: typeof RCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_admin/admin/': {
       id: '/_admin/admin/'
       path: '/'
@@ -665,6 +710,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminPlansRouteImport
       parentRoute: typeof AdminAdminRoute
     }
+    '/_admin/admin/referrals': {
+      id: '/_admin/admin/referrals'
+      path: '/referrals'
+      fullPath: '/admin/referrals'
+      preLoaderRoute: typeof AdminAdminReferralsRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
     '/_admin/admin/security': {
       id: '/_admin/admin/security'
       path: '/security'
@@ -712,6 +764,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/dashboard/profile'
       preLoaderRoute: typeof AuthenticatedDashboardProfileRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_authenticated/dashboard/referral': {
+      id: '/_authenticated/dashboard/referral'
+      path: '/referral'
+      fullPath: '/dashboard/referral'
+      preLoaderRoute: typeof AuthenticatedDashboardReferralRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
     '/_authenticated/dashboard/settings': {
@@ -827,6 +886,7 @@ interface AdminAdminRouteChildren {
   AdminAdminFeaturesRoute: typeof AdminAdminFeaturesRoute
   AdminAdminPaymentsRoute: typeof AdminAdminPaymentsRoute
   AdminAdminPlansRoute: typeof AdminAdminPlansRoute
+  AdminAdminReferralsRoute: typeof AdminAdminReferralsRoute
   AdminAdminSecurityRoute: typeof AdminAdminSecurityRoute
   AdminAdminSettingsRoute: typeof AdminAdminSettingsRoute
   AdminAdminSubscriptionsRoute: typeof AdminAdminSubscriptionsRoute
@@ -842,6 +902,7 @@ const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminFeaturesRoute: AdminAdminFeaturesRoute,
   AdminAdminPaymentsRoute: AdminAdminPaymentsRoute,
   AdminAdminPlansRoute: AdminAdminPlansRoute,
+  AdminAdminReferralsRoute: AdminAdminReferralsRoute,
   AdminAdminSecurityRoute: AdminAdminSecurityRoute,
   AdminAdminSettingsRoute: AdminAdminSettingsRoute,
   AdminAdminSubscriptionsRoute: AdminAdminSubscriptionsRoute,
@@ -868,6 +929,7 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
 
 interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardProfileRoute: typeof AuthenticatedDashboardProfileRoute
+  AuthenticatedDashboardReferralRoute: typeof AuthenticatedDashboardReferralRoute
   AuthenticatedDashboardSettingsRoute: typeof AuthenticatedDashboardSettingsRoute
   AuthenticatedDashboardSubscriptionRoute: typeof AuthenticatedDashboardSubscriptionRoute
   AuthenticatedDashboardTool1Route: typeof AuthenticatedDashboardTool1Route
@@ -885,6 +947,7 @@ interface AuthenticatedDashboardRouteChildren {
 const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
   {
     AuthenticatedDashboardProfileRoute: AuthenticatedDashboardProfileRoute,
+    AuthenticatedDashboardReferralRoute: AuthenticatedDashboardReferralRoute,
     AuthenticatedDashboardSettingsRoute: AuthenticatedDashboardSettingsRoute,
     AuthenticatedDashboardSubscriptionRoute:
       AuthenticatedDashboardSubscriptionRoute,
@@ -928,6 +991,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProvaRoute: ProvaRoute,
   StatusRoute: StatusRoute,
   TermsRoute: TermsRoute,
+  RCodeRoute: RCodeRoute,
   ApiPublicLemonSqueezyWebhookRoute: ApiPublicLemonSqueezyWebhookRoute,
 }
 export const routeTree = rootRouteImport

@@ -46,12 +46,27 @@ export const createCheckout = createServerFn({ method: "POST" })
     try {
       await enforceRateLimit(`checkout:${context.userId}`, BILLING_RATE_LIMIT);
 
+      // Sconto 30% primo mese per chi arriva da referral: solo finché il referral risulta ancora
+      // REGISTERED (mai pagato prima) — dopo la prima conversione lo stato passa ad ACTIVE e lo
+      // sconto non si applica più, anche a un eventuale nuovo checkout futuro.
+      let discountCode: string | undefined;
+      const { data: referral } = await context.supabase
+        .from("referrals")
+        .select("status")
+        .eq("referred_user_id", context.userId)
+        .maybeSingle();
+      if (referral?.status === "REGISTERED") {
+        const { getReferralDiscountCode } = await import("./lemon-squeezy.server");
+        discountCode = getReferralDiscountCode() ?? undefined;
+      }
+
       const url = await createCheckoutUrl({
         planSlug: data.planSlug,
         email: claims.email ?? null,
         name: claims.user_metadata?.name ?? null,
         userId: context.userId,
         redirectUrl: data.redirectUrl,
+        ...(discountCode ? { discountCode } : {}),
       });
 
       if (!url) {

@@ -59,9 +59,18 @@ export interface CreditState {
   subscription_id?: string | null;
 }
 
+const accountStateInput = z.object({
+  /** Codice referral catturato al primo arrivo (vedi /r/$code): passato solo
+   * finché il profilo non esiste ancora, associato UNA VOLTA sola alla creazione
+   * del profilo — non c'è altro punto di ingresso per "aggiungere" un referral
+   * dopo la registrazione. */
+  referralCode: z.string().trim().max(32).optional(),
+});
+
 export const getAccountState = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((data: unknown) => accountStateInput.parse(data ?? {}))
+  .handler(async ({ data, context }) => {
     const { supabase, userId, claims } = context;
 
     // Il profilo viene creato al primo accesso (nessun trigger su auth).
@@ -87,6 +96,16 @@ export const getAccountState = createServerFn({ method: "GET" })
         .select("*")
         .maybeSingle();
       ensured = created ?? null;
+
+      if (ensured && data.referralCode) {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { error: referralError } = await supabaseAdmin.rpc("register_referral", {
+          _referred_user_id: userId,
+          _referral_code: data.referralCode,
+        });
+        if (referralError)
+          console.error("[referral] register_referral fallito", referralError.message);
+      }
 
       if (ensured) {
         const { dispatchNotification } = await import("@/services/notifications.server");

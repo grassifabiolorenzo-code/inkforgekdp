@@ -300,6 +300,36 @@ export type Database = {
         };
         Relationships: [];
       };
+      pro_referral_pricing: {
+        Row: {
+          active_direct_referrals: number;
+          applied_lemon_squeezy_variant_id: string | null;
+          applied_price: number | null;
+          effective_price: number;
+          pending_sync: boolean;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          active_direct_referrals?: number;
+          applied_lemon_squeezy_variant_id?: string | null;
+          applied_price?: number | null;
+          effective_price?: number;
+          pending_sync?: boolean;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          active_direct_referrals?: number;
+          applied_lemon_squeezy_variant_id?: string | null;
+          applied_price?: number | null;
+          effective_price?: number;
+          pending_sync?: boolean;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           avatar: string | null;
@@ -308,6 +338,8 @@ export type Database = {
           email: string | null;
           id: string;
           name: string | null;
+          referral_code: string | null;
+          referred_by_user_id: string | null;
           starter_bonus_granted: boolean;
           starter_bonus_used: boolean;
           updated_at: string;
@@ -319,6 +351,8 @@ export type Database = {
           email?: string | null;
           id: string;
           name?: string | null;
+          referral_code?: string | null;
+          referred_by_user_id?: string | null;
           starter_bonus_granted?: boolean;
           starter_bonus_used?: boolean;
           updated_at?: string;
@@ -330,6 +364,8 @@ export type Database = {
           email?: string | null;
           id?: string;
           name?: string | null;
+          referral_code?: string | null;
+          referred_by_user_id?: string | null;
           starter_bonus_granted?: boolean;
           starter_bonus_used?: boolean;
           updated_at?: string;
@@ -341,6 +377,110 @@ export type Database = {
         Insert: { hits?: number; key: string; window_start: string };
         Update: { hits?: number; key?: string; window_start?: string };
         Relationships: [];
+      };
+      referral_config: {
+        Row: { key: string; updated_at: string; value: Json };
+        Insert: { key: string; updated_at?: string; value: Json };
+        Update: { key?: string; updated_at?: string; value?: Json };
+        Relationships: [];
+      };
+      referral_cycles: {
+        Row: {
+          bonus_credits_granted: boolean;
+          completed: boolean;
+          completed_at: string | null;
+          created_at: string;
+          cycle_number: number;
+          id: string;
+          referral_count: number;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          bonus_credits_granted?: boolean;
+          completed?: boolean;
+          completed_at?: string | null;
+          created_at?: string;
+          cycle_number: number;
+          id?: string;
+          referral_count?: number;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          bonus_credits_granted?: boolean;
+          completed?: boolean;
+          completed_at?: string | null;
+          created_at?: string;
+          cycle_number?: number;
+          id?: string;
+          referral_count?: number;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      referral_level_rewards: {
+        Row: { credits: number; level: number };
+        Insert: { credits: number; level: number };
+        Update: { credits?: number; level?: number };
+        Relationships: [];
+      };
+      referrals: {
+        Row: {
+          activated_at: string | null;
+          cancelled_at: string | null;
+          created_at: string;
+          cycle_number: number | null;
+          id: string;
+          position_in_cycle: number | null;
+          referred_user_id: string;
+          referrer_id: string;
+          reward_credits: number;
+          reward_granted_at: string | null;
+          status: string;
+          subscription_id: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          activated_at?: string | null;
+          cancelled_at?: string | null;
+          created_at?: string;
+          cycle_number?: number | null;
+          id?: string;
+          position_in_cycle?: number | null;
+          referred_user_id: string;
+          referrer_id: string;
+          reward_credits?: number;
+          reward_granted_at?: string | null;
+          status?: string;
+          subscription_id?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          activated_at?: string | null;
+          cancelled_at?: string | null;
+          created_at?: string;
+          cycle_number?: number | null;
+          id?: string;
+          position_in_cycle?: number | null;
+          referred_user_id?: string;
+          referrer_id?: string;
+          reward_credits?: number;
+          reward_granted_at?: string | null;
+          status?: string;
+          subscription_id?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "referrals_subscription_id_fkey";
+            columns: ["subscription_id"];
+            isOneToOne: false;
+            referencedRelation: "subscriptions";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       subscriptions: {
         Row: {
@@ -465,8 +605,19 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      activate_referral: {
+        Args: { _referred_user_id: string; _subscription_id?: string };
+        Returns: Json;
+      };
       add_purchased_credits: {
-        Args: { _amount: number; _description?: string; _operation_id: string; _user_id: string };
+        Args: {
+          _amount: number;
+          _description?: string;
+          _operation_id: string;
+          _source?: string;
+          _tool_id?: string;
+          _user_id: string;
+        };
         Returns: Json;
       };
       admin_active_users_counts: { Args: never; Returns: Json };
@@ -474,6 +625,34 @@ export type Database = {
       admin_dashboard_kpis: { Args: never; Returns: Json };
       admin_db_ping: { Args: never; Returns: Json };
       admin_find_user_id_by_email: { Args: { _email: string }; Returns: string };
+      admin_list_referrals: {
+        Args: { _limit?: number; _offset?: number; _search?: string; _status?: string };
+        Returns: {
+          activated_at: string | null;
+          cancelled_at: string | null;
+          created_at: string;
+          cycle_number: number | null;
+          id: string;
+          position_in_cycle: number | null;
+          referred_email: string | null;
+          referred_user_id: string;
+          referrer_email: string | null;
+          referrer_id: string;
+          reward_credits: number;
+          status: string;
+          total_count: number;
+        }[];
+      };
+      admin_referral_kpis: { Args: never; Returns: Json };
+      admin_suspicious_referrals: {
+        Args: never;
+        Returns: {
+          referred_count: number;
+          referrer_email: string | null;
+          referrer_id: string;
+          same_ip_pattern: boolean;
+        }[];
+      };
       admin_get_user_detail: { Args: { _user_id: string }; Returns: Json };
       admin_global_search: { Args: { _query: string }; Returns: Json };
       admin_list_payments: {
@@ -571,6 +750,9 @@ export type Database = {
         Args: { _days?: number };
         Returns: { day: string; new_users: number }[];
       };
+      advance_referral_cycle: { Args: { _referrer_id: string }; Returns: Json };
+      calc_pro_price: { Args: { _active_referrals: number }; Returns: number };
+      cancel_referral: { Args: { _referred_user_id: string }; Returns: Json };
       check_rate_limit: {
         Args: { _key: string; _max_hits: number; _window_seconds: number };
         Returns: boolean;
@@ -582,9 +764,13 @@ export type Database = {
         Args: { _description?: string; _operation_id: string; _tool_id: string };
         Returns: Json;
       };
+      count_active_direct_referrals: { Args: { _referrer_id: string }; Returns: number };
       current_admin_role: { Args: never; Returns: string };
+      ensure_referral_code: { Args: { _user_id: string }; Returns: string };
       ensure_super_admin: { Args: { _user_id: string }; Returns: undefined };
+      find_referrer_by_code: { Args: { _code: string }; Returns: string };
       get_credit_state: { Args: never; Returns: Json };
+      get_referral_dashboard: { Args: never; Returns: Json };
       grant_starter_bonus: {
         Args: { _amount?: number; _user_id: string };
         Returns: boolean;
@@ -592,6 +778,16 @@ export type Database = {
       is_feature_enabled: {
         Args: { _key: string; _plan_slug?: string; _user_id?: string };
         Returns: boolean;
+      };
+      mark_pro_pricing_synced: {
+        Args: { _applied_price: number; _user_id: string; _variant_id: string };
+        Returns: undefined;
+      };
+      recompute_referrer_pricing: { Args: { _referrer_id: string }; Returns: Json };
+      refund_referral: { Args: { _new_status: string; _referred_user_id: string }; Returns: Json };
+      register_referral: {
+        Args: { _referral_code: string; _referred_user_id: string };
+        Returns: Json;
       };
     };
     Enums: {

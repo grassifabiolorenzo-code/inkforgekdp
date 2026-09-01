@@ -9,6 +9,7 @@ import {
   type ConsumeResult,
   type CreditState,
 } from "@/lib/credits.functions";
+import { clearReferralCode, peekReferralCode } from "@/lib/referralCapture";
 import type { ToolConfig } from "@/config/tools";
 
 export const accountQueryKey = ["account-state"] as const;
@@ -18,7 +19,15 @@ export function useAccount() {
   const fetchState = useServerFn(getAccountState);
   return useQuery({
     queryKey: accountQueryKey,
-    queryFn: () => fetchState(),
+    queryFn: async () => {
+      const referralCode = peekReferralCode();
+      const result = await fetchState({ data: { referralCode: referralCode ?? undefined } });
+      // Va rimosso solo dopo che la chiamata è andata a buon fine: se la prima
+      // richiesta fallisse prima di associare il referral, resterebbe comunque
+      // disponibile per il tentativo successivo invece di andare perso.
+      if (referralCode) clearReferralCode();
+      return result;
+    },
     staleTime: 15_000,
   });
 }

@@ -142,6 +142,57 @@ export const Route = createFileRoute("/api/public/lemon-squeezy/webhook")({
           return new Response("ok", { status: 200 });
         }
 
+        // Rimborso di una fattura di abbonamento: storna anche il beneficio referral collegato
+        // (vedi refund_referral — a differenza della semplice cancellazione, qui i crediti già
+        // erogati al referrer vengono recuperati). NOTA: il nome esatto di questo evento per i
+        // rimborsi di abbonamento andrebbe riverificato contro l'account Lemon Squeezy reale
+        // (non ancora attivo per questo progetto) — se il nome differisse, questo branch
+        // semplicemente non scatterebbe mai (nessun comportamento errato, solo mancata copertura).
+        if (event === "subscription_payment_refunded") {
+          const invoiceId = payload.data?.id;
+          if (invoiceId) {
+            const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+            await supabaseAdmin
+              .from("payments")
+              .update({ status: "refunded" })
+              .eq("provider", "lemon_squeezy")
+              .eq("provider_payment_id", String(invoiceId));
+
+            const targetUserId =
+              payload.meta?.custom_data?.user_id ??
+              (
+                await supabaseAdmin
+                  .from("payments")
+                  .select("user_id")
+                  .eq("provider_payment_id", String(invoiceId))
+                  .maybeSingle()
+              ).data?.user_id ??
+              null;
+
+            if (targetUserId) {
+              const { data: refundResult, error: refundError } = await supabaseAdmin.rpc(
+                "refund_referral",
+                { _referred_user_id: targetUserId, _new_status: "REFUNDED" },
+              );
+              if (refundError) {
+                logger.error("lemon-webhook: refund_referral failed", {
+                  error: refundError.message,
+                  targetUserId,
+                });
+              } else if (refundResult && (refundResult as { ok?: boolean }).ok) {
+                const referrerId = (refundResult as { referrer_id?: string }).referrer_id;
+                if (referrerId) {
+                  const { syncProReferralPricing } = await import("@/lib/referral.server");
+                  await syncProReferralPricing(referrerId);
+                }
+              }
+              const { dispatchNotification } = await import("@/services/notifications.server");
+              await dispatchNotification({ event: "payment_refunded", userId: targetUserId });
+            }
+          }
+          return new Response("ok", { status: 200 });
+        }
+
         // Rimborso di un ordine one-time (es. pacchetto crediti). Non tocca i crediti già erogati:
         // un eventuale storno manuale dei crediti resta una decisione dell'admin, non automatica.
         if (event === "order_refunded") {
@@ -271,6 +322,71 @@ export const Route = createFileRoute("/api/public/lemon-squeezy/webhook")({
             });
             return new Response("db error", { status: 500 });
           }
+        }
+
+        // Attivazione referral: al primo pagamento riuscito (mai al rinnovo) o alla ripresa di un
+        // abbonamento precedentemente sospeso/in pausa — activate_referral è idempotente e non
+        // rierogherà il premio in crediti se era già stato assegnato in passato.
+        if (
+          (event === "subscription_payment_success" && !isRenewalPayment) ||
+          event === "subscription_resumed" ||
+          event === "subscription_unpaused"
+        ) {
+          const { data: subRow } = await supabaseAdmin
+            .from("subscriptions")
+            .select("id")
+            .eq("lemon_squeezy_subscription_id", lsSubscriptionId)
+            .maybeSingle();
+          const { data: activation, error: activationError } = await supabaseAdmin.rpc(
+            "activate_referral",
+            {
+              _referred_user_id: resolvedUserId,
+              ...(subRow?.id ? { _subscription_id: subRow.id } : {}),
+            },
+          );
+          if (activationError) {
+            logger.error("lemon-webhook: activate_referral failed", {
+              error: activationError.message,
+              userId: resolvedUserId,
+            });
+          } else if (activation && (activation as { ok?: boolean }).ok) {
+            const referrerId = (activation as { referrer_id?: string }).referrer_id;
+            if (referrerId) {
+              const { syncProReferralPricing } = await import("@/lib/referral.server");
+              await syncProReferralPricing(referrerId);
+            }
+          }
+        }
+
+        // Cancellazione/scadenza: il referral smette di contare come attivo, il prezzo Pro del
+        // referrer viene ricalcolato. I crediti già erogati NON vengono toccati (solo il rimborso
+        // li storna — vedi subscription_payment_refunded sopra).
+        if (event === "subscription_cancelled" || event === "subscription_expired") {
+          const { data: cancellation, error: cancellationError } = await supabaseAdmin.rpc(
+            "cancel_referral",
+            { _referred_user_id: resolvedUserId },
+          );
+          if (cancellationError) {
+            logger.error("lemon-webhook: cancel_referral failed", {
+              error: cancellationError.message,
+              userId: resolvedUserId,
+            });
+          } else if (cancellation && (cancellation as { ok?: boolean }).ok) {
+            const referrerId = (cancellation as { referrer_id?: string }).referrer_id;
+            if (referrerId) {
+              const { syncProReferralPricing } = await import("@/lib/referral.server");
+              await syncProReferralPricing(referrerId);
+            }
+          }
+        }
+
+        // L'utente stesso è tornato Pro attivo (nuovo abbonamento, rinnovo o riattivazione dopo
+        // pausa/sospensione): riapplica il suo eventuale sconto referral, che mentre il Pro non
+        // era attivo restava "congelato" (non sincronizzato, ma nemmeno perso — vedi condizione
+        // di mantenimento nella sezione 12 della spec).
+        if (planSlug === "pro" && (status === "active" || status === "on_trial")) {
+          const { syncProReferralPricing } = await import("@/lib/referral.server");
+          await syncProReferralPricing(resolvedUserId);
         }
 
         // Bonus Starter: una sola volta per utente, mai al rinnovo o riattivazione.
