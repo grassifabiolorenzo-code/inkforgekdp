@@ -5,17 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COPERTINE Studio KDP — InkForgeKdp</title>
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
+    <!-- Tailwind CSS — versione fissata (3.4.17, quella già servita da cdn.tailwindcss.com
+         al momento di questa modifica) invece dell'URL "sempre l'ultima versione": un
+         aggiornamento futuro non pinnato potrebbe cambiare comportamento senza preavviso.
+         Niente integrity/crossorigin qui: cdn.tailwindcss.com non invia header CORS, quindi
+         il browser bloccherebbe l'intero script (verificato: pagina senza stili). -->
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+
     <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0"
+        crossorigin="anonymous">
+
     <!-- Google WebFont Loader -->
-    <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"
+        integrity="sha384-pvXSwSU09c+q9mPyY++ygUHWIYRoaxgnJ/JC5wcOzMb/NVVu+IDniiB9qWp3ZNWM"
+        crossorigin="anonymous"></script>
 
     <!-- html2canvas per Esportazione HD -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
+        integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H"
+        crossorigin="anonymous"></script>
 
     <style>
         body { font-family: 'Inter', sans-serif; }
