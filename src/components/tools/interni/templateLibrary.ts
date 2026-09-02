@@ -1,11 +1,15 @@
 /**
  * Libreria di template per interni di libri a basso contenuto ("low-content books"):
- * quaderni, planner, activity book. Ogni template è disegnato proceduralmente su canvas
- * (nessuna immagine esterna, nessun costo di generazione, nessun problema di copyright) e si
- * adatta automaticamente alla risoluzione/pagina scelta nel documento.
+ * quaderni, planner, guide al disegno, registri professionali. Ogni template è disegnato
+ * proceduralmente su canvas (nessuna immagine esterna, nessun costo di generazione, nessun
+ * problema di copyright) e si adatta automaticamente alla risoluzione/pagina scelta nel
+ * documento.
  *
  * Pensata per crescere: aggiungere un template richiede solo una nuova entry in
- * TEMPLATE_LIBRARY + il relativo case in drawTemplate.
+ * TEMPLATE_LIBRARY + il relativo case in drawTemplate. I template puramente decorativi/ludici
+ * per bambini (labirinti, mandala, unisci i puntini, ricalco) sono stati rimossi: il loro
+ * disegno geometrico "a formula" leggeva come generato in modo grezzo, non come un prodotto
+ * curato — meglio poche pagine ben fatte che tante riempitive.
  */
 
 export type TemplateId =
@@ -25,19 +29,19 @@ export type TemplateId =
   | "mini-calendar"
   | "meal-planner"
   | "gratitude-journal"
-  | "maze"
-  | "connect-dots"
-  | "mandala"
-  | "tracing-dots"
-  | "alphabet-tracing"
+  | "perspective-one-point"
+  | "focal-radial-guides"
+  | "haccp-temperature-log"
+  | "haccp-cleaning-log"
+  | "guest-review-bnb"
+  | "delivery-inventory-log"
   | "sudoku-grid"
-  | "tic-tac-toe-grid"
-  | "decorative-frame";
+  | "tic-tac-toe-grid";
 
 export interface TemplateSpec {
   id: TemplateId;
   label: string;
-  category: "Quaderno" | "Organizzazione" | "Attività / basso contenuto";
+  category: "Quaderno" | "Organizzazione" | "Disegno" | "Registri professionali" | "Attività";
 }
 
 export const TEMPLATE_LIBRARY: TemplateSpec[] = [
@@ -57,18 +61,34 @@ export const TEMPLATE_LIBRARY: TemplateSpec[] = [
   { id: "mini-calendar", label: "Calendario mensile", category: "Organizzazione" },
   { id: "meal-planner", label: "Planner pasti settimanale", category: "Organizzazione" },
   { id: "gratitude-journal", label: "Diario della gratitudine", category: "Organizzazione" },
-  { id: "maze", label: "Labirinto", category: "Attività / basso contenuto" },
-  { id: "connect-dots", label: "Unisci i puntini", category: "Attività / basso contenuto" },
-  { id: "mandala", label: "Mandala da colorare", category: "Attività / basso contenuto" },
-  { id: "tracing-dots", label: "Tracciato guidato", category: "Attività / basso contenuto" },
   {
-    id: "alphabet-tracing",
-    label: "Alfabeto da ricalcare",
-    category: "Attività / basso contenuto",
+    id: "perspective-one-point",
+    label: "Griglia prospettica a un punto di fuga",
+    category: "Disegno",
   },
-  { id: "sudoku-grid", label: "Griglia Sudoku vuota", category: "Attività / basso contenuto" },
-  { id: "tic-tac-toe-grid", label: "Griglie Tris", category: "Attività / basso contenuto" },
-  { id: "decorative-frame", label: "Cornice decorativa", category: "Attività / basso contenuto" },
+  { id: "focal-radial-guides", label: "Guide radiali a 4 punti focali", category: "Disegno" },
+  {
+    id: "haccp-temperature-log",
+    label: "Registro HACCP — Temperature",
+    category: "Registri professionali",
+  },
+  {
+    id: "haccp-cleaning-log",
+    label: "Registro HACCP — Pulizie e sanificazione",
+    category: "Registri professionali",
+  },
+  {
+    id: "guest-review-bnb",
+    label: "Recensione ospite (B&B / Guest House)",
+    category: "Registri professionali",
+  },
+  {
+    id: "delivery-inventory-log",
+    label: "Registro consegne e inventario",
+    category: "Registri professionali",
+  },
+  { id: "sudoku-grid", label: "Griglia Sudoku vuota", category: "Attività" },
+  { id: "tic-tac-toe-grid", label: "Griglie Tris", category: "Attività" },
 ];
 
 export const getTemplateSpec = (id: string): TemplateSpec | undefined =>
@@ -131,29 +151,29 @@ export function drawTemplate(
     case "gratitude-journal":
       drawGratitudeJournal(ctx, w, h, margin);
       break;
-    case "maze":
-      drawMaze(ctx, w, h, margin);
+    case "perspective-one-point":
+      drawPerspectiveOnePoint(ctx, w, h, margin);
       break;
-    case "connect-dots":
-      drawConnectDots(ctx, w, h, margin);
+    case "focal-radial-guides":
+      drawFocalRadialGuides(ctx, w, h, margin);
       break;
-    case "mandala":
-      drawMandala(ctx, w, h, margin);
+    case "haccp-temperature-log":
+      drawHaccpTemperatureLog(ctx, w, h, margin);
       break;
-    case "tracing-dots":
-      drawTracingDots(ctx, w, h, margin);
+    case "haccp-cleaning-log":
+      drawHaccpCleaningLog(ctx, w, h, margin);
       break;
-    case "alphabet-tracing":
-      drawAlphabetTracing(ctx, w, h, margin);
+    case "guest-review-bnb":
+      drawGuestReviewBnb(ctx, w, h, margin);
+      break;
+    case "delivery-inventory-log":
+      drawDeliveryInventoryLog(ctx, w, h, margin);
       break;
     case "sudoku-grid":
       drawSudokuGrid(ctx, w, h, margin);
       break;
     case "tic-tac-toe-grid":
       drawTicTacToeGrid(ctx, w, h, margin);
-      break;
-    case "decorative-frame":
-      drawDecorativeFrame(ctx, w, h, margin);
       break;
   }
 }
@@ -535,179 +555,302 @@ function drawGratitudeJournal(ctx: CanvasRenderingContext2D, w: number, h: numbe
 }
 
 /* ------------------------------------------------------------------------ */
-/* Attività / basso contenuto                                                */
+/* Disegno                                                                   */
 /* ------------------------------------------------------------------------ */
 
-/** Labirinto generato con un semplice backtracking su griglia. */
-function drawMaze(ctx: CanvasRenderingContext2D, w: number, h: number, margin: number) {
-  const cols = 16;
-  const rows = 20;
-  const size = Math.min((w - margin * 2) / cols, (h - margin * 2) / rows);
-  const ox = margin + (w - margin * 2 - size * cols) / 2;
-  const oy = margin + (h - margin * 2 - size * rows) / 2;
-
-  const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
-  const wallsV = Array.from({ length: rows }, () => Array(cols + 1).fill(true)); // muri verticali (tra colonne)
-  const wallsH = Array.from({ length: rows + 1 }, () => Array(cols).fill(true)); // muri orizzontali (tra righe)
-
-  // Backtracking iterativo (evita ricorsione profonda su griglie grandi).
-  const stack: [number, number][] = [[0, 0]];
-  visited[0]![0] = true;
-  while (stack.length > 0) {
-    const [r, c] = stack[stack.length - 1]!;
-    const neighbors: [number, number, "N" | "S" | "E" | "W"][] = [];
-    if (r > 0 && !visited[r - 1]![c]) neighbors.push([r - 1, c, "N"]);
-    if (r < rows - 1 && !visited[r + 1]![c]) neighbors.push([r + 1, c, "S"]);
-    if (c > 0 && !visited[r]![c - 1]) neighbors.push([r, c - 1, "W"]);
-    if (c < cols - 1 && !visited[r]![c + 1]) neighbors.push([r, c + 1, "E"]);
-
-    if (neighbors.length === 0) {
-      stack.pop();
-      continue;
-    }
-    const [nr, nc, dir] = neighbors[Math.floor(Math.random() * neighbors.length)]!;
-    if (dir === "N") wallsH[r]![c] = false;
-    if (dir === "S") wallsH[r + 1]![c] = false;
-    if (dir === "W") wallsV[r]![c] = false;
-    if (dir === "E") wallsV[r]![c + 1] = false;
-    visited[nr]![nc] = true;
-    stack.push([nr, nc]);
-  }
-
-  ctx.strokeStyle = "#334155";
-  ctx.lineWidth = Math.max(2, size * 0.06);
-  ctx.lineCap = "square";
-  ctx.strokeRect(ox, oy, size * cols, size * rows);
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const x = ox + c * size;
-      const y = oy + r * size;
-      if (wallsH[r]![c] && r > 0) {
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + size, y);
-        ctx.stroke();
-      }
-      if (wallsV[r]![c] && c > 0) {
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x, y + size);
-        ctx.stroke();
-      }
-    }
-  }
-  // Entrata/uscita.
-  ctx.strokeStyle = "#16a34a";
-  ctx.beginPath();
-  ctx.moveTo(ox, oy);
-  ctx.lineTo(ox, oy + size);
-  ctx.stroke();
-  ctx.strokeStyle = "#dc2626";
-  ctx.beginPath();
-  ctx.moveTo(ox + size * cols, oy + size * (rows - 1));
-  ctx.lineTo(ox + size * cols, oy + size * rows);
-  ctx.stroke();
-}
-
-/** Punti numerati disposti su un cerchio: uniti in ordine formano una figura semplice. */
-function drawConnectDots(ctx: CanvasRenderingContext2D, w: number, h: number, margin: number) {
-  const cx = w / 2;
-  const cy = h / 2;
-  const radius = Math.min(w, h) / 2 - margin * 1.5;
-  const points = 18;
-  ctx.fillStyle = "#334155";
-  ctx.font = `${Math.round(radius * 0.09)}px sans-serif`;
-  for (let i = 0; i < points; i++) {
-    const angle = (i / points) * Math.PI * 2 - Math.PI / 2;
-    const x = cx + Math.cos(angle) * radius;
-    const y = cy + Math.sin(angle) * radius;
-    ctx.beginPath();
-    ctx.arc(x, y, Math.max(2, radius * 0.02), 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillText(String(i + 1), x + radius * 0.03, y - radius * 0.03);
-  }
-}
-
-/** Pattern radiale semplice (cerchi + petali concentrici) pensato per essere colorato. */
-function drawMandala(ctx: CanvasRenderingContext2D, w: number, h: number, margin: number) {
-  const cx = w / 2;
-  const cy = h / 2;
-  const maxR = Math.min(w, h) / 2 - margin;
-  ctx.strokeStyle = "#1f2937";
-  ctx.lineWidth = Math.max(2, w * 0.0025);
-
-  const rings = 4;
-  for (let ring = 1; ring <= rings; ring++) {
-    const r = (maxR / rings) * ring;
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.stroke();
-
-    const petals = 6 + ring * 4;
-    const petalR = (maxR / rings) * 0.42;
-    for (let i = 0; i < petals; i++) {
-      const angle = (i / petals) * Math.PI * 2;
-      const px = cx + Math.cos(angle) * r;
-      const py = cy + Math.sin(angle) * r;
-      ctx.beginPath();
-      ctx.arc(px, py, petalR, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-  }
-}
-
-/** Righe ondulate/tratteggiate su cui ricalcare, utile per attività pre-scrittura. */
-function drawTracingDots(ctx: CanvasRenderingContext2D, w: number, h: number, margin: number) {
-  const rows = 6;
-  const rowGap = (h - margin * 2) / rows;
-  ctx.setLineDash([w * 0.012, w * 0.012]);
-  ctx.strokeStyle = "#64748b";
-  ctx.lineWidth = Math.max(2, w * 0.002);
-  for (let i = 0; i < rows; i++) {
-    const y = margin + rowGap * (i + 0.5);
-    ctx.beginPath();
-    const amplitude = rowGap * 0.22;
-    const steps = 60;
-    for (let s = 0; s <= steps; s++) {
-      const x = margin + ((w - margin * 2) * s) / steps;
-      const yy = y + Math.sin((s / steps) * Math.PI * 4) * amplitude;
-      if (s === 0) ctx.moveTo(x, yy);
-      else ctx.lineTo(x, yy);
-    }
-    ctx.stroke();
-  }
-  ctx.setLineDash([]);
-}
-
-/** Alfabeto maiuscolo tratteggiato, in griglia, per esercizi di ricalco. */
-function drawAlphabetTracing(ctx: CanvasRenderingContext2D, w: number, h: number, margin: number) {
-  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-  const cols = 5;
-  const rows = 6;
-  const cellW = (w - margin * 2) / cols;
-  const cellH = (h - margin * 2) / rows;
-  const fontSize = Math.round(Math.min(cellW, cellH) * 0.55);
+/** Foglio guida per disegno prospettico a un punto di fuga: orizzonte + linee radianti verso i
+ * bordi/angoli della pagina, come i classici blocchi da disegno tecnico/architettonico. */
+function drawPerspectiveOnePoint(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  margin: number,
+) {
+  const vpX = w / 2;
+  const vpY = h * 0.42;
 
   ctx.strokeStyle = "#94a3b8";
-  ctx.lineWidth = Math.max(1.5, fontSize * 0.03);
-  ctx.setLineDash([fontSize * 0.06, fontSize * 0.06]);
-  ctx.font = `bold ${fontSize}px sans-serif`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
+  ctx.lineWidth = Math.max(1.2, w * 0.0015);
+  ctx.beginPath();
+  ctx.moveTo(margin, vpY);
+  ctx.lineTo(w - margin, vpY);
+  ctx.stroke();
 
-  letters.forEach((letter, i) => {
-    const r = Math.floor(i / cols);
-    const c = i % cols;
-    if (r >= rows) return;
-    const x = margin + c * cellW + cellW / 2;
-    const y = margin + r * cellH + cellH / 2;
-    ctx.strokeText(letter, x, y);
+  const targets: [number, number][] = [
+    [margin, margin],
+    [w / 2, margin],
+    [w - margin, margin],
+    [margin, h - margin],
+    [w / 2, h - margin],
+    [w - margin, h - margin],
+    [margin, vpY],
+    [w - margin, vpY],
+  ];
+  ctx.strokeStyle = "#e2e8f0";
+  ctx.lineWidth = Math.max(1, w * 0.001);
+  targets.forEach(([tx, ty]) => {
+    ctx.beginPath();
+    ctx.moveTo(vpX, vpY);
+    ctx.lineTo(tx, ty);
+    ctx.stroke();
   });
 
-  ctx.setLineDash([]);
-  ctx.textAlign = "left";
-  ctx.textBaseline = "alphabetic";
+  ctx.fillStyle = "#1f2937";
+  ctx.beginPath();
+  ctx.arc(vpX, vpY, Math.max(2, w * 0.004), 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "#64748b";
+  ctx.font = `${Math.round(margin * 0.32)}px sans-serif`;
+  ctx.fillText("PUNTO DI FUGA — DISEGNO PROSPETTICO", margin, margin * 0.6);
 }
+
+/** Pagina divisa in 4 riquadri, ciascuno con il proprio punto focale e raggi guida: utile per
+ * più schizzi/studi rapidi di oggetti o figure nella stessa pagina. */
+function drawFocalRadialGuides(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  margin: number,
+) {
+  const cols = 2;
+  const rows = 2;
+  const cellW = (w - margin * 2) / cols;
+  const cellH = (h - margin * 2) / rows;
+
+  ctx.strokeStyle = "#e2e8f0";
+  ctx.lineWidth = Math.max(1, w * 0.001);
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cx = margin + c * cellW + cellW / 2;
+      const cy = margin + r * cellH + cellH / 2;
+      const rays = 12;
+      const len = Math.min(cellW, cellH) * 0.46;
+      for (let i = 0; i < rays; i++) {
+        const angle = (i / rays) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(angle) * len, cy + Math.sin(angle) * len);
+        ctx.stroke();
+      }
+      ctx.fillStyle = "#1f2937";
+      ctx.beginPath();
+      ctx.arc(cx, cy, Math.max(2, w * 0.003), 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  ctx.strokeStyle = "#cbd5e1";
+  ctx.lineWidth = Math.max(1, w * 0.0015);
+  ctx.beginPath();
+  ctx.moveTo(w / 2, margin);
+  ctx.lineTo(w / 2, h - margin);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(margin, h / 2);
+  ctx.lineTo(w - margin, h / 2);
+  ctx.stroke();
+}
+
+/* ------------------------------------------------------------------------ */
+/* Registri professionali                                                    */
+/* ------------------------------------------------------------------------ */
+
+/** Tabella generica a colonne per registri professionali: intestazione in grassetto, righe
+ * leggere, prima colonna sempre più stretta (data/ora). Condivisa dai template HACCP/consegne. */
+function drawLogTable(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  margin: number,
+  title: string,
+  headers: string[],
+  colWeights: number[],
+) {
+  const headerH = margin * 1.15;
+  const tableTop = margin + headerH;
+  const tableW = w - margin * 2;
+  const rowH = Math.max(margin * 0.9, (h - margin - tableTop) / 16);
+  const rows = Math.floor((h - margin - tableTop) / rowH);
+
+  ctx.fillStyle = "#64748b";
+  ctx.font = `${Math.round(margin * 0.34)}px sans-serif`;
+  ctx.fillText(title, margin, margin * 0.6);
+
+  const totalWeight = colWeights.reduce((a, b) => a + b, 0);
+  const colX: number[] = [margin];
+  colWeights.forEach((weight) => {
+    colX.push(colX[colX.length - 1]! + (tableW * weight) / totalWeight);
+  });
+
+  ctx.fillStyle = "#1f2937";
+  ctx.font = `bold ${Math.round(headerH * 0.3)}px sans-serif`;
+  headers.forEach((label, i) => {
+    ctx.fillText(label, colX[i]! + margin * 0.08, margin + headerH * 0.65);
+  });
+
+  ctx.strokeStyle = "#1f2937";
+  ctx.lineWidth = Math.max(1.5, w * 0.0018);
+  ctx.beginPath();
+  ctx.moveTo(margin, tableTop);
+  ctx.lineTo(margin + tableW, tableTop);
+  ctx.stroke();
+
+  colX.forEach((x) => {
+    ctx.beginPath();
+    ctx.moveTo(x, margin);
+    ctx.lineTo(x, tableTop + rowH * rows);
+    ctx.stroke();
+  });
+
+  ctx.strokeStyle = "#e2e8f0";
+  ctx.lineWidth = Math.max(1, w * 0.0012);
+  for (let r = 0; r <= rows; r++) {
+    const y = tableTop + r * rowH;
+    ctx.beginPath();
+    ctx.moveTo(margin, y);
+    ctx.lineTo(margin + tableW, y);
+    ctx.stroke();
+  }
+}
+
+/** Registro HACCP delle temperature (frigoriferi/congelatori): data, ora, punto di controllo,
+ * temperatura rilevata, operatore, firma. */
+function drawHaccpTemperatureLog(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  margin: number,
+) {
+  drawLogTable(
+    ctx,
+    w,
+    h,
+    margin,
+    "REGISTRO CONTROLLO TEMPERATURE — HACCP",
+    ["DATA", "ORA", "FRIGO / PRODOTTO", "TEMP °C", "OPERATORE", "FIRMA"],
+    [1.1, 0.8, 2.2, 1, 1.4, 1.2],
+  );
+}
+
+/** Registro HACCP di pulizie e sanificazione: data, area/attrezzatura, prodotto usato, eseguito
+ * da, verificato da. */
+function drawHaccpCleaningLog(ctx: CanvasRenderingContext2D, w: number, h: number, margin: number) {
+  drawLogTable(
+    ctx,
+    w,
+    h,
+    margin,
+    "REGISTRO PULIZIE E SANIFICAZIONE — HACCP",
+    ["DATA", "AREA / ATTREZZATURA", "PRODOTTO USATO", "ESEGUITO DA", "VERIFICATO DA"],
+    [0.9, 1.8, 1.6, 1.4, 1.4],
+  );
+}
+
+/** Registro consegne e inventario: data, fornitore/prodotto, quantità, controllo qualità, firma. */
+function drawDeliveryInventoryLog(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  margin: number,
+) {
+  drawLogTable(
+    ctx,
+    w,
+    h,
+    margin,
+    "REGISTRO CONSEGNE E INVENTARIO",
+    ["DATA", "FORNITORE / PRODOTTO", "QUANTITÀ", "CONTROLLO QUALITÀ", "FIRMA"],
+    [0.9, 2, 1, 1.6, 1.2],
+  );
+}
+
+function drawStarOutline(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number) {
+  ctx.beginPath();
+  for (let i = 0; i < 5; i++) {
+    const angle = (Math.PI * 2 * i) / 5 - Math.PI / 2;
+    const x = cx + Math.cos(angle) * r;
+    const y = cy + Math.sin(angle) * r;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+    const innerAngle = angle + Math.PI / 5;
+    ctx.lineTo(cx + Math.cos(innerAngle) * (r * 0.4), cy + Math.sin(innerAngle) * (r * 0.4));
+  }
+  ctx.closePath();
+  ctx.stroke();
+}
+
+/** Pagina di recensione ospite per B&B/guest house: dati soggiorno, valutazione a stelle, righe
+ * per il commento e firma — pensata come prima pagina di un registro ospiti che prosegue con
+ * pagine rigate identiche (usa il campo "quante copie" della libreria per aggiungerle). */
+function drawGuestReviewBnb(ctx: CanvasRenderingContext2D, w: number, h: number, margin: number) {
+  ctx.fillStyle = "#1f2937";
+  ctx.font = `bold ${Math.round(margin * 0.55)}px sans-serif`;
+  ctx.fillText("RECENSIONE OSPITE", margin, margin * 0.9);
+
+  ctx.fillStyle = "#475569";
+  ctx.font = `${Math.round(margin * 0.32)}px sans-serif`;
+  ctx.strokeStyle = "#94a3b8";
+  ctx.lineWidth = Math.max(1.2, w * 0.0015);
+
+  const y1 = margin * 1.6;
+  ctx.fillText("Nome ospite:", margin, y1);
+  ctx.beginPath();
+  ctx.moveTo(margin + w * 0.2, y1);
+  ctx.lineTo(w - margin, y1);
+  ctx.stroke();
+
+  const y2 = y1 + margin * 0.75;
+  ctx.fillText("Soggiorno dal:", margin, y2);
+  ctx.beginPath();
+  ctx.moveTo(margin + w * 0.2, y2);
+  ctx.lineTo(margin + w * 0.5, y2);
+  ctx.stroke();
+  ctx.fillText("al:", margin + w * 0.54, y2);
+  ctx.beginPath();
+  ctx.moveTo(margin + w * 0.6, y2);
+  ctx.lineTo(w - margin, y2);
+  ctx.stroke();
+
+  const starY = y2 + margin;
+  ctx.fillText("Valutazione:", margin, starY);
+  for (let i = 0; i < 5; i++) {
+    drawStarOutline(
+      ctx,
+      margin + w * 0.22 + i * margin * 0.75,
+      starY - margin * 0.15,
+      margin * 0.26,
+    );
+  }
+
+  const commentTop = starY + margin * 0.9;
+  const sigY = h - margin * 1.1;
+  const rowGap = margin * 0.55;
+  const rows = Math.max(1, Math.floor((sigY - margin * 0.5 - commentTop) / rowGap));
+  ctx.strokeStyle = "#e2e8f0";
+  ctx.lineWidth = Math.max(1, w * 0.0012);
+  for (let i = 0; i < rows; i++) {
+    const y = commentTop + i * rowGap;
+    ctx.beginPath();
+    ctx.moveTo(margin, y);
+    ctx.lineTo(w - margin, y);
+    ctx.stroke();
+  }
+
+  ctx.strokeStyle = "#94a3b8";
+  ctx.lineWidth = Math.max(1.2, w * 0.0015);
+  ctx.beginPath();
+  ctx.moveTo(margin, sigY);
+  ctx.lineTo(margin + w * 0.32, sigY);
+  ctx.stroke();
+  ctx.fillStyle = "#64748b";
+  ctx.font = `${Math.round(margin * 0.28)}px sans-serif`;
+  ctx.fillText("Firma", margin, sigY + margin * 0.32);
+}
+
+/* ------------------------------------------------------------------------ */
+/* Attività                                                                  */
+/* ------------------------------------------------------------------------ */
 
 /** Griglia Sudoku 9×9 vuota, con i bordi dei blocchi 3×3 in evidenza. */
 function drawSudokuGrid(ctx: CanvasRenderingContext2D, w: number, h: number, margin: number) {
@@ -759,28 +902,4 @@ function drawTicTacToeGrid(ctx: CanvasRenderingContext2D, w: number, h: number, 
       }
     }
   }
-}
-
-function drawDecorativeFrame(ctx: CanvasRenderingContext2D, w: number, h: number, margin: number) {
-  ctx.strokeStyle = "#94a3b8";
-  ctx.lineWidth = Math.max(2, w * 0.003);
-  ctx.strokeRect(margin, margin, w - margin * 2, h - margin * 2);
-  ctx.strokeStyle = "#cbd5e1";
-  ctx.lineWidth = Math.max(1, w * 0.0012);
-  ctx.strokeRect(margin * 1.25, margin * 1.25, w - margin * 2.5, h - margin * 2.5);
-
-  const cornerSize = margin * 0.9;
-  ctx.strokeStyle = "#94a3b8";
-  ctx.lineWidth = Math.max(2, w * 0.0025);
-  const corners: [number, number][] = [
-    [margin, margin],
-    [w - margin, margin],
-    [margin, h - margin],
-    [w - margin, h - margin],
-  ];
-  corners.forEach(([x, y]) => {
-    ctx.beginPath();
-    ctx.arc(x, y, cornerSize * 0.35, 0, Math.PI * 2);
-    ctx.stroke();
-  });
 }
