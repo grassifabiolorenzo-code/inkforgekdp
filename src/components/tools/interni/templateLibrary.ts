@@ -19,6 +19,7 @@
  */
 
 export type TemplateId =
+  | "blank-page"
   | "lines-narrow"
   | "lines-medium"
   | "lines-wide"
@@ -50,6 +51,7 @@ export interface TemplateSpec {
 }
 
 export const TEMPLATE_LIBRARY: TemplateSpec[] = [
+  { id: "blank-page", label: "Pagina bianca", category: "Quaderno" },
   { id: "lines-narrow", label: "Righe strette", category: "Quaderno" },
   { id: "lines-medium", label: "Righe medie", category: "Quaderno" },
   { id: "lines-wide", label: "Righe larghe", category: "Quaderno" },
@@ -100,24 +102,31 @@ export const getTemplateSpec = (id: string): TemplateSpec | undefined =>
 
 /** Disegna il template scelto su un canvas già dimensionato (w×h in pixel, sfondo bianco).
  * `seed` determina il contenuto dei template generati casualmente (solo Sudoku, per ora):
- * stesso seed → stesso puzzle, così la stessa pagina non cambia tra preview ed export. */
+ * stesso seed → stesso puzzle, così la stessa pagina non cambia tra preview ed export.
+ * `mirrored` (layout per mancini) specchia gli elementi asimmetrici dei template che ne hanno
+ * uno (il margine rosso delle righe, la colonna spunti del metodo Cornell) sul lato opposto. */
 export function drawTemplate(
   ctx: CanvasRenderingContext2D,
   id: TemplateId,
   w: number,
   h: number,
   seed = 1,
+  mirrored = false,
 ): void {
   const margin = Math.round(Math.min(w, h) * 0.06);
   switch (id) {
+    case "blank-page":
+      // Pagina completamente bianca: il canvas è già riempito di bianco prima di questa
+      // chiamata, nessun disegno aggiuntivo necessario.
+      break;
     case "lines-narrow":
-      drawRuledLines(ctx, w, h, margin, Math.round(h * 0.028));
+      drawRuledLines(ctx, w, h, margin, Math.round(h * 0.028), mirrored);
       break;
     case "lines-medium":
-      drawRuledLines(ctx, w, h, margin, Math.round(h * 0.038));
+      drawRuledLines(ctx, w, h, margin, Math.round(h * 0.038), mirrored);
       break;
     case "lines-wide":
-      drawRuledLines(ctx, w, h, margin, Math.round(h * 0.05));
+      drawRuledLines(ctx, w, h, margin, Math.round(h * 0.05), mirrored);
       break;
     case "dot-grid":
       drawDotGrid(ctx, w, h, margin, Math.round(Math.min(w, h) * 0.035));
@@ -132,7 +141,7 @@ export function drawTemplate(
       drawBlankWithTitle(ctx, w, h, margin);
       break;
     case "cornell-notes":
-      drawCornellNotes(ctx, w, h, margin);
+      drawCornellNotes(ctx, w, h, margin, mirrored);
       break;
     case "music-staff":
       drawMusicStaff(ctx, w, h, margin);
@@ -192,6 +201,7 @@ function drawRuledLines(
   h: number,
   margin: number,
   gap: number,
+  mirrored: boolean,
 ) {
   ctx.strokeStyle = "#c7d2e0";
   ctx.lineWidth = Math.max(1, w * 0.0015);
@@ -201,11 +211,12 @@ function drawRuledLines(
     ctx.lineTo(w - margin, y);
     ctx.stroke();
   }
-  // Margine verticale sinistro (stile quaderno).
+  // Margine verticale (stile quaderno): a sinistra di default, a destra in layout per mancini.
+  const marginLineX = mirrored ? w - margin * 1.7 : margin * 1.7;
   ctx.strokeStyle = "#e59a9a";
   ctx.beginPath();
-  ctx.moveTo(margin * 1.7, margin * 1.4);
-  ctx.lineTo(margin * 1.7, h - margin);
+  ctx.moveTo(marginLineX, margin * 1.4);
+  ctx.lineTo(marginLineX, h - margin);
   ctx.stroke();
 }
 
@@ -289,18 +300,30 @@ function drawIsometricDotGrid(
 }
 
 /** Griglia per il metodo di appunti Cornell: colonna spunti a sinistra, righe di nota, riepilogo in fondo. */
-function drawCornellNotes(ctx: CanvasRenderingContext2D, w: number, h: number, margin: number) {
+function drawCornellNotes(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  margin: number,
+  mirrored: boolean,
+) {
   const cueColW = (w - margin * 2) * 0.28;
   const summaryH = (h - margin * 2) * 0.16;
   const noteTop = margin;
   const noteBottom = h - margin - summaryH;
 
+  // Colonna spunti a sinistra di default, a destra in layout per mancini.
+  const dividerX = mirrored ? w - margin - cueColW : margin + cueColW;
+  const cueLabelX = mirrored ? w - margin - cueColW + margin * 0.2 : margin + margin * 0.2;
+  const notesLeftX = mirrored ? margin + margin * 0.3 : margin + cueColW + margin * 0.3;
+  const notesRightX = mirrored ? w - margin - cueColW - margin * 0.2 : w - margin - margin * 0.2;
+
   ctx.strokeStyle = "#94a3b8";
   ctx.lineWidth = Math.max(1.5, w * 0.0018);
   ctx.strokeRect(margin, margin, w - margin * 2, h - margin * 2);
   ctx.beginPath();
-  ctx.moveTo(margin + cueColW, noteTop);
-  ctx.lineTo(margin + cueColW, noteBottom);
+  ctx.moveTo(dividerX, noteTop);
+  ctx.lineTo(dividerX, noteBottom);
   ctx.stroke();
   ctx.beginPath();
   ctx.moveTo(margin, noteBottom);
@@ -311,14 +334,14 @@ function drawCornellNotes(ctx: CanvasRenderingContext2D, w: number, h: number, m
   const rowGap = Math.round(h * 0.032);
   for (let y = noteTop + rowGap; y < noteBottom; y += rowGap) {
     ctx.beginPath();
-    ctx.moveTo(margin + cueColW + margin * 0.3, y);
-    ctx.lineTo(w - margin - margin * 0.2, y);
+    ctx.moveTo(notesLeftX, y);
+    ctx.lineTo(notesRightX, y);
     ctx.stroke();
   }
 
   ctx.fillStyle = "#94a3b8";
   ctx.font = `${Math.round(margin * 0.45)}px sans-serif`;
-  ctx.fillText("SPUNTI", margin + margin * 0.2, noteTop + margin * 0.5);
+  ctx.fillText("SPUNTI", cueLabelX, noteTop + margin * 0.5);
   ctx.fillText("RIASSUNTO", margin + margin * 0.2, noteBottom + summaryH * 0.35);
 }
 

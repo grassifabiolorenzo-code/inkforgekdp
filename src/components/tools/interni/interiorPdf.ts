@@ -15,7 +15,9 @@ function loadImage(file: File): Promise<HTMLImageElement> {
  * Disegna il contenuto di una pagina (immagine, template o vuota) su un canvas della
  * risoluzione di stampa richiesta. I margini "inside"/"outside" vengono specchiati in base a
  * `isRecto`: su una pagina destra (recto) l'interno/dorso è a sinistra, su una sinistra (verso)
- * è a destra.
+ * è a destra. `mirrored` (layout per mancini) inverte questa regola su OGNI pagina — il dorso
+ * finisce sempre dal lato opposto a quello di default — e viene passato anche ai template che
+ * hanno un elemento asimmetrico (es. il margine rosso delle righe, la colonna Cornell).
  * - "cover" (solo immagini): l'immagine riempie l'intera pagina (bleed incluso), ritaglia l'eccesso.
  * - "contain" (solo immagini): adattamento automatico dentro i margini, centrata, nessun ritaglio.
  * - I template disegnano da soli la propria impaginazione interna e ignorano fillMode/margini.
@@ -28,6 +30,7 @@ async function renderContentCanvas(
   isRecto: boolean,
   fillMode: FillMode,
   dpi: number,
+  mirrored: boolean,
 ): Promise<HTMLCanvasElement> {
   const canvas = document.createElement("canvas");
   canvas.width = Math.max(1, Math.round(pageWIn * dpi));
@@ -37,7 +40,7 @@ async function renderContentCanvas(
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   if (page.kind === "template" && page.templateId) {
-    drawTemplate(ctx, page.templateId, canvas.width, canvas.height, page.templateSeed);
+    drawTemplate(ctx, page.templateId, canvas.width, canvas.height, page.templateSeed, mirrored);
     return canvas;
   }
 
@@ -53,8 +56,9 @@ async function renderContentCanvas(
     return canvas;
   }
 
-  const leftIn = isRecto ? margins.insideIn : margins.outsideIn;
-  const rightIn = isRecto ? margins.outsideIn : margins.insideIn;
+  const effectiveIsRecto = mirrored ? !isRecto : isRecto;
+  const leftIn = effectiveIsRecto ? margins.insideIn : margins.outsideIn;
+  const rightIn = effectiveIsRecto ? margins.outsideIn : margins.insideIn;
   const topPx = margins.topIn * dpi;
   const bottomPx = margins.bottomIn * dpi;
   const leftPx = leftIn * dpi;
@@ -91,6 +95,9 @@ export interface InteriorDocSpec {
   defaultFillMode: FillMode;
   printMode: PrintMode;
   fillerColor: string;
+  /** Layout per mancini: specchia il lato del margine di rilegatura (e gli elementi asimmetrici
+   * dei template, es. il margine rosso delle righe) su ogni pagina del documento. */
+  leftHanded: boolean;
 }
 
 function resolveFillMode(page: InteriorPage, defaultFillMode: FillMode): FillMode {
@@ -135,6 +142,7 @@ export async function renderSinglePagePreview(
     isRecto,
     resolveFillMode(page, spec.defaultFillMode),
     DPI,
+    spec.leftHanded,
   );
 }
 
@@ -167,6 +175,7 @@ async function renderAllPhysicalPages(
           isRecto,
           resolveFillMode(physical.source!, spec.defaultFillMode),
           dpi,
+          spec.leftHanded,
         );
     canvases.push(canvas);
   }
@@ -217,6 +226,7 @@ export async function renderPreviewPages(
           isRecto,
           resolveFillMode(physical.source!, spec.defaultFillMode),
           previewDpi,
+          spec.leftHanded,
         );
     results.push({
       canvas,

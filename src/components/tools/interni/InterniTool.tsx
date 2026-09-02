@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import type { ToolRuntime } from "@/components/tools/ToolPageShell";
 import { newOperationId } from "@/hooks/useAccount";
 import { useBookProject } from "@/hooks/useBookProject";
@@ -56,11 +57,20 @@ import type {
 const TEMPLATE_CATEGORIES = [...new Set(TEMPLATE_LIBRARY.map((t) => t.category))];
 
 // Il Sudoku è un vero puzzle generato e verificato al volo (non una pagina statica gratuita
-// come righe/quadretti): a differenza degli altri template costa 1 credito per pagina, con un
-// tetto più basso per singola aggiunta.
+// come righe/quadretti): a differenza degli altri template costa 1 credito ogni 10 pagine
+// (arrotondato per eccesso), con un tetto più basso per singola aggiunta.
 const SUDOKU_TEMPLATE_ID: TemplateId = "sudoku-grid";
 const MAX_SUDOKU_PER_BATCH = 100;
+const SUDOKU_PAGES_PER_CREDIT = 10;
 const MAX_FREE_TEMPLATES_PER_BATCH = 200;
+// operationId FISSO (non newOperationId()): consume_credit è idempotente per (utente,
+// operationId), quindi il primo utilizzo addebita 1 credito e ogni tentativo successivo, in
+// qualunque sessione/dispositivo, torna "duplicate" senza costo — è così che lo sblocco resta
+// pagato una volta sola per sempre, invece che una volta a sessione.
+const FREE_TEMPLATES_UNLOCK_OPERATION_ID = "interni-unlock-free-templates";
+// La pagina bianca resta gratuita anche prima di sbloccare il resto della libreria: non ha
+// alcun contenuto generato, è l'equivalente del pulsante "Inserisci pagina vuota" già gratuito.
+const ALWAYS_FREE_TEMPLATE_IDS: ReadonlySet<TemplateId> = new Set(["blank-page"]);
 
 type ExportFormat = "pdf" | "png-zip" | "jpg-zip";
 const EXPORT_FORMATS: { id: ExportFormat; label: string }[] = [
@@ -86,6 +96,7 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
   const [defaultFillMode, setDefaultFillMode] = useState<FillMode>("contain");
   const [printMode, setPrintMode] = useState<PrintMode>("continuous");
   const [fillerColor, setFillerColor] = useState(DEFAULT_FILLER_COLOR);
+  const [leftHanded, setLeftHanded] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<TemplateId>(TEMPLATE_LIBRARY[0]!.id);
   const [templateCount, setTemplateCount] = useState(1);
@@ -107,6 +118,7 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
   const [previewLoading, setPreviewLoading] = useState(false);
 
   const [addingSudoku, setAddingSudoku] = useState(false);
+  const [unlockingTemplates, setUnlockingTemplates] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const pdfInputRef = useRef<HTMLInputElement | null>(null);
@@ -114,6 +126,7 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
   const chargeGuard = useRef(false);
   const pageDownloadGuard = useRef(false);
   const sudokuAddGuard = useRef(false);
+  const freeTemplateGuard = useRef(false);
 
   const trim = getTrimSize(trimSizeId);
 
@@ -128,6 +141,7 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
     defaultFillMode,
     printMode,
     fillerColor,
+    leftHanded,
   };
 
   // Anteprima scorrevole di TUTTE le pagine fisiche (inclusi i retro di riempimento), a bassa
@@ -162,13 +176,31 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
       if (previewDebounceRef.current) clearTimeout(previewDebounceRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pages, trim.widthIn, trim.heightIn, margins, defaultFillMode, printMode, fillerColor]);
+  }, [
+    pages,
+    trim.widthIn,
+    trim.heightIn,
+    margins,
+    defaultFillMode,
+    printMode,
+    fillerColor,
+    leftHanded,
+  ]);
 
   // Il file già generato non corrisponde più alle impostazioni correnti: invalida il download
   // rapido (evita di far riscaricare un file non aggiornato senza che l'utente se ne accorga).
   useEffect(() => {
     setGeneratedExport(null);
-  }, [pages, trim.widthIn, trim.heightIn, margins, defaultFillMode, printMode, fillerColor]);
+  }, [
+    pages,
+    trim.widthIn,
+    trim.heightIn,
+    margins,
+    defaultFillMode,
+    printMode,
+    fillerColor,
+    leftHanded,
+  ]);
 
   function triggerBlobDownload(blob: Blob, filename: string) {
     const url = URL.createObjectURL(blob);
@@ -256,17 +288,59 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
     };
   }
 
-  /** Accoda `count` copie di un template gratuito (righe, quadretti, planner, registri...) in un
-   * colpo solo: nessun credito, nessuna verifica di accesso — sono pagine statiche o comunque
-   * senza un vero "contenuto" da pagare. */
-  function addFreeTemplatePages(templateId: TemplateId, count: number) {
+  /** Accoda `count` copie di un template sempre gratuito (es. la pagina bianca): nessun credito,
+   * nessuno sblocco richiesto — utilizzabile fin da subito, anche prima di sbloccare il resto
+   * della libreria. */
+  function addAlwaysFreeTemplatePages(templateId: TemplateId, count: number) {
     const n = Math.max(1, Math.min(MAX_FREE_TEMPLATES_PER_BATCH, Math.round(count) || 1));
     setPages((prev) => [...prev, ...Array.from({ length: n }, () => makeTemplatePage(templateId))]);
   }
 
-  /** Genera fino a `count` puzzle Sudoku (max 100 per volta), addebitando 1 credito per ognuno,
-   * uno alla volta: se i crediti finiscono a metà, si fermano l'addebito e l'aggiunta pagine
-   * insieme, mantenendo solo le pagine effettivamente pagate. */
+  /** Accoda `count` copie di un template gratuito (righe, quadretti, planner, registri...).
+   * Il PRIMO utilizzo in assoluto della libreria (Sudoku e pagina bianca esclusi) costa 1 credito
+   * una tantum:
+   * addebitato con un operationId fisso, così ogni tentativo successivo — in questa o in
+   * qualunque altra sessione — torna "duplicate" e non costa più nulla. Se il primo sblocco
+   * fallisce per crediti insufficienti, nessuna pagina viene aggiunta. */
+  async function addFreeTemplatePages(templateId: TemplateId, count: number) {
+    if (freeTemplateGuard.current) return;
+    freeTemplateGuard.current = true;
+    try {
+      const n = Math.max(1, Math.min(MAX_FREE_TEMPLATES_PER_BATCH, Math.round(count) || 1));
+      setUnlockingTemplates(true);
+      try {
+        // Non si passa da runtime.ensureAccess()/canOperate qui: una volta sbloccata, la
+        // libreria deve restare gratuita per l'utente anche se in seguito i crediti finiscono o
+        // l'abbonamento cambia — l'unica autorità è la risposta di charge() sull'operationId fisso.
+        const result = await runtime.charge(
+          FREE_TEMPLATES_UNLOCK_OPERATION_ID,
+          "Sblocco libreria template Interni",
+        );
+        if (!result.ok) {
+          runtime.blockOperation();
+          return;
+        }
+        setPages((prev) => [
+          ...prev,
+          ...Array.from({ length: n }, () => makeTemplatePage(templateId)),
+        ]);
+        if (!result.duplicate) {
+          toast.success(
+            "Libreria template sbloccata — 1 credito. Da ora in poi è sempre gratuita.",
+          );
+        }
+      } finally {
+        setUnlockingTemplates(false);
+      }
+    } finally {
+      freeTemplateGuard.current = false;
+    }
+  }
+
+  /** Genera fino a `count` puzzle Sudoku (max 100 per volta), addebitando 1 credito ogni 10
+   * pagine (arrotondato per eccesso: 1-10 pagine = 1 credito, 11-20 = 2, ecc.). Se i crediti
+   * finiscono a metà, si fermano insieme l'addebito e l'aggiunta pagine, mantenendo solo le
+   * pagine effettivamente coperte da un blocco già pagato. */
   async function addSudokuPages(count: number) {
     if (sudokuAddGuard.current) return;
     sudokuAddGuard.current = true;
@@ -281,26 +355,30 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
       setAddingSudoku(true);
       try {
         const newPages: InteriorPage[] = [];
-        for (let i = 0; i < n; i++) {
+        for (let addedSoFar = 0; addedSoFar < n; addedSoFar += SUDOKU_PAGES_PER_CREDIT) {
           const result = await runtime.charge(
-            newOperationId("interni-sudoku"),
-            "Puzzle Sudoku generato",
+            newOperationId("interni-sudoku-batch"),
+            `Fino a ${SUDOKU_PAGES_PER_CREDIT} puzzle Sudoku generati`,
           );
           if (!result.ok) break;
-          newPages.push(makeTemplatePage(SUDOKU_TEMPLATE_ID));
+          const batchSize = Math.min(SUDOKU_PAGES_PER_CREDIT, n - addedSoFar);
+          for (let i = 0; i < batchSize; i++) {
+            newPages.push(makeTemplatePage(SUDOKU_TEMPLATE_ID));
+          }
         }
 
         if (newPages.length > 0) {
           setPages((prev) => [...prev, ...newPages]);
         }
 
+        const creditsSpent = Math.ceil(newPages.length / SUDOKU_PAGES_PER_CREDIT);
         if (newPages.length === n) {
           toast.success(
-            `${newPages.length} ${newPages.length === 1 ? "puzzle Sudoku aggiunto" : "puzzle Sudoku aggiunti"} — ${newPages.length} ${newPages.length === 1 ? "credito" : "crediti"}`,
+            `${newPages.length} ${newPages.length === 1 ? "puzzle Sudoku aggiunto" : "puzzle Sudoku aggiunti"} — ${creditsSpent} ${creditsSpent === 1 ? "credito" : "crediti"}`,
           );
         } else if (newPages.length > 0) {
           toast.warning(
-            `Aggiunti solo ${newPages.length} di ${n} puzzle Sudoku: crediti esauriti a metà dell'operazione.`,
+            `Aggiunti solo ${newPages.length} di ${n} puzzle Sudoku (${creditsSpent} ${creditsSpent === 1 ? "credito" : "crediti"}): crediti esauriti a metà dell'operazione.`,
           );
         } else {
           toast.error("Nessun puzzle Sudoku aggiunto: crediti non disponibili.");
@@ -316,8 +394,10 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
   function handleAddTemplateClick() {
     if (selectedTemplateId === SUDOKU_TEMPLATE_ID) {
       void addSudokuPages(templateCount);
+    } else if (ALWAYS_FREE_TEMPLATE_IDS.has(selectedTemplateId)) {
+      addAlwaysFreeTemplatePages(selectedTemplateId, templateCount);
     } else {
-      addFreeTemplatePages(selectedTemplateId, templateCount);
+      void addFreeTemplatePages(selectedTemplateId, templateCount);
     }
   }
 
@@ -533,6 +613,20 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
           </p>
         </div>
 
+        <div className="flex items-start justify-between gap-3 rounded-md border border-border bg-surface p-3">
+          <div className="space-y-0.5">
+            <Label htmlFor="interni-left-handed" className="text-sm">
+              Layout per mancini
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              Specchia il margine di rilegatura e gli elementi asimmetrici dei template (il margine
+              rosso delle righe, la colonna spunti del metodo Cornell) sul lato opposto — utile per
+              chi scrive con la mano sinistra.
+            </p>
+          </div>
+          <Switch id="interni-left-handed" checked={leftHanded} onCheckedChange={setLeftHanded} />
+        </div>
+
         <div className="space-y-1.5">
           <Label htmlFor="interni-default-fill">Stile pagina di default</Label>
           <Select value={defaultFillMode} onValueChange={(v) => setDefaultFillMode(v as FillMode)}>
@@ -722,23 +816,36 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
               variant="outline"
               onClick={handleAddTemplateClick}
               disabled={
-                selectedTemplateId === SUDOKU_TEMPLATE_ID && (addingSudoku || runtime.charging)
+                selectedTemplateId === SUDOKU_TEMPLATE_ID
+                  ? addingSudoku || runtime.charging
+                  : !ALWAYS_FREE_TEMPLATE_IDS.has(selectedTemplateId) &&
+                    (unlockingTemplates || runtime.charging)
               }
             >
-              {selectedTemplateId === SUDOKU_TEMPLATE_ID && (addingSudoku || runtime.charging) ? (
+              {(
+                selectedTemplateId === SUDOKU_TEMPLATE_ID
+                  ? addingSudoku || runtime.charging
+                  : !ALWAYS_FREE_TEMPLATE_IDS.has(selectedTemplateId) &&
+                    (unlockingTemplates || runtime.charging)
+              ) ? (
                 <Loader2 className="mr-1.5 size-3.5 animate-spin" />
               ) : (
                 <FilePlus2 className="mr-1.5 size-3.5" />
               )}
               {selectedTemplateId === SUDOKU_TEMPLATE_ID
-                ? `Aggiungi (${templateCount} ${templateCount === 1 ? "credito" : "crediti"})`
+                ? (() => {
+                    const credits = Math.ceil(templateCount / SUDOKU_PAGES_PER_CREDIT);
+                    return `Aggiungi (${credits} ${credits === 1 ? "credito" : "crediti"})`;
+                  })()
                 : "Aggiungi"}
             </Button>
           </div>
           <p className="text-[11px] text-muted-foreground">
             {selectedTemplateId === SUDOKU_TEMPLATE_ID
-              ? `Ogni pagina Sudoku è un puzzle vero generato al momento (soluzione unica garantita) e costa 1 credito: fino a ${MAX_SUDOKU_PER_BATCH} alla volta.`
-              : "Imposta un numero maggiore di 1 per accodare più copie dello stesso template in un solo click (es. 20 pagine di righe strette) — nessun credito richiesto."}
+              ? `Ogni pagina Sudoku è un puzzle vero generato al momento (soluzione unica garantita). Costa 1 credito ogni ${SUDOKU_PAGES_PER_CREDIT} pagine (arrotondato per eccesso): fino a ${MAX_SUDOKU_PER_BATCH} alla volta.`
+              : ALWAYS_FREE_TEMPLATE_IDS.has(selectedTemplateId)
+                ? "Pagina completamente bianca: sempre gratuita, nessun credito richiesto — utilizzabile anche prima di sbloccare il resto della libreria."
+                : "Imposta un numero maggiore di 1 per accodare più copie dello stesso template in un solo click (es. 20 pagine di righe strette). Il primo utilizzo della libreria (Sudoku e pagina bianca esclusi) costa 1 credito una tantum, poi resta sempre gratuita."}
           </p>
         </div>
 
