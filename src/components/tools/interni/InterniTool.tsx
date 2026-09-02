@@ -34,6 +34,7 @@ import {
   getTrimSize,
 } from "@/components/tools/interni/constants";
 import {
+  buildInteriorImagesZip,
   buildInteriorPdf,
   renderFirstPagePreview,
   renderSinglePagePreview,
@@ -54,6 +55,13 @@ import type {
 
 const TEMPLATE_CATEGORIES = [...new Set(TEMPLATE_LIBRARY.map((t) => t.category))];
 
+type ExportFormat = "pdf" | "png-zip" | "jpg-zip";
+const EXPORT_FORMATS: { id: ExportFormat; label: string }[] = [
+  { id: "pdf", label: "PDF unico (pronto per la stampa KDP)" },
+  { id: "png-zip", label: "Immagini PNG (una per pagina, in uno ZIP)" },
+  { id: "jpg-zip", label: "Immagini JPG (una per pagina, in uno ZIP)" },
+];
+
 let pageUid = 0;
 const nextPageId = () => `page-${Date.now().toString(36)}-${(pageUid += 1)}`;
 
@@ -73,8 +81,14 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
   const [fillerColor, setFillerColor] = useState(DEFAULT_FILLER_COLOR);
   const [generating, setGenerating] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<TemplateId>(TEMPLATE_LIBRARY[0]!.id);
+  const [templateCount, setTemplateCount] = useState(1);
   const [downloadingPageId, setDownloadingPageId] = useState<string | null>(null);
-  const [generatedPdf, setGeneratedPdf] = useState<{ blob: Blob; filename: string } | null>(null);
+  const [exportFormat, setExportFormat] = useState<ExportFormat>("pdf");
+  const [generatedExport, setGeneratedExport] = useState<{
+    blob: Blob;
+    filename: string;
+    format: ExportFormat;
+  } | null>(null);
   const [importingPdf, setImportingPdf] = useState(false);
   const [importProgress, setImportProgress] = useState<{ done: number; total: number } | null>(
     null,
@@ -119,10 +133,10 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pages, trim.widthIn, trim.heightIn, margins, defaultFillMode, printMode, fillerColor]);
 
-  // Il PDF già generato non corrisponde più alle impostazioni correnti: invalida il download rapido
-  // (evita di far riscaricare un file non aggiornato senza che l'utente se ne accorga).
+  // Il file già generato non corrisponde più alle impostazioni correnti: invalida il download
+  // rapido (evita di far riscaricare un file non aggiornato senza che l'utente se ne accorga).
   useEffect(() => {
-    setGeneratedPdf(null);
+    setGeneratedExport(null);
   }, [pages, trim.widthIn, trim.heightIn, margins, defaultFillMode, printMode, fillerColor]);
 
   function triggerBlobDownload(blob: Blob, filename: string) {
@@ -199,17 +213,19 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
     }
   }
 
-  function addTemplatePage() {
+  /** Accoda `count` copie del template scelto in un colpo solo (es. 10 pagine di righe strette). */
+  function addTemplatePages(count: number) {
     const spec = getTemplateSpec(selectedTemplateId);
+    const n = Math.max(1, Math.min(200, Math.round(count) || 1));
     setPages((prev) => [
       ...prev,
-      {
+      ...Array.from({ length: n }, () => ({
         id: nextPageId(),
-        kind: "template",
+        kind: "template" as const,
         templateId: selectedTemplateId,
         name: spec?.label ?? "Template",
-        fillModeOverride: "default",
-      },
+        fillModeOverride: "default" as const,
+      })),
     ]);
   }
 
@@ -285,7 +301,7 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
     chargeGuard.current = true;
     try {
       if (pages.length === 0) {
-        toast.error("Carica almeno un'immagine prima di generare il PDF interno.");
+        toast.error("Carica almeno un'immagine prima di generare l'interno.");
         return;
       }
       if (!runtime.canOperate) {
@@ -297,21 +313,30 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
       setGenerating(true);
       const operationId = newOperationId("interni-pdf");
       try {
-        const blob = await buildInteriorPdf(pages, docSpec);
-        const filename = `Interno_KDP_${trim.id}_${Date.now()}.pdf`;
+        const isPdf = exportFormat === "pdf";
+        const blob = isPdf
+          ? await buildInteriorPdf(pages, docSpec)
+          : await buildInteriorImagesZip(
+              pages,
+              docSpec,
+              exportFormat === "png-zip" ? "png" : "jpg",
+            );
+        const filename = isPdf
+          ? `Interno_KDP_${trim.id}_${Date.now()}.pdf`
+          : `Interno_KDP_${trim.id}_${Date.now()}.zip`;
 
         // Il credito viene confermato PRIMA di consegnare il file: se il charge fallisse
         // (limite raggiunto, abbonamento non attivo, ecc.) nessun download deve partire.
-        const result = await runtime.charge(operationId, "PDF interno generato");
+        const result = await runtime.charge(operationId, "Interno generato");
         if (!result.ok) return;
 
         triggerBlobDownload(blob, filename);
         // Tenuto in stato: permette di riscaricarlo in seguito (es. se il download automatico
-        // viene bloccato dal browser) senza rigenerare il PDF e senza consumare un altro credito.
-        setGeneratedPdf({ blob, filename });
-        toast.success(result.duplicate ? "PDF generato" : "PDF generato — 1 credito");
+        // viene bloccato dal browser) senza rigenerare il file e senza consumare un altro credito.
+        setGeneratedExport({ blob, filename, format: exportFormat });
+        toast.success(result.duplicate ? "Interno generato" : "Interno generato — 1 credito");
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Generazione PDF non riuscita.");
+        toast.error(error instanceof Error ? error.message : "Generazione non riuscita.");
       } finally {
         setGenerating(false);
       }
@@ -570,10 +595,24 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
                 ))}
               </SelectContent>
             </Select>
-            <Button type="button" variant="outline" onClick={addTemplatePage}>
+            <Input
+              type="number"
+              min={1}
+              max={200}
+              value={templateCount}
+              onChange={(e) => setTemplateCount(Math.max(1, Number(e.target.value) || 1))}
+              className="w-16 shrink-0 text-center"
+              aria-label="Quante copie aggiungere"
+              title="Quante copie aggiungere"
+            />
+            <Button type="button" variant="outline" onClick={() => addTemplatePages(templateCount)}>
               <FilePlus2 className="mr-1.5 size-3.5" /> Aggiungi
             </Button>
           </div>
+          <p className="text-[11px] text-muted-foreground">
+            Imposta un numero maggiore di 1 per accodare più copie dello stesso template in un solo
+            click (es. 20 pagine di righe strette).
+          </p>
         </div>
 
         {/* Elenco pagine */}
@@ -669,6 +708,26 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
           </div>
         </div>
 
+        <div className="space-y-1.5">
+          <Label htmlFor="interni-export-format">Formato di esportazione</Label>
+          <Select value={exportFormat} onValueChange={(v) => setExportFormat(v as ExportFormat)}>
+            <SelectTrigger id="interni-export-format">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {EXPORT_FORMATS.map((f) => (
+                <SelectItem key={f.id} value={f.id}>
+                  {f.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-[11px] text-muted-foreground">
+            Il PDF unico è il formato richiesto da KDP per la stampa; le immagini PNG/JPG sono utili
+            per riusare le pagine altrove.
+          </p>
+        </div>
+
         <Button
           onClick={handleGenerate}
           disabled={generating || runtime.charging}
@@ -679,27 +738,27 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
           ) : (
             <Download className="mr-2 size-4" />
           )}
-          Genera PDF interno (1 credito)
+          {exportFormat === "pdf" ? "Genera PDF interno" : "Genera ZIP immagini"} (1 credito)
         </Button>
 
-        {generatedPdf && (
+        {generatedExport && (
           <div className="space-y-2 rounded-md border border-border bg-surface p-3">
             <p className="text-xs text-muted-foreground">
-              PDF generato. Se il download automatico non è partito (o l'hai chiuso per sbaglio),
+              File generato. Se il download automatico non è partito (o l'hai chiuso per sbaglio),
               puoi riscaricarlo qui — non consuma un altro credito.
             </p>
             <Button
               type="button"
               variant="outline"
               className="w-full"
-              onClick={() => triggerBlobDownload(generatedPdf.blob, generatedPdf.filename)}
+              onClick={() => triggerBlobDownload(generatedExport.blob, generatedExport.filename)}
             >
-              <Download className="mr-2 size-4" /> Scarica di nuovo il PDF generato
+              <Download className="mr-2 size-4" /> Scarica di nuovo
             </Button>
           </div>
         )}
 
-        {generatedPdf && (
+        {generatedExport && generatedExport.format === "pdf" && (
           <div className="space-y-1.5">
             <Label>Salva come interno di un progetto libro (opzionale)</Label>
             <p className="text-xs text-muted-foreground">
@@ -710,7 +769,9 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
               bookProject={bookProject}
               currentCoverFile={null}
               currentInteriorFile={
-                new File([generatedPdf.blob], generatedPdf.filename, { type: "application/pdf" })
+                new File([generatedExport.blob], generatedExport.filename, {
+                  type: "application/pdf",
+                })
               }
               onFilesLoaded={() => {
                 // Qui il picker serve solo a scegliere/creare il progetto di destinazione:

@@ -115,14 +115,18 @@ function buildPhysicalSequence(pages: InteriorPage[], printMode: PrintMode): Phy
 }
 
 /** Genera un'anteprima canvas per la prima pagina fisica del documento. */
-export async function renderFirstPagePreview(pages: InteriorPage[], spec: InteriorDocSpec): Promise<HTMLCanvasElement | null> {
+export async function renderFirstPagePreview(
+  pages: InteriorPage[],
+  spec: InteriorDocSpec,
+): Promise<HTMLCanvasElement | null> {
   const sequence = buildPhysicalSequence(pages, spec.printMode);
   const first = sequence[0];
   if (!first) return null;
 
-  const usesBleed = !first.isFiller && first.source
-    ? resolveFillMode(first.source, spec.defaultFillMode) === "cover"
-    : false;
+  const usesBleed =
+    !first.isFiller && first.source
+      ? resolveFillMode(first.source, spec.defaultFillMode) === "cover"
+      : false;
   const bleed = usesBleed ? BLEED_IN : 0;
   const pageWIn = spec.trimWidthIn + bleed * 2;
   const pageHIn = spec.trimHeightIn + bleed * 2;
@@ -131,7 +135,14 @@ export async function renderFirstPagePreview(pages: InteriorPage[], spec: Interi
 
   const page = first.source!;
   // La prima pagina fisica è sempre recto (destra).
-  return renderContentCanvas(page, pageWIn, pageHIn, spec.margins, true, resolveFillMode(page, spec.defaultFillMode));
+  return renderContentCanvas(
+    page,
+    pageWIn,
+    pageHIn,
+    spec.margins,
+    true,
+    resolveFillMode(page, spec.defaultFillMode),
+  );
 }
 
 /** Anteprima canvas per una singola pagina, indipendente dal documento (usata per il download del singolo file). */
@@ -151,16 +162,12 @@ export async function renderSinglePagePreview(
   );
 }
 
-/**
- * Assembla tutte le pagine in un unico PDF pronto per KDP. Le dimensioni fisiche della pagina
- * restano uniformi in tutto il documento: se almeno una pagina usa "piena pagina", l'intero PDF
- * include il bleed KDP (0.125") su tutti i lati.
- */
-export async function buildInteriorPdf(pages: InteriorPage[], spec: InteriorDocSpec): Promise<Blob> {
-  if (pages.length === 0) throw new Error("Aggiungi almeno una pagina prima di generare il PDF.");
-
-  const { jsPDF } = await import("jspdf");
-
+/** Renderizza ogni pagina fisica del documento (inclusi eventuali riempimenti) su un canvas
+ * della risoluzione di stampa finale — logica condivisa da tutti i formati di export. */
+async function renderAllPhysicalPages(
+  pages: InteriorPage[],
+  spec: InteriorDocSpec,
+): Promise<{ canvases: HTMLCanvasElement[]; pageWIn: number; pageHIn: number }> {
   const sequence = buildPhysicalSequence(pages, spec.printMode);
   const usesBleedAnywhere = sequence.some(
     (p) => !p.isFiller && p.source && resolveFillMode(p.source, spec.defaultFillMode) === "cover",
@@ -168,14 +175,11 @@ export async function buildInteriorPdf(pages: InteriorPage[], spec: InteriorDocS
   const bleed = usesBleedAnywhere ? BLEED_IN : 0;
   const pageWIn = spec.trimWidthIn + bleed * 2;
   const pageHIn = spec.trimHeightIn + bleed * 2;
-  const orientation = pageWIn > pageHIn ? "landscape" : "portrait";
 
-  const doc = new jsPDF({ unit: "in", format: [pageWIn, pageHIn], orientation });
-
+  const canvases: HTMLCanvasElement[] = [];
   for (let i = 0; i < sequence.length; i++) {
     const physical = sequence[i]!;
     const isRecto = i % 2 === 0;
-
     const canvas = physical.isFiller
       ? renderFillerCanvas(pageWIn, pageHIn, spec.fillerColor)
       : await renderContentCanvas(
@@ -186,11 +190,73 @@ export async function buildInteriorPdf(pages: InteriorPage[], spec: InteriorDocS
           isRecto,
           resolveFillMode(physical.source!, spec.defaultFillMode),
         );
+    canvases.push(canvas);
+  }
+  return { canvases, pageWIn, pageHIn };
+}
 
+/**
+ * Assembla tutte le pagine in un unico PDF pronto per KDP. Le dimensioni fisiche della pagina
+ * restano uniformi in tutto il documento: se almeno una pagina usa "piena pagina", l'intero PDF
+ * include il bleed KDP (0.125") su tutti i lati.
+ */
+export async function buildInteriorPdf(
+  pages: InteriorPage[],
+  spec: InteriorDocSpec,
+): Promise<Blob> {
+  if (pages.length === 0) throw new Error("Aggiungi almeno una pagina prima di generare il PDF.");
+
+  const { jsPDF } = await import("jspdf");
+  const { canvases, pageWIn, pageHIn } = await renderAllPhysicalPages(pages, spec);
+  const orientation = pageWIn > pageHIn ? "landscape" : "portrait";
+  const doc = new jsPDF({ unit: "in", format: [pageWIn, pageHIn], orientation });
+
+  canvases.forEach((canvas, i) => {
     const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
     if (i > 0) doc.addPage([pageWIn, pageHIn], orientation);
     doc.addImage(dataUrl, "JPEG", 0, 0, pageWIn, pageHIn);
-  }
+  });
 
   return doc.output("blob");
+}
+
+function canvasToBlob(canvas: HTMLCanvasElement, mime: string, quality?: number): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (b) => (b ? resolve(b) : reject(new Error("Impossibile convertire una pagina in immagine."))),
+      mime,
+      quality,
+    );
+  });
+}
+
+/**
+ * Alternativa al PDF: ogni pagina fisica del documento come file immagine separato, tutti
+ * raccolti in uno ZIP. Utile per chi vuole riusare le pagine altrove (non è il formato richiesto
+ * da KDP per la stampa, che resta il PDF di `buildInteriorPdf`).
+ */
+export async function buildInteriorImagesZip(
+  pages: InteriorPage[],
+  spec: InteriorDocSpec,
+  format: "png" | "jpg",
+): Promise<Blob> {
+  if (pages.length === 0)
+    throw new Error("Aggiungi almeno una pagina prima di generare le immagini.");
+
+  const { default: JSZip } = await import("jszip");
+  const { canvases } = await renderAllPhysicalPages(pages, spec);
+  const mime = format === "png" ? "image/png" : "image/jpeg";
+  const quality = format === "jpg" ? 0.92 : undefined;
+
+  const zip = new JSZip();
+  for (let i = 0; i < canvases.length; i++) {
+    const blob = await canvasToBlob(canvases[i]!, mime, quality);
+    zip.file(`pagina_${String(i + 1).padStart(3, "0")}.${format}`, blob);
+  }
+
+  return zip.generateAsync({
+    type: "blob",
+    compression: "DEFLATE",
+    compressionOptions: { level: 6 },
+  });
 }
