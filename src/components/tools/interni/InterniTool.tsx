@@ -36,7 +36,7 @@ import {
 import {
   buildInteriorImagesZip,
   buildInteriorPdf,
-  renderFirstPagePreview,
+  renderPreviewPages,
   renderSinglePagePreview,
 } from "@/components/tools/interni/interiorPdf";
 import { extractPdfPagesAsImages } from "@/components/tools/interni/pdfPageImport";
@@ -94,9 +94,14 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
     null,
   );
 
+  const [previewPages, setPreviewPages] = useState<
+    { dataUrl: string; isFiller: boolean; label: string }[]
+  >([]);
+  const [previewLoading, setPreviewLoading] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const pdfInputRef = useRef<HTMLInputElement | null>(null);
-  const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const previewDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const chargeGuard = useRef(false);
   const pageDownloadGuard = useRef(false);
 
@@ -115,20 +120,36 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
     fillerColor,
   };
 
-  // Anteprima live della prima pagina fisica, aggiornata a ogni cambio di impostazione.
+  // Anteprima scorrevole di TUTTE le pagine fisiche (inclusi i retro di riempimento), a bassa
+  // risoluzione e con un piccolo debounce: si ricalcola ad ogni cambio di impostazione, anche
+  // su documenti lunghi, senza bloccare la digitazione nei campi (es. margini).
   useEffect(() => {
-    const canvasEl = previewCanvasRef.current;
-    if (!canvasEl || pages.length === 0) return;
     let cancelled = false;
-    void renderFirstPagePreview(pages, docSpec).then((rendered) => {
-      if (cancelled || !rendered) return;
-      canvasEl.width = rendered.width;
-      canvasEl.height = rendered.height;
-      const ctx = canvasEl.getContext("2d");
-      ctx?.drawImage(rendered, 0, 0);
-    });
+    if (previewDebounceRef.current) clearTimeout(previewDebounceRef.current);
+    if (pages.length === 0) {
+      setPreviewPages([]);
+      return;
+    }
+    previewDebounceRef.current = setTimeout(() => {
+      setPreviewLoading(true);
+      void renderPreviewPages(pages, docSpec)
+        .then((rendered) => {
+          if (cancelled) return;
+          setPreviewPages(
+            rendered.map((p) => ({
+              dataUrl: p.canvas.toDataURL("image/png"),
+              isFiller: p.isFiller,
+              label: p.label,
+            })),
+          );
+        })
+        .finally(() => {
+          if (!cancelled) setPreviewLoading(false);
+        });
+    }, 250);
     return () => {
       cancelled = true;
+      if (previewDebounceRef.current) clearTimeout(previewDebounceRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pages, trim.widthIn, trim.heightIn, margins, defaultFillMode, printMode, fillerColor]);
@@ -388,8 +409,7 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
                 id="m-top"
                 type="number"
                 min={0}
-                max={2}
-                step={0.05}
+                step={0.01}
                 value={margins.topIn}
                 onChange={(e) => updateMargin("topIn", Number(e.target.value) || 0)}
               />
@@ -402,8 +422,7 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
                 id="m-bottom"
                 type="number"
                 min={0}
-                max={2}
-                step={0.05}
+                step={0.01}
                 value={margins.bottomIn}
                 onChange={(e) => updateMargin("bottomIn", Number(e.target.value) || 0)}
               />
@@ -416,8 +435,7 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
                 id="m-inside"
                 type="number"
                 min={0}
-                max={2}
-                step={0.05}
+                step={0.01}
                 value={margins.insideIn}
                 onChange={(e) => updateMargin("insideIn", Number(e.target.value) || 0)}
               />
@@ -430,8 +448,7 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
                 id="m-outside"
                 type="number"
                 min={0}
-                max={2}
-                step={0.05}
+                step={0.01}
                 value={margins.outsideIn}
                 onChange={(e) => updateMargin("outsideIn", Number(e.target.value) || 0)}
               />
@@ -440,6 +457,8 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
           <p className="text-[11px] text-muted-foreground">
             "Interno" è il lato verso il dorso/rilegatura e viene specchiato automaticamente tra
             pagine destre e sinistre; di solito conviene tenerlo leggermente più ampio di "Esterno".
+            Nessun limite fisso: imposta il valore che preferisci, l'anteprima qui a destra si
+            aggiorna subito.
           </p>
         </div>
 
@@ -782,27 +801,51 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
         )}
       </div>
 
-      <div className="panel space-y-3 p-6">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">
-          Anteprima pagina 1
-        </h3>
+      <div className="panel flex max-h-[calc(100vh-8rem)] flex-col space-y-3 p-6">
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">
+            Anteprima completa ({previewPages.length}{" "}
+            {previewPages.length === 1 ? "pagina" : "pagine"})
+          </h3>
+          {previewLoading && (
+            <Loader2 className="size-4 shrink-0 animate-spin text-muted-foreground" />
+          )}
+        </div>
         <p className="text-xs text-muted-foreground">
-          {trim.label} · interno {margins.insideIn}" / esterno {margins.outsideIn}" ·{" "}
+          {trim.label} · interno {margins.insideIn}" / esterno {margins.outsideIn}" · alto{" "}
+          {margins.topIn}" / basso {margins.bottomIn}" ·{" "}
           {defaultFillMode === "cover" ? "piena pagina" : "con margine"} ·{" "}
           {printMode === "singleSidedWithFiller" ? "solo fronte + riempimento" : "continua"}
         </p>
-        <div className="flex items-center justify-center overflow-hidden rounded-md border border-border bg-black/60 p-3">
-          {pages.length > 0 ? (
-            <canvas
-              ref={previewCanvasRef}
-              className="h-auto max-h-[520px] w-full max-w-full object-contain"
-            />
-          ) : (
+        {previewPages.length === 0 ? (
+          <div className="flex flex-1 items-center justify-center overflow-hidden rounded-md border border-border bg-black/60 p-3">
             <p className="p-10 text-center text-xs text-muted-foreground">
-              Carica almeno un'immagine per vedere l'anteprima.
+              Carica almeno un&apos;immagine per vedere l&apos;anteprima.
             </p>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="flex-1 space-y-3 overflow-y-auto rounded-md border border-border bg-black/60 p-3">
+            {previewPages.map((p, index) => (
+              <div key={index} className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-medium text-white/70">{p.label}</span>
+                  {p.isFiller && (
+                    <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] text-white/70">
+                      Pagina di riempimento
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center justify-center overflow-hidden rounded-md bg-white">
+                  <img
+                    src={p.dataUrl}
+                    alt={p.label}
+                    className="h-auto max-h-[420px] w-full max-w-full object-contain"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

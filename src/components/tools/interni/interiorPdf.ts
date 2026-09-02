@@ -27,10 +27,11 @@ async function renderContentCanvas(
   margins: PageMargins,
   isRecto: boolean,
   fillMode: FillMode,
+  dpi: number,
 ): Promise<HTMLCanvasElement> {
   const canvas = document.createElement("canvas");
-  canvas.width = Math.round(pageWIn * DPI);
-  canvas.height = Math.round(pageHIn * DPI);
+  canvas.width = Math.max(1, Math.round(pageWIn * dpi));
+  canvas.height = Math.max(1, Math.round(pageHIn * dpi));
   const ctx = canvas.getContext("2d")!;
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -54,10 +55,10 @@ async function renderContentCanvas(
 
   const leftIn = isRecto ? margins.insideIn : margins.outsideIn;
   const rightIn = isRecto ? margins.outsideIn : margins.insideIn;
-  const topPx = margins.topIn * DPI;
-  const bottomPx = margins.bottomIn * DPI;
-  const leftPx = leftIn * DPI;
-  const rightPx = rightIn * DPI;
+  const topPx = margins.topIn * dpi;
+  const bottomPx = margins.bottomIn * dpi;
+  const leftPx = leftIn * dpi;
+  const rightPx = rightIn * dpi;
 
   const boxW = Math.max(1, canvas.width - leftPx - rightPx);
   const boxH = Math.max(1, canvas.height - topPx - bottomPx);
@@ -68,10 +69,15 @@ async function renderContentCanvas(
   return canvas;
 }
 
-function renderFillerCanvas(pageWIn: number, pageHIn: number, colorHex: string): HTMLCanvasElement {
+function renderFillerCanvas(
+  pageWIn: number,
+  pageHIn: number,
+  colorHex: string,
+  dpi: number,
+): HTMLCanvasElement {
   const canvas = document.createElement("canvas");
-  canvas.width = Math.round(pageWIn * DPI);
-  canvas.height = Math.round(pageHIn * DPI);
+  canvas.width = Math.max(1, Math.round(pageWIn * dpi));
+  canvas.height = Math.max(1, Math.round(pageHIn * dpi));
   const ctx = canvas.getContext("2d")!;
   ctx.fillStyle = colorHex || "#ffffff";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -114,37 +120,6 @@ function buildPhysicalSequence(pages: InteriorPage[], printMode: PrintMode): Phy
   return sequence;
 }
 
-/** Genera un'anteprima canvas per la prima pagina fisica del documento. */
-export async function renderFirstPagePreview(
-  pages: InteriorPage[],
-  spec: InteriorDocSpec,
-): Promise<HTMLCanvasElement | null> {
-  const sequence = buildPhysicalSequence(pages, spec.printMode);
-  const first = sequence[0];
-  if (!first) return null;
-
-  const usesBleed =
-    !first.isFiller && first.source
-      ? resolveFillMode(first.source, spec.defaultFillMode) === "cover"
-      : false;
-  const bleed = usesBleed ? BLEED_IN : 0;
-  const pageWIn = spec.trimWidthIn + bleed * 2;
-  const pageHIn = spec.trimHeightIn + bleed * 2;
-
-  if (first.isFiller) return renderFillerCanvas(pageWIn, pageHIn, spec.fillerColor);
-
-  const page = first.source!;
-  // La prima pagina fisica è sempre recto (destra).
-  return renderContentCanvas(
-    page,
-    pageWIn,
-    pageHIn,
-    spec.margins,
-    true,
-    resolveFillMode(page, spec.defaultFillMode),
-  );
-}
-
 /** Anteprima canvas per una singola pagina, indipendente dal documento (usata per il download del singolo file). */
 export async function renderSinglePagePreview(
   page: InteriorPage,
@@ -159,14 +134,16 @@ export async function renderSinglePagePreview(
     spec.margins,
     isRecto,
     resolveFillMode(page, spec.defaultFillMode),
+    DPI,
   );
 }
 
 /** Renderizza ogni pagina fisica del documento (inclusi eventuali riempimenti) su un canvas
- * della risoluzione di stampa finale — logica condivisa da tutti i formati di export. */
+ * alla risoluzione richiesta — logica condivisa da export di stampa e anteprima a schermo. */
 async function renderAllPhysicalPages(
   pages: InteriorPage[],
   spec: InteriorDocSpec,
+  dpi: number,
 ): Promise<{ canvases: HTMLCanvasElement[]; pageWIn: number; pageHIn: number }> {
   const sequence = buildPhysicalSequence(pages, spec.printMode);
   const usesBleedAnywhere = sequence.some(
@@ -181,7 +158,7 @@ async function renderAllPhysicalPages(
     const physical = sequence[i]!;
     const isRecto = i % 2 === 0;
     const canvas = physical.isFiller
-      ? renderFillerCanvas(pageWIn, pageHIn, spec.fillerColor)
+      ? renderFillerCanvas(pageWIn, pageHIn, spec.fillerColor, dpi)
       : await renderContentCanvas(
           physical.source!,
           pageWIn,
@@ -189,10 +166,65 @@ async function renderAllPhysicalPages(
           spec.margins,
           isRecto,
           resolveFillMode(physical.source!, spec.defaultFillMode),
+          dpi,
         );
     canvases.push(canvas);
   }
   return { canvases, pageWIn, pageHIn };
+}
+
+export interface PreviewPage {
+  canvas: HTMLCanvasElement;
+  /** Pagina di riempimento (retro bianco o del colore scelto), non contenuto caricato dall'utente. */
+  isFiller: boolean;
+  label: string;
+}
+
+/**
+ * Anteprima a bassa risoluzione (non di stampa) di TUTTE le pagine fisiche del documento, nello
+ * stesso ordine dell'export finale — inclusi i retro di riempimento in modalità "solo fronte".
+ * Risoluzione ridotta rispetto a `DPI`: è pensata per essere ricalcolata spesso (ogni cambio di
+ * impostazione) su documenti anche lunghi, non per la qualità di stampa.
+ */
+export async function renderPreviewPages(
+  pages: InteriorPage[],
+  spec: InteriorDocSpec,
+  maxWidthPx = 260,
+  maxHeightPx = 340,
+): Promise<PreviewPage[]> {
+  if (pages.length === 0) return [];
+
+  const sequence = buildPhysicalSequence(pages, spec.printMode);
+  const usesBleedAnywhere = sequence.some(
+    (p) => !p.isFiller && p.source && resolveFillMode(p.source, spec.defaultFillMode) === "cover",
+  );
+  const bleed = usesBleedAnywhere ? BLEED_IN : 0;
+  const pageWIn = spec.trimWidthIn + bleed * 2;
+  const pageHIn = spec.trimHeightIn + bleed * 2;
+  const previewDpi = Math.max(20, Math.min(maxWidthPx / pageWIn, maxHeightPx / pageHIn));
+
+  const results: PreviewPage[] = [];
+  for (let i = 0; i < sequence.length; i++) {
+    const physical = sequence[i]!;
+    const isRecto = i % 2 === 0;
+    const canvas = physical.isFiller
+      ? renderFillerCanvas(pageWIn, pageHIn, spec.fillerColor, previewDpi)
+      : await renderContentCanvas(
+          physical.source!,
+          pageWIn,
+          pageHIn,
+          spec.margins,
+          isRecto,
+          resolveFillMode(physical.source!, spec.defaultFillMode),
+          previewDpi,
+        );
+    results.push({
+      canvas,
+      isFiller: physical.isFiller,
+      label: physical.isFiller ? `Retro ${i + 1}` : `Pagina ${i + 1}`,
+    });
+  }
+  return results;
 }
 
 /**
@@ -207,7 +239,7 @@ export async function buildInteriorPdf(
   if (pages.length === 0) throw new Error("Aggiungi almeno una pagina prima di generare il PDF.");
 
   const { jsPDF } = await import("jspdf");
-  const { canvases, pageWIn, pageHIn } = await renderAllPhysicalPages(pages, spec);
+  const { canvases, pageWIn, pageHIn } = await renderAllPhysicalPages(pages, spec, DPI);
   const orientation = pageWIn > pageHIn ? "landscape" : "portrait";
   const doc = new jsPDF({ unit: "in", format: [pageWIn, pageHIn], orientation });
 
@@ -244,7 +276,7 @@ export async function buildInteriorImagesZip(
     throw new Error("Aggiungi almeno una pagina prima di generare le immagini.");
 
   const { default: JSZip } = await import("jszip");
-  const { canvases } = await renderAllPhysicalPages(pages, spec);
+  const { canvases } = await renderAllPhysicalPages(pages, spec, DPI);
   const mime = format === "png" ? "image/png" : "image/jpeg";
   const quality = format === "jpg" ? 0.92 : undefined;
 
