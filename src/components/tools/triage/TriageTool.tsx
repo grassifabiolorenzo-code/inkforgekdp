@@ -8,7 +8,7 @@ import {
   Sparkles,
   Undo2,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -136,15 +136,18 @@ export function TriageTool({ runtime }: { runtime: ToolRuntime }) {
     }
   }
 
-  function process(category: Category) {
-    if (!currentFile) return;
-    const file = currentFile;
-    setHistory((h) => [...h, { index: currentIndex, category, file }]);
-    if (category === "promossa") setPromosse((arr) => [...arr, file]);
-    else if (category === "rimandata") setRimandate((arr) => [...arr, file]);
-    else setBocciate((arr) => [...arr, file]);
-    setCurrentIndex((i) => i + 1);
-  }
+  const process = useCallback(
+    (category: Category) => {
+      if (!currentFile) return;
+      const file = currentFile;
+      setHistory((h) => [...h, { index: currentIndex, category, file }]);
+      if (category === "promossa") setPromosse((arr) => [...arr, file]);
+      else if (category === "rimandata") setRimandate((arr) => [...arr, file]);
+      else setBocciate((arr) => [...arr, file]);
+      setCurrentIndex((i) => i + 1);
+    },
+    [currentFile, currentIndex],
+  );
 
   // Scorciatoie da tastiera attive solo durante la revisione.
   useEffect(() => {

@@ -4,8 +4,20 @@ import { Loader2, Maximize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { newOperationId } from "@/hooks/useAccount";
 import type { ToolRuntime } from "@/components/tools/ToolPageShell";
+import { BookProjectPicker } from "@/components/tools/BookProjectPicker";
+import { useBookProject } from "@/hooks/useBookProject";
 
 const STUDIO_URL = "/tools/copertine-studio.html";
+
+function dataUrlToFile(dataUrl: string, filename: string): File | null {
+  const match = /^data:(.+?);base64,(.+)$/.exec(dataUrl);
+  if (!match) return null;
+  const [, mime, base64] = match;
+  const bytes = atob(base64!);
+  const buffer = new Uint8Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) buffer[i] = bytes.charCodeAt(i);
+  return new File([buffer], filename, { type: mime ?? "image/png" });
+}
 
 /**
  * Copertine: lo studio KDP completo viene servito come applicazione autonoma
@@ -18,11 +30,27 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
   const frameRef = useRef<HTMLIFrameElement>(null);
   const chargeGuard = useRef(false);
   const [loading, setLoading] = useState(true);
+  const [exportedCover, setExportedCover] = useState<File | null>(null);
+  const bookProject = useBookProject();
 
   useEffect(() => {
     async function onMessage(event: MessageEvent) {
-      const data = event.data as { source?: string; type?: string; id?: string } | null;
+      const data = event.data as {
+        source?: string;
+        type?: string;
+        id?: string;
+        dataUrl?: string;
+      } | null;
       if (!data || data.source !== "op-copertine") return;
+
+      if (data.type === "export-complete") {
+        if (data.dataUrl) {
+          const file = dataUrlToFile(data.dataUrl, `copertina-${Date.now()}.png`);
+          if (file) setExportedCover(file);
+        }
+        return;
+      }
+
       const frameWindow = frameRef.current?.contentWindow;
       if (!frameWindow) return;
 
@@ -77,6 +105,16 @@ export function CopertineTool({ runtime }: { runtime: ToolRuntime }) {
           Schermo intero
         </Button>
       </div>
+
+      <BookProjectPicker
+        bookProject={bookProject}
+        onFilesLoaded={() => {
+          // Copertine è un editor da zero: selezionare un progetto qui serve solo a
+          // scegliere dove salvare la PROSSIMA esportazione, non carica nulla nell'editor.
+        }}
+        currentCoverFile={exportedCover}
+        currentInteriorFile={null}
+      />
 
       <div className="relative overflow-hidden rounded-xl border border-border bg-background">
         {loading && (

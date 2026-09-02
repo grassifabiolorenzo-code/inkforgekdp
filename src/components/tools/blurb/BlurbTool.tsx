@@ -104,6 +104,13 @@ export function BlurbTool({ runtime }: { runtime: ToolRuntime }) {
         const fullInput: BlurbInput = { ...input, tone };
         let result = generateBlurbLocal(fullInput);
         let usedAi = false;
+        // Il motore interno di riserva scrive solo in italiano: se l'AI fallisce e l'utente
+        // aveva scelto un'altra lingua di output, l'avviso deve dirlo esplicitamente — altrimenti
+        // l'utente riceve (e paga) un testo in una lingua diversa da quella richiesta senza saperlo.
+        const fallbackLanguageNote =
+          outputLocale === "it"
+            ? "Usato il motore interno di riserva."
+            : "Usato il motore interno di riserva, che scrive solo in italiano: il testo generato NON è nella lingua scelta.";
 
         if (useAi) {
           try {
@@ -131,11 +138,15 @@ export function BlurbTool({ runtime }: { runtime: ToolRuntime }) {
               result = response.copy;
               usedAi = true;
             } else {
-              toast.warning(`AI non disponibile: ${response.error}. Usato il motore interno.`);
+              toast.warning(`AI non disponibile: ${response.error}. ${fallbackLanguageNote}`, {
+                duration: 7000,
+              });
             }
           } catch (aiError) {
             console.error(aiError);
-            toast.warning("Generazione AI non riuscita: usato il motore interno.");
+            toast.warning(`Generazione AI non riuscita. ${fallbackLanguageNote}`, {
+              duration: 7000,
+            });
           }
         }
 
@@ -315,7 +326,11 @@ export function BlurbTool({ runtime }: { runtime: ToolRuntime }) {
           disabled={!useAi}
         />
 
-        <Button className="w-full" onClick={handleGenerate} disabled={generating}>
+        <Button
+          className="w-full"
+          onClick={handleGenerate}
+          disabled={generating || runtime.charging}
+        >
           {generating ? (
             <Loader2 className="mr-2 size-4 animate-spin" />
           ) : (

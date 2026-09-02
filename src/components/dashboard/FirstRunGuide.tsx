@@ -1,5 +1,15 @@
 import { Link } from "@tanstack/react-router";
-import { Compass, FileText, Image, Layers } from "lucide-react";
+import {
+  BookOpen,
+  Compass,
+  FileText,
+  Image,
+  Layers,
+  LayoutGrid,
+  Megaphone,
+  ScanSearch,
+  User,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -15,9 +25,28 @@ import { TOOLS } from "@/config/tools";
 
 const copertine = TOOLS.find((t) => t.id === "copertine")!;
 const pubblicazione = TOOLS.find((t) => t.id === "pubblicazione")!;
+const aplus = TOOLS.find((t) => t.id === "aplus")!;
+const triage = TOOLS.find((t) => t.id === "triage")!;
 const interni = TOOLS.find((t) => t.id === "interni")!;
+const blurb = TOOLS.find((t) => t.id === "blurb")!;
+const bio = TOOLS.find((t) => t.id === "bio")!;
+const promo = TOOLS.find((t) => t.id === "promo")!;
 
 const STARTING_POINTS = [
+  {
+    icon: ScanSearch,
+    question: "Hai un lotto di foto da scremare prima di impaginare?",
+    answer:
+      "Triage ti fa scorrere le immagini una a una (Bocciata/Rimandata/Promossa) ed esporta solo le migliori, pronte per l'interno.",
+    tool: triage,
+  },
+  {
+    icon: Layers,
+    question: "Hai un PDF da impaginare per l'interno del libro?",
+    answer:
+      "Interni lo trasforma in un PDF pronto per KDP, con margini e ridimensionamento automatici.",
+    tool: interni,
+  },
   {
     icon: Image,
     question: "Devi ancora creare la copertina?",
@@ -32,11 +61,29 @@ const STARTING_POINTS = [
     tool: pubblicazione,
   },
   {
-    icon: Layers,
-    question: "Hai un PDF da impaginare per l'interno del libro?",
+    icon: LayoutGrid,
+    question: "Vuoi i moduli grafici A+ per la pagina prodotto?",
     answer:
-      "Interni lo trasforma in un PDF pronto per KDP, con margini e ridimensionamento automatici.",
-    tool: interni,
+      "A+ KDPstudio genera i 5 moduli Amazon (Hero, Proof, Value, Feature Grid, Compare) dalle tue immagini reali.",
+    tool: aplus,
+  },
+  {
+    icon: BookOpen,
+    question: "Ti serve una quarta di copertina o una sinossi?",
+    answer: "Blurb scrive hook, sinossi ed editorial blurb nel tono e genere che scegli.",
+    tool: blurb,
+  },
+  {
+    icon: User,
+    question: "Manca la tua bio autore o un comunicato stampa?",
+    answer: "Bio genera 3 bio di lunghezza crescente più un comunicato per il lancio del libro.",
+    tool: bio,
+  },
+  {
+    icon: Megaphone,
+    question: "Pronto a promuovere il lancio?",
+    answer: "Promo crea post social, headline/bullet per Amazon Ads ed email di lancio.",
+    tool: promo,
   },
 ];
 
@@ -83,7 +130,7 @@ export function FirstRunGuide({ userId }: { userId: string }) {
       </Button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Benvenuto su InkForgeKdp</DialogTitle>
             <DialogDescription>

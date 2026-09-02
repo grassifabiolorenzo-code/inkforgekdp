@@ -102,9 +102,9 @@ function ProjectsPage() {
           <h2 className="font-semibold">Come funzionano</h2>
           <p className="text-sm text-muted-foreground">
             Crea un progetto per ogni libro a cui stai lavorando, carica copertina e/o interno da un
-            qualsiasi tool (Pubblicazione, A+, Blurb, Bio, Promo, o come output di Interni) e
-            riusali negli altri tool senza ricaricarli. Ogni progetto scade automaticamente 6 ore
-            dopo l'ultimo utilizzo.
+            qualsiasi tool (Pubblicazione, A+, Blurb, Bio, Promo, o come output di Interni e
+            Copertine) e riusali negli altri tool senza ricaricarli. Ogni progetto scade
+            automaticamente 6 ore dopo l'ultimo utilizzo.
           </p>
         </div>
 

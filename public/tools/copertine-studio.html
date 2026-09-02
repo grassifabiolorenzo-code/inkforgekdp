@@ -454,6 +454,27 @@
 
     <!-- SCRIPT ENGINE FIXATO -->
     <script>
+        // Avviso non bloccante al posto di alert() nativo, coerente con i toast (sonner) usati
+        // nel resto della piattaforma: un alert() blocca l'intero thread del browser e stona con
+        // l'esperienza React circostante.
+        function showNotice(message, isError) {
+            let el = document.getElementById('opNotice');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'opNotice';
+                el.style.cssText = 'position:fixed;top:16px;left:50%;transform:translateX(-50%);' +
+                    'z-index:9999;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:500;' +
+                    'box-shadow:0 4px 14px rgba(0,0,0,.35);transition:opacity .2s;max-width:90vw;';
+                document.body.appendChild(el);
+            }
+            el.style.background = isError ? '#7f1d1d' : '#1e293b';
+            el.style.color = '#f8fafc';
+            el.style.opacity = '1';
+            el.textContent = message;
+            clearTimeout(el._hideTimer);
+            el._hideTimer = setTimeout(() => { el.style.opacity = '0'; }, 4000);
+        }
+
         // Ponte con la piattaforma InkForgeKdp: verifica accesso/crediti prima dell'export.
         // Se questa pagina viene aperta senza un genitore (es. navigazione diretta
         // all'URL, o una finestra standalone non collegata all'app), NON c'è modo
@@ -1147,16 +1168,24 @@
 
                         const charged = await window.__opConfirmCharge();
                         if (!charged) {
-                            alert('Addebito del credito non riuscito: esportazione annullata.');
+                            showNotice('Addebito del credito non riuscito: esportazione annullata.', true);
                             return;
                         }
 
+                        const dataUrl = canvas.toDataURL('image/png');
                         const link = document.createElement('a');
                         link.download = `Copertina_KDP_HD_${Date.now()}.png`;
-                        link.href = canvas.toDataURL('image/png');
+                        link.href = dataUrl;
                         link.click();
+
+                        // Rende disponibile l'ultima copertina esportata alla piattaforma (fuori
+                        // dall'iframe), così l'utente può salvarla come copertina del progetto
+                        // libro condiviso senza dover ricaricare manualmente il PNG scaricato.
+                        if (window.parent !== window) {
+                            window.parent.postMessage({ source: 'op-copertine', type: 'export-complete', dataUrl }, '*');
+                        }
                     } catch (err) {
-                        alert('Errore durante l\'esportazione: ' + err.message);
+                        showNotice('Errore durante l\'esportazione: ' + err.message, true);
                     } finally {
                         if (guides && !wasGuidesHidden) guides.classList.remove('hidden');
                     }

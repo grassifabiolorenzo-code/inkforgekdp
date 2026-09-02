@@ -112,6 +112,13 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
         const fullInput: PromoInput = { ...input, tone };
         let result = generatePromoKitLocal(fullInput);
         let usedAi = false;
+        // Il motore interno di riserva scrive solo in italiano: se l'AI fallisce e l'utente
+        // aveva scelto un'altra lingua di output, l'avviso deve dirlo esplicitamente — altrimenti
+        // l'utente riceve (e paga) un testo in una lingua diversa da quella richiesta senza saperlo.
+        const fallbackLanguageNote =
+          outputLocale === "it"
+            ? "Usato il motore interno di riserva."
+            : "Usato il motore interno di riserva, che scrive solo in italiano: il testo generato NON è nella lingua scelta.";
 
         if (useAi) {
           try {
@@ -140,6 +147,14 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
               const posts = response.copy.posts
                 .filter((p) => validPlatforms.has(p.platform as PromoPlatform))
                 .map((p) => ({ platform: p.platform as PromoPlatform, caption: p.caption }));
+              if (posts.length === 0 && response.copy.posts.length > 0) {
+                // L'AI ha risposto ma con piattaforme non riconosciute: senza questo avviso
+                // l'utente vedrebbe post generici del motore interno senza sapere perché non
+                // riflettono le piattaforme scelte.
+                toast.warning(
+                  "L'AI ha restituito piattaforme non riconosciute: post social sostituiti con il motore interno.",
+                );
+              }
               result = {
                 posts: posts.length > 0 ? posts : result.posts,
                 adsHeadlines:
@@ -154,11 +169,15 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
               };
               usedAi = true;
             } else {
-              toast.warning(`AI non disponibile: ${response.error}. Usato il motore interno.`);
+              toast.warning(`AI non disponibile: ${response.error}. ${fallbackLanguageNote}`, {
+                duration: 7000,
+              });
             }
           } catch (aiError) {
             console.error(aiError);
-            toast.warning("Generazione AI non riuscita: usato il motore interno.");
+            toast.warning(`Generazione AI non riuscita. ${fallbackLanguageNote}`, {
+              duration: 7000,
+            });
           }
         }
 
@@ -338,7 +357,11 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
           disabled={!useAi}
         />
 
-        <Button className="w-full" onClick={handleGenerate} disabled={generating}>
+        <Button
+          className="w-full"
+          onClick={handleGenerate}
+          disabled={generating || runtime.charging}
+        >
           {generating ? (
             <Loader2 className="mr-2 size-4 animate-spin" />
           ) : (
