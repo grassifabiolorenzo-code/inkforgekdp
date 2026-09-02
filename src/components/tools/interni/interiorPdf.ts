@@ -37,7 +37,7 @@ async function renderContentCanvas(
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   if (page.kind === "template" && page.templateId) {
-    drawTemplate(ctx, page.templateId, canvas.width, canvas.height);
+    drawTemplate(ctx, page.templateId, canvas.width, canvas.height, page.templateSeed);
     return canvas;
   }
 

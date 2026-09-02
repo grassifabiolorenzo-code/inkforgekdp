@@ -234,7 +234,9 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
     }
   }
 
-  /** Accoda `count` copie del template scelto in un colpo solo (es. 10 pagine di righe strette). */
+  /** Accoda `count` copie del template scelto in un colpo solo (es. 10 pagine di righe strette).
+   * Ogni copia riceve un `templateSeed` casuale proprio: per i template con contenuto generato
+   * (es. Sudoku) garantisce che ogni pagina abbia un puzzle diverso, stabile nel tempo. */
   function addTemplatePages(count: number) {
     const spec = getTemplateSpec(selectedTemplateId);
     const n = Math.max(1, Math.min(200, Math.round(count) || 1));
@@ -244,6 +246,7 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
         id: nextPageId(),
         kind: "template" as const,
         templateId: selectedTemplateId,
+        templateSeed: Math.floor(Math.random() * 2 ** 31),
         name: spec?.label ?? "Template",
         fillModeOverride: "default" as const,
       })),

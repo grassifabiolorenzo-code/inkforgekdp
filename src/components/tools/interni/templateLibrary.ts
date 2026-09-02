@@ -10,6 +10,12 @@
  * per bambini (labirinti, mandala, unisci i puntini, ricalco) sono stati rimossi: il loro
  * disegno geometrico "a formula" leggeva come generato in modo grezzo, non come un prodotto
  * curato — meglio poche pagine ben fatte che tante riempitive.
+ *
+ * Il Sudoku è un vero puzzle generato e verificato (soluzione unica garantita da un solutore,
+ * non una griglia vuota), diverso a ogni pagina ma stabile nel tempo grazie a `templateSeed` —
+ * niente più errori di soluzione o pagine duplicate. Il tris è stato rimosso: una griglia vuota
+ * non ha contenuto da generare, quindi non può mai essere "diversa ogni volta" in modo
+ * significativo.
  */
 
 export type TemplateId =
@@ -35,8 +41,7 @@ export type TemplateId =
   | "haccp-cleaning-log"
   | "guest-review-bnb"
   | "delivery-inventory-log"
-  | "sudoku-grid"
-  | "tic-tac-toe-grid";
+  | "sudoku-grid";
 
 export interface TemplateSpec {
   id: TemplateId;
@@ -87,19 +92,21 @@ export const TEMPLATE_LIBRARY: TemplateSpec[] = [
     label: "Registro consegne e inventario",
     category: "Registri professionali",
   },
-  { id: "sudoku-grid", label: "Griglia Sudoku vuota", category: "Attività" },
-  { id: "tic-tac-toe-grid", label: "Griglie Tris", category: "Attività" },
+  { id: "sudoku-grid", label: "Sudoku (puzzle vero, soluzione unica)", category: "Attività" },
 ];
 
 export const getTemplateSpec = (id: string): TemplateSpec | undefined =>
   TEMPLATE_LIBRARY.find((t) => t.id === id);
 
-/** Disegna il template scelto su un canvas già dimensionato (w×h in pixel, sfondo bianco). */
+/** Disegna il template scelto su un canvas già dimensionato (w×h in pixel, sfondo bianco).
+ * `seed` determina il contenuto dei template generati casualmente (solo Sudoku, per ora):
+ * stesso seed → stesso puzzle, così la stessa pagina non cambia tra preview ed export. */
 export function drawTemplate(
   ctx: CanvasRenderingContext2D,
   id: TemplateId,
   w: number,
   h: number,
+  seed = 1,
 ): void {
   const margin = Math.round(Math.min(w, h) * 0.06);
   switch (id) {
@@ -170,10 +177,7 @@ export function drawTemplate(
       drawDeliveryInventoryLog(ctx, w, h, margin);
       break;
     case "sudoku-grid":
-      drawSudokuGrid(ctx, w, h, margin);
-      break;
-    case "tic-tac-toe-grid":
-      drawTicTacToeGrid(ctx, w, h, margin);
+      drawSudokuGrid(ctx, w, h, margin, seed);
       break;
   }
 }
@@ -852,8 +856,153 @@ function drawGuestReviewBnb(ctx: CanvasRenderingContext2D, w: number, h: number,
 /* Attività                                                                  */
 /* ------------------------------------------------------------------------ */
 
-/** Griglia Sudoku 9×9 vuota, con i bordi dei blocchi 3×3 in evidenza. */
-function drawSudokuGrid(ctx: CanvasRenderingContext2D, w: number, h: number, margin: number) {
+/**
+ * Generatore + solutore Sudoku: un vero puzzle a soluzione UNICA, mai una griglia vuota o un
+ * riempimento casuale che potrebbe risultare irrisolvibile o avere più soluzioni.
+ *
+ * - `mulberry32` è un PRNG deterministico: stesso seed → stessa sequenza pseudo-casuale, quindi
+ *   la stessa pagina produce sempre lo stesso puzzle (preview ed export coerenti), mentre pagine
+ *   diverse (seed diversi) producono puzzle diversi.
+ * - La soluzione piena si genera con backtracking randomizzato (ordine delle cifre mescolato a
+ *   ogni cella), poi si rimuovono celle una alla volta: una rimozione si tiene SOLO se
+ *   `countSolutions` conferma che la griglia risultante ha ancora esattamente una soluzione —
+ *   questa verifica è ciò che garantisce l'assenza di errori di soluzione.
+ */
+
+type SudokuGrid = number[][]; // 9×9, 0 = casella vuota
+
+function mulberry32(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function shuffled<T>(items: T[], rnd: () => number): T[] {
+  const arr = [...items];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [arr[i], arr[j]] = [arr[j]!, arr[i]!];
+  }
+  return arr;
+}
+
+function canPlace(grid: SudokuGrid, row: number, col: number, value: number): boolean {
+  for (let i = 0; i < 9; i++) {
+    if (grid[row]![i] === value || grid[i]![col] === value) return false;
+  }
+  const blockRow = Math.floor(row / 3) * 3;
+  const blockCol = Math.floor(col / 3) * 3;
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 3; c++) {
+      if (grid[blockRow + r]![blockCol + c] === value) return false;
+    }
+  }
+  return true;
+}
+
+function findEmptyCell(grid: SudokuGrid): [number, number] | null {
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      if (grid[r]![c] === 0) return [r, c];
+    }
+  }
+  return null;
+}
+
+function fillRandomSolution(grid: SudokuGrid, rnd: () => number): boolean {
+  const empty = findEmptyCell(grid);
+  if (!empty) return true;
+  const [row, col] = empty;
+  for (const value of shuffled([1, 2, 3, 4, 5, 6, 7, 8, 9], rnd)) {
+    if (canPlace(grid, row, col, value)) {
+      grid[row]![col] = value;
+      if (fillRandomSolution(grid, rnd)) return true;
+      grid[row]![col] = 0;
+    }
+  }
+  return false;
+}
+
+/** Conta le soluzioni fino a un massimo di 2 (basta per verificare l'unicità senza esplorare tutto lo spazio).
+ * Esportata per il test di correttezza (templateLibrary.test.ts): un puzzle è valido solo se
+ * questa funzione restituisce esattamente 1. */
+export function countSolutions(grid: SudokuGrid, cap = 2): number {
+  const empty = findEmptyCell(grid);
+  if (!empty) return 1;
+  const [row, col] = empty;
+  let count = 0;
+  for (let value = 1; value <= 9 && count < cap; value++) {
+    if (canPlace(grid, row, col, value)) {
+      grid[row]![col] = value;
+      count += countSolutions(grid, cap - count);
+      grid[row]![col] = 0;
+    }
+  }
+  return count;
+}
+
+export interface SudokuPuzzle {
+  puzzle: SudokuGrid;
+}
+
+const TARGET_CLUES = 32;
+
+/** Esportata (oltre che usata internamente da drawSudokuGrid via getSudokuPuzzle) per il test
+ * di correttezza: verifica che ogni seed produca un puzzle a soluzione unica. */
+export function generateSudoku(seed: number): SudokuPuzzle {
+  const rnd = mulberry32(seed);
+  const solution: SudokuGrid = Array.from({ length: 9 }, () => Array(9).fill(0));
+  fillRandomSolution(solution, rnd);
+
+  const puzzle = solution.map((row) => [...row]);
+  const cellOrder = shuffled(
+    Array.from({ length: 81 }, (_, i) => [Math.floor(i / 9), i % 9] as [number, number]),
+    rnd,
+  );
+
+  let clues = 81;
+  for (const [row, col] of cellOrder) {
+    if (clues <= TARGET_CLUES) break;
+    const backup = puzzle[row]![col]!;
+    puzzle[row]![col] = 0;
+    const attempt = puzzle.map((r) => [...r]);
+    if (countSolutions(attempt) === 1) {
+      clues -= 1;
+    } else {
+      puzzle[row]![col] = backup; // rimuoverla renderebbe la soluzione non più unica.
+    }
+  }
+
+  return { puzzle };
+}
+
+// Cache in memoria per seed: evita di rigenerare/riverificare lo stesso puzzle a ogni render
+// dell'anteprima (la generazione con verifica di unicità non è gratuita).
+const sudokuCache = new Map<number, SudokuPuzzle>();
+
+function getSudokuPuzzle(seed: number): SudokuPuzzle {
+  let cached = sudokuCache.get(seed);
+  if (!cached) {
+    cached = generateSudoku(seed);
+    sudokuCache.set(seed, cached);
+  }
+  return cached;
+}
+
+/** Sudoku 9×9 vero e proprio: puzzle generato e verificato a soluzione unica, con i numeri dati
+ * stampati nella griglia — non una griglia vuota. */
+function drawSudokuGrid(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  margin: number,
+  seed: number,
+) {
+  const { puzzle } = getSudokuPuzzle(seed);
   const size = Math.min(w, h) - margin * 2;
   const ox = margin + (w - margin * 2 - size) / 2;
   const oy = margin + (h - margin * 2 - size) / 2;
@@ -872,34 +1021,23 @@ function drawSudokuGrid(ctx: CanvasRenderingContext2D, w: number, h: number, mar
     ctx.lineTo(ox + size, oy + i * cell);
     ctx.stroke();
   }
-}
 
-/** Griglie di Tris (3×3) ripetute, pronte da giocare a matita. */
-function drawTicTacToeGrid(ctx: CanvasRenderingContext2D, w: number, h: number, margin: number) {
-  const cols = 2;
-  const rows = 3;
-  const cellW = (w - margin * 2) / cols;
-  const cellH = (h - margin * 2) / rows;
-  const boardSize = Math.min(cellW, cellH) * 0.7;
-
-  ctx.strokeStyle = "#334155";
-  ctx.lineWidth = Math.max(2, boardSize * 0.02);
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const cx = margin + c * cellW + cellW / 2;
-      const cy = margin + r * cellH + cellH / 2;
-      const x0 = cx - boardSize / 2;
-      const y0 = cy - boardSize / 2;
-      for (let i = 1; i < 3; i++) {
-        ctx.beginPath();
-        ctx.moveTo(x0 + (boardSize * i) / 3, y0);
-        ctx.lineTo(x0 + (boardSize * i) / 3, y0 + boardSize);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(x0, y0 + (boardSize * i) / 3);
-        ctx.lineTo(x0 + boardSize, y0 + (boardSize * i) / 3);
-        ctx.stroke();
+  ctx.fillStyle = "#1f2937";
+  ctx.font = `${Math.round(cell * 0.55)}px sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      const value = puzzle[r]![c]!;
+      if (value !== 0) {
+        ctx.fillText(String(value), ox + c * cell + cell / 2, oy + r * cell + cell / 2);
       }
     }
   }
+  ctx.textAlign = "left";
+  ctx.textBaseline = "alphabetic";
+
+  ctx.fillStyle = "#64748b";
+  ctx.font = `${Math.round(margin * 0.32)}px sans-serif`;
+  ctx.fillText("SUDOKU", margin, margin * 0.6);
 }

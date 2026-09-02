@@ -34,6 +34,10 @@ export interface InteriorPage {
   file?: File;
   /** Presente solo quando kind === "template". */
   templateId?: import("./templateLibrary").TemplateId;
+  /** Seed per i template con contenuto generato casualmente (es. un puzzle Sudoku): stessa
+   * pagina → stesso contenuto a ogni render (preview ed export coerenti), pagine diverse →
+   * contenuto diverso. Presente solo quando kind === "template". */
+  templateSeed?: number;
   name?: string;
   /** "default" = usa l'impostazione generale del documento. */
   fillModeOverride: FillMode | "default";
