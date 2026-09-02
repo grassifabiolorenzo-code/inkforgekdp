@@ -57,11 +57,15 @@ import type {
 const TEMPLATE_CATEGORIES = [...new Set(TEMPLATE_LIBRARY.map((t) => t.category))];
 
 // Il Sudoku è un vero puzzle generato e verificato al volo (non una pagina statica gratuita
-// come righe/quadretti): a differenza degli altri template costa 1 credito ogni 10 pagine
-// (arrotondato per eccesso), con un tetto più basso per singola aggiunta.
+// come righe/quadretti): a differenza degli altri template si acquista solo in pacchetti da 10
+// pagine, ciascuno a 1 credito fisso — mai un numero libero di pagine.
 const SUDOKU_TEMPLATE_ID: TemplateId = "sudoku-grid";
-const MAX_SUDOKU_PER_BATCH = 100;
 const SUDOKU_PAGES_PER_CREDIT = 10;
+const MAX_SUDOKU_PER_BATCH = 100;
+const SUDOKU_PACKAGE_SIZES = Array.from(
+  { length: MAX_SUDOKU_PER_BATCH / SUDOKU_PAGES_PER_CREDIT },
+  (_, i) => (i + 1) * SUDOKU_PAGES_PER_CREDIT,
+); // [10, 20, 30, ..., 100]
 const MAX_FREE_TEMPLATES_PER_BATCH = 200;
 // operationId FISSO (non newOperationId()): consume_credit è idempotente per (utente,
 // operationId), quindi il primo utilizzo addebita 1 credito e ogni tentativo successivo, in
@@ -337,10 +341,9 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
     }
   }
 
-  /** Genera fino a `count` puzzle Sudoku (max 100 per volta), addebitando 1 credito ogni 10
-   * pagine (arrotondato per eccesso: 1-10 pagine = 1 credito, 11-20 = 2, ecc.). Se i crediti
-   * finiscono a metà, si fermano insieme l'addebito e l'aggiunta pagine, mantenendo solo le
-   * pagine effettivamente coperte da un blocco già pagato. */
+  /** Genera `count` puzzle Sudoku (dalla UI: sempre un multiplo di 10, un pacchetto da
+   * SUDOKU_PAGES_PER_CREDIT pagine = 1 credito fisso). Se i crediti finiscono a metà, si fermano
+   * insieme l'addebito e l'aggiunta pagine, mantenendo solo i pacchetti effettivamente pagati. */
   async function addSudokuPages(count: number) {
     if (sudokuAddGuard.current) return;
     sudokuAddGuard.current = true;
@@ -763,7 +766,9 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
                 const next = v as TemplateId;
                 setSelectedTemplateId(next);
                 if (next === SUDOKU_TEMPLATE_ID) {
-                  setTemplateCount((c) => Math.min(c, MAX_SUDOKU_PER_BATCH));
+                  // Il Sudoku si sceglie solo in pacchetti da 10: si riparte sempre dal più
+                  // piccolo, non si eredita un numero libero impostato per un altro template.
+                  setTemplateCount(SUDOKU_PAGES_PER_CREDIT);
                 }
               }}
             >
@@ -785,32 +790,44 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
                 ))}
               </SelectContent>
             </Select>
-            <Input
-              type="number"
-              min={1}
-              max={
-                selectedTemplateId === SUDOKU_TEMPLATE_ID
-                  ? MAX_SUDOKU_PER_BATCH
-                  : MAX_FREE_TEMPLATES_PER_BATCH
-              }
-              value={templateCount}
-              onChange={(e) =>
-                setTemplateCount(
-                  Math.max(
-                    1,
-                    Math.min(
-                      selectedTemplateId === SUDOKU_TEMPLATE_ID
-                        ? MAX_SUDOKU_PER_BATCH
-                        : MAX_FREE_TEMPLATES_PER_BATCH,
-                      Number(e.target.value) || 1,
+            {selectedTemplateId === SUDOKU_TEMPLATE_ID ? (
+              <Select
+                value={String(templateCount)}
+                onValueChange={(v) => setTemplateCount(Number(v))}
+              >
+                <SelectTrigger className="w-44 shrink-0" aria-label="Pacchetto Sudoku">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SUDOKU_PACKAGE_SIZES.map((size) => {
+                    const credits = size / SUDOKU_PAGES_PER_CREDIT;
+                    return (
+                      <SelectItem key={size} value={String(size)}>
+                        {size} pagine ({credits} {credits === 1 ? "credito" : "crediti"})
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input
+                type="number"
+                min={1}
+                max={MAX_FREE_TEMPLATES_PER_BATCH}
+                value={templateCount}
+                onChange={(e) =>
+                  setTemplateCount(
+                    Math.max(
+                      1,
+                      Math.min(MAX_FREE_TEMPLATES_PER_BATCH, Number(e.target.value) || 1),
                     ),
-                  ),
-                )
-              }
-              className="w-16 shrink-0 text-center"
-              aria-label="Quante copie aggiungere"
-              title="Quante copie aggiungere"
-            />
+                  )
+                }
+                className="w-16 shrink-0 text-center"
+                aria-label="Quante copie aggiungere"
+                title="Quante copie aggiungere"
+              />
+            )}
             <Button
               type="button"
               variant="outline"
@@ -842,7 +859,7 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
           </div>
           <p className="text-[11px] text-muted-foreground">
             {selectedTemplateId === SUDOKU_TEMPLATE_ID
-              ? `Ogni pagina Sudoku è un puzzle vero generato al momento (soluzione unica garantita). Costa 1 credito ogni ${SUDOKU_PAGES_PER_CREDIT} pagine (arrotondato per eccesso): fino a ${MAX_SUDOKU_PER_BATCH} alla volta.`
+              ? `Ogni pagina Sudoku è un puzzle vero generato al momento (soluzione unica garantita). Si acquista in pacchetti da ${SUDOKU_PAGES_PER_CREDIT} pagine, sempre 1 credito a pacchetto: fino a ${MAX_SUDOKU_PER_BATCH} alla volta.`
               : ALWAYS_FREE_TEMPLATE_IDS.has(selectedTemplateId)
                 ? "Pagina completamente bianca: sempre gratuita, nessun credito richiesto — utilizzabile anche prima di sbloccare il resto della libreria."
                 : "Imposta un numero maggiore di 1 per accodare più copie dello stesso template in un solo click (es. 20 pagine di righe strette). Il primo utilizzo della libreria (Sudoku e pagina bianca esclusi) costa 1 credito una tantum, poi resta sempre gratuita."}
