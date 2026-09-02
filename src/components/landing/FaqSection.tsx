@@ -4,11 +4,12 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { getPlan } from "@/config/plans";
 
 export const FAQ_ITEMS = [
   {
     q: "Cosa include l'abbonamento?",
-    a: "Tutti i piani includono Copertine, Pubblicazione e Triage. A+ KDPstudio è riservato ai piani Pro e Business. La differenza tra i piani riguarda quindi i tool inclusi e il numero di utilizzi mensili (50 con Starter, 300 con Pro, illimitati con Business).",
+    a: `Tutti i piani includono Copertine, Pubblicazione e Triage. A+ KDPstudio è riservato ai piani Pro e Business. La differenza tra i piani riguarda quindi i tool inclusi e il numero di utilizzi mensili (${getPlan("starter")?.monthlyLimit} con Starter, ${getPlan("pro")?.monthlyLimit} con Pro, illimitati con Business).`,
   },
   {
     q: "Come funziona il consumo dei crediti?",

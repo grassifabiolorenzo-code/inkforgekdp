@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { upgradePathFrom } from "@/config/plans";
+import { getPlan, upgradePathFrom } from "@/config/plans";
 import type { CreditBlock } from "@/hooks/useAccount";
 import type { CreditState } from "@/lib/credits.functions";
 
@@ -89,8 +89,9 @@ export function ToolNotInPlanState({ toolName }: { toolName: string }) {
       </span>
       <h2 className="text-lg font-semibold">{toolName} è disponibile con Pro e Business</h2>
       <p className="mx-auto max-w-md text-sm text-muted-foreground">
-        Il tuo piano attuale non include questo strumento. Passa a Pro (€35/mese, 300 utilizzi) o
-        Business (€99/mese, utilizzo illimitato) per sbloccarlo.
+        Il tuo piano attuale non include questo strumento. Passa a Pro (€35/mese,{" "}
+        {getPlan("pro")?.monthlyLimit} utilizzi) o Business (€99/mese, utilizzo illimitato) per
+        sbloccarlo.
       </p>
       <Button asChild className="bg-gradient-brand text-primary-foreground hover:opacity-90">
         <Link to="/dashboard/subscription">Passa a Pro o Business</Link>

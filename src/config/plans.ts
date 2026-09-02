@@ -62,16 +62,32 @@ export const PLANS: PlanConfig[] = [
     price: 35,
     currency: "EUR",
     interval: "month",
-    monthlyLimit: 300,
+    // Alzato da un abbozzo iniziale di 300 (audit modernizzazione, 2026-09-02): con ogni
+    // operazione a costo fisso di 1 credito indipendente da pagine/moduli (vedi consume_credit),
+    // un publisher Pro a volume sostenuto (~12 libri/mese, moduli A+ inclusi) consuma in media
+    // circa 65-70 crediti/mese. 120 lascia comunque un margine di quasi 2× sopra questa media,
+    // lo stesso rapporto già presente nel piano Starter (50 crediti su una media stimata di
+    // circa 28/mese) — non più il 4× di margine di prima, che regalava capacità mai usata dalla
+    // maggioranza degli abbonati senza cambiare il prezzo.
+    monthlyLimit: 120,
     unlimited: false,
-    allowedTools: ["copertine", "pubblicazione", "aplus", "triage", "interni", "blurb", "bio", "promo"],
+    allowedTools: [
+      "copertine",
+      "pubblicazione",
+      "aplus",
+      "triage",
+      "interni",
+      "blurb",
+      "bio",
+      "promo",
+    ],
     firstMonthBonus: 0,
     recommended: true,
     badge: "PIÙ SCELTO",
     tagline: "Il piano ideale per chi pubblica ogni settimana.",
     features: [
       "Tutti i tool, incluso A+ KDPstudio e Interni",
-      "300 utilizzi al mese",
+      "120 utilizzi al mese",
       "Storico utilizzi completo",
       "Priorità di elaborazione",
       "Supporto prioritario",
@@ -86,7 +102,16 @@ export const PLANS: PlanConfig[] = [
     interval: "month",
     monthlyLimit: null,
     unlimited: true,
-    allowedTools: ["copertine", "pubblicazione", "aplus", "triage", "interni", "blurb", "bio", "promo"],
+    allowedTools: [
+      "copertine",
+      "pubblicazione",
+      "aplus",
+      "triage",
+      "interni",
+      "blurb",
+      "bio",
+      "promo",
+    ],
     firstMonthBonus: 0,
     recommended: false,
     badge: "PREMIUM",
@@ -128,15 +153,22 @@ export const planLimitLabel = (plan: PlanConfig) =>
 
 /**
  * Pacchetto di crediti extra acquistabile una tantum (senza abbonamento), per chi esaurisce i
- * crediti del piano prima del rinnovo. Prezzo: €0,49/credito — più caro del costo per credito di
- * Starter (€0,30) per non rendere conveniente restare su un piano piccolo e comprare extra invece
- * di fare upgrade, ma comunque un impulso a basso attrito per un bisogno occasionale. Non scade e
- * non si riporta al rinnovo: si somma semplicemente al monte crediti disponibile.
+ * crediti del piano prima del rinnovo. Alzato da 10 a 15 crediti (audit modernizzazione,
+ * 2026-09-02): con il limite Pro ridotto da 300 a 120, chi lavora a raffica sforerà il piano più
+ * spesso di prima, e un pacchetto da 10 copriva a malapena 2 libri "medi" (~5,5 crediti/libro) —
+ * 15 ne copre quasi 3, un salto più utile in pratica. Prezzo: €0,46/credito — resta più caro sia
+ * di Starter (€0,30/credito) sia del nuovo Pro (€0,29/credito), per non rendere conveniente
+ * comprare extra invece di fare upgrade, ma comunque un impulso a basso attrito per un bisogno
+ * occasionale. Non scade e non si riporta al rinnovo: si somma semplicemente al monte crediti
+ * disponibile.
+ *
+ * `id`/`variantEnvKey` restano "10" per compatibilità con l'env var e il prodotto Lemon Squeezy
+ * già esistenti — sono etichette interne opache, non derivano dal valore di `credits`.
  */
 export const CREDIT_PACK = {
   id: "credits10" as const,
-  credits: 10,
-  price: 4.9,
+  credits: 15,
+  price: 6.9,
   currency: "EUR",
   variantEnvKey: "VITE_LEMON_SQUEEZY_CREDITPACK10_VARIANT_ID",
 };

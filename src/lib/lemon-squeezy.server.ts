@@ -27,7 +27,9 @@ export function readLemonConfig(): LemonConfig {
       starter: process.env["LEMON_SQUEEZY_STARTER_VARIANT_ID"] ?? "",
       pro: process.env["LEMON_SQUEEZY_PRO_VARIANT_ID"] ?? "",
       business: process.env["LEMON_SQUEEZY_BUSINESS_VARIANT_ID"] ?? "",
-      // Prodotto "one-time" (non abbonamento) per il pacchetto da 10 crediti extra.
+      // Prodotto "one-time" (non abbonamento) per il pacchetto crediti extra (CREDIT_PACK in
+      // config/plans.ts — la chiave "credits10" è un'etichetta interna storica, non riflette
+      // più il numero di crediti attuale del pacchetto).
       credits10: process.env["LEMON_SQUEEZY_CREDITPACK10_VARIANT_ID"] ?? "",
     },
   };

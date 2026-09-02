@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SiteFooter } from "@/components/landing/SiteFooter";
 import { SiteNav } from "@/components/landing/SiteNav";
 import { canonicalUrl } from "@/config/site";
+import { getPlan } from "@/config/plans";
 
 const title = "Termini e condizioni — InkForgeKdp";
 const description =
@@ -55,7 +56,8 @@ function TermsPage() {
           <section className="space-y-2">
             <h2 className="text-lg font-semibold text-foreground">3. Crediti di utilizzo</h2>
             <p>
-              Ogni piano include un numero di utilizzi per periodo (Starter 50, Pro 300, Business
+              Ogni piano include un numero di utilizzi per periodo (Starter{" "}
+              {getPlan("starter")?.monthlyLimit}, Pro {getPlan("pro")?.monthlyLimit}, Business
               illimitato). Un credito viene consumato soltanto al completamento dell'operazione
               finale del tool. Le operazioni fallite non vengono addebitate. I crediti non
               utilizzati non vengono trasferiti al periodo successivo.

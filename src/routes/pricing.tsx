@@ -10,7 +10,7 @@ import { softwareApplicationSchema } from "@/lib/structuredData";
 
 const title = "Prezzi e piani — InkForgeKdp";
 const description =
-  "Starter €15/mese con 50 utilizzi e +50 bonus il primo mese, Pro €35/mese con 300 utilizzi, Business €99/mese illimitato. A+ KDPstudio incluso in Pro e Business.";
+  "Starter €15/mese con 50 utilizzi e +50 bonus il primo mese, Pro €35/mese con 120 utilizzi, Business €99/mese illimitato. A+ KDPstudio incluso in Pro e Business.";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
