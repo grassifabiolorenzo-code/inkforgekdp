@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Lock } from "lucide-react";
+import { ArrowRight, FolderOpen, Lock } from "lucide-react";
 
+import { CreditsCard } from "@/components/dashboard/CreditsCard";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { FirstRunGuide } from "@/components/dashboard/FirstRunGuide";
 import {
@@ -14,7 +15,18 @@ import { Button } from "@/components/ui/button";
 import { planAllowsTool } from "@/config/plans";
 import { TOOLS } from "@/config/tools";
 import { useAccount } from "@/hooks/useAccount";
+import { useBookProject } from "@/hooks/useBookProject";
 import { useI18n, useToolCopy } from "@/lib/i18n";
+
+function timeAgo(iso: string): string {
+  const minutes = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+  if (minutes < 1) return "adesso";
+  if (minutes < 60) return `${minutes} min fa`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours} ${hours === 1 ? "ora" : "ore"} fa`;
+  const days = Math.round(hours / 24);
+  return `${days} ${days === 1 ? "giorno" : "giorni"} fa`;
+}
 
 export const Route = createFileRoute("/_authenticated/dashboard/")({
   head: () => ({
@@ -32,11 +44,16 @@ function DashboardHome() {
   const state = account.data?.credits;
   const { t } = useI18n();
   const copyOf = useToolCopy();
+  const bookProject = useBookProject();
 
   const isAllowed = (toolId: string) =>
     state?.allowed_tools
       ? state.allowed_tools.includes(toolId)
       : planAllowsTool(state?.plan?.slug, toolId);
+
+  const lastProject = [...bookProject.projects].sort(
+    (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
+  )[0];
 
   return (
     <DashboardShell title={t("dash.dashboard")} description={t("tools.sub")}>
@@ -52,6 +69,29 @@ function DashboardHome() {
         )}
 
         {state && !state.active && <InactiveSubscriptionState state={state} />}
+
+        {(state ?? lastProject) && (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {state && <CreditsCard state={state} />}
+            {lastProject && (
+              <Link
+                to="/dashboard/projects"
+                className="panel flex flex-col justify-between gap-3 p-6 transition-colors hover:bg-accent/40"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm text-muted-foreground">Riprendi da dove eri rimasto</p>
+                  <FolderOpen className="size-4 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="truncate text-xl font-bold">{lastProject.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Aggiornato {timeAgo(lastProject.updated_at)}
+                  </p>
+                </div>
+              </Link>
+            )}
+          </div>
+        )}
 
         <div>
           <div className="flex items-center justify-between gap-3">
