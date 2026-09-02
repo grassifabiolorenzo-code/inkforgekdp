@@ -76,11 +76,48 @@ function AdminSystemPage() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-sm">Pagamenti</CardTitle>
+                <CardTitle className="text-sm">
+                  Pagamenti — {data.paymentProvider.provider}
+                </CardTitle>
                 <StatusBadge status={data.paymentProvider.status} />
               </CardHeader>
-              <CardContent className="text-sm text-muted-foreground">
-                {data.paymentProvider.provider}
+              <CardContent className="space-y-2 text-sm text-muted-foreground">
+                <p className="text-xs">
+                  Dettaglio configurazione (solo presenza/assenza, mai i valori):
+                </p>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs sm:grid-cols-3">
+                  {[
+                    ["Chiave API", data.paymentProvider.details.apiKey],
+                    ["Store ID", data.paymentProvider.details.storeId],
+                    ["Webhook secret", data.paymentProvider.details.webhookSecret],
+                    ["Variant Starter", data.paymentProvider.details.variantStarter],
+                    ["Variant Pro", data.paymentProvider.details.variantPro],
+                    ["Variant Business", data.paymentProvider.details.variantBusiness],
+                  ].map(([label, ok]) => (
+                    <div key={label as string} className="flex items-center gap-1.5">
+                      <span
+                        className={
+                          ok ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"
+                        }
+                      >
+                        {ok ? "✓" : "✗"}
+                      </span>
+                      <span>{label}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="flex items-center gap-1.5 pt-1 text-xs">
+                  <span
+                    className={
+                      data.paymentProvider.details.creditPackReady
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : "text-destructive"
+                    }
+                  >
+                    {data.paymentProvider.details.creditPackReady ? "✓" : "✗"}
+                  </span>
+                  Pacchetto crediti extra (prodotto one-time)
+                </p>
               </CardContent>
             </Card>
 
@@ -110,6 +147,25 @@ function AdminSystemPage() {
               </CardHeader>
               <CardContent className="text-sm text-muted-foreground">
                 {data.environment}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Hosting</CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-muted-foreground">
+                {data.hosting.platform} · {data.hosting.framework}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Dominio</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-1 text-sm text-muted-foreground">
+                <p className="font-mono text-foreground">{data.domain.url}</p>
+                <p className="text-xs">{data.domain.source}</p>
               </CardContent>
             </Card>
           </>
