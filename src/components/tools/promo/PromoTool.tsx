@@ -14,6 +14,8 @@ import { useBookProject } from "@/hooks/useBookProject";
 import { OutputLanguageSelect, useOutputLanguage } from "@/components/tools/OutputLanguageSelect";
 import { AiStyleControls } from "@/components/tools/ai/AiStyleControls";
 import { BookProjectPicker } from "@/components/tools/BookProjectPicker";
+import { GenerationHistoryPanel } from "@/components/tools/GenerationHistoryPanel";
+import { useGenerationHistory } from "@/hooks/useGenerationHistory";
 import { DEFAULT_CREATIVITY, DEFAULT_TONE } from "@/components/tools/ai/aiStyle";
 import { generatePromoCopy } from "@/lib/aiCopy.functions";
 import { extractCoverContent, extractPdfContent } from "@/components/tools/pdfContent";
@@ -36,6 +38,7 @@ import {
 export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
   const outputLocale = useOutputLanguage();
   const bookProject = useBookProject();
+  const history = useGenerationHistory<PromoInput, PromoOutput>("promo");
   const [input, setInput] = useState<Omit<PromoInput, "tone">>({
     bookTitle: "",
     genre: "",
@@ -50,6 +53,7 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
   const [aiUsed, setAiUsed] = useState(false);
   const [output, setOutput] = useState<PromoOutput | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [restoredFromHistory, setRestoredFromHistory] = useState(false);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [interiorFile, setInteriorFile] = useState<File | null>(null);
   const chargeGuard = useRef(false);
@@ -185,9 +189,18 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
         if (!charge.ok) return;
         setOutput(result);
         setAiUsed(usedAi);
+        setRestoredFromHistory(false);
         toast.success(
           charge.duplicate ? "Generazione completata" : "Generazione completata — 1 credito",
         );
+        history
+          .saveEntry({
+            title: input.bookTitle || "Senza titolo",
+            locale: outputLocale,
+            input: fullInput,
+            output: result,
+          })
+          .catch((err) => console.error("Salvataggio cronologia non riuscito", err));
       } finally {
         setGenerating(false);
       }
@@ -372,9 +385,21 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
       </div>
 
       <div className="panel space-y-4 p-6">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">
-          Risultato
-        </h3>
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">
+            Risultato
+          </h3>
+          <GenerationHistoryPanel
+            history={history}
+            onRestore={(savedInput, savedOutput) => {
+              const { tone: savedTone, ...rest } = savedInput;
+              setInput(rest);
+              setTone(savedTone);
+              setOutput(savedOutput);
+              setRestoredFromHistory(true);
+            }}
+          />
+        </div>
 
         {!output && (
           <p className="text-sm text-muted-foreground">
@@ -386,7 +411,11 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
         {output && (
           <div className="space-y-5">
             <p className="text-[11px] text-muted-foreground">
-              {aiUsed ? "Generato con AI." : "Generato con il motore interno (fallback)."}
+              {restoredFromHistory
+                ? "Caricato dalla cronologia."
+                : aiUsed
+                  ? "Generato con AI."
+                  : "Generato con il motore interno (fallback)."}
             </p>
 
             {output.posts.map((post, index) => {

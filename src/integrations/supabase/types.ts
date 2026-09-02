@@ -398,6 +398,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      generations: {
+        Row: {
+          created_at: string;
+          id: string;
+          input: Json;
+          locale: string;
+          output: Json;
+          title: string;
+          tool_id: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          input: Json;
+          locale: string;
+          output: Json;
+          title: string;
+          tool_id: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          input?: Json;
+          locale?: string;
+          output?: Json;
+          title?: string;
+          tool_id?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       leads: {
         Row: {
           consented_at: string | null;

@@ -16,6 +16,11 @@ da `service_role` (già garantito da `pg_cron`, che gira come superuser).
 (Definite in `20260901050000_retention_cleanup.sql`, `20260901040000_rate_limiting.sql` e
 `20260902000000_book_projects.sql`.)
 
+`generations` (cronologia generazioni di Pubblicazione/Blurb/Bio/Promo, vedi
+`20260902010000_generations_history.sql`) **non ha bisogno di un job pg_cron**: un trigger
+`AFTER INSERT` tiene la cronologia di ogni utente/tool entro le 30 voci più recenti da sola, ad
+ogni inserimento — nessuna riga orfana da ripulire in un secondo momento.
+
 ## Come attivarle
 
 1. Apri il progetto su [supabase.com/dashboard](https://supabase.com/dashboard) → **Database → Extensions**.

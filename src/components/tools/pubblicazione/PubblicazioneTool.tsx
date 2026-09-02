@@ -17,6 +17,8 @@ import { OutputLanguageSelect, useOutputLanguage } from "@/components/tools/Outp
 import { newOperationId } from "@/hooks/useAccount";
 import { useBookProject } from "@/hooks/useBookProject";
 import { BookProjectPicker } from "@/components/tools/BookProjectPicker";
+import { GenerationHistoryPanel } from "@/components/tools/GenerationHistoryPanel";
+import { useGenerationHistory } from "@/hooks/useGenerationHistory";
 
 import {
   type Audience,
@@ -59,9 +61,18 @@ const AUDIENCES: { id: Audience; label: string }[] = [
   { id: "adults", label: "Adulti & Relax" },
 ];
 
+type PubblicazioneHistoryInput = {
+  subject: string;
+  bookType: BookType;
+  audience: Audience;
+  ageDetails: string;
+};
+
 export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
   const outputLocale = useOutputLanguage();
   const bookProject = useBookProject();
+  const history = useGenerationHistory<PubblicazioneHistoryInput, Listing>("pubblicazione");
+  const [restoredFromHistory, setRestoredFromHistory] = useState(false);
   const [subject, setSubject] = useState("");
   const [bookType, setBookType] = useState<BookType>("coloring");
   const [audience, setAudience] = useState<Audience>("toddlers");
@@ -241,9 +252,18 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
         setListing(result);
         setAiInsight(insight);
         setAiUsed(usedAi);
+        setRestoredFromHistory(false);
         toast.success(
           charge.duplicate ? "Generazione completata" : "Generazione completata — 1 credito",
         );
+        history
+          .saveEntry({
+            title: subject || "Senza soggetto",
+            locale: outputLocale,
+            input: { subject, bookType, audience, ageDetails },
+            output: result,
+          })
+          .catch((err) => console.error("Salvataggio cronologia non riuscito", err));
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Generazione non riuscita");
       } finally {
@@ -466,12 +486,33 @@ export function PubblicazioneTool({ runtime }: { runtime: ToolRuntime }) {
       </div>
 
       <div className="space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">
+            Risultato
+          </h3>
+          <GenerationHistoryPanel
+            history={history}
+            onRestore={(savedInput, savedOutput) => {
+              setSubject(savedInput.subject);
+              setBookType(savedInput.bookType);
+              setAudience(savedInput.audience);
+              setAgeDetails(savedInput.ageDetails);
+              setListing(savedOutput);
+              setRestoredFromHistory(true);
+            }}
+          />
+        </div>
+
         {!listing ? (
           <div className="panel p-10 text-center text-sm text-muted-foreground">
             Nessuna generazione ancora. Compila i campi e genera il tuo primo listing KDP.
           </div>
         ) : (
           <>
+            {restoredFromHistory && (
+              <p className="text-xs text-muted-foreground">Caricato dalla cronologia.</p>
+            )}
+
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="panel space-y-1 border-l-4 border-l-amber-400 p-5">
                 <h4 className="text-sm font-semibold">🔍 Audit Qualità &amp; Conformità</h4>
