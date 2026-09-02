@@ -4,6 +4,7 @@ import {
   BookImage,
   Download,
   FilePlus2,
+  FileUp,
   ImageDown,
   Loader2,
   Trash2,
@@ -37,6 +38,7 @@ import {
   renderFirstPagePreview,
   renderSinglePagePreview,
 } from "@/components/tools/interni/interiorPdf";
+import { extractPdfPagesAsImages } from "@/components/tools/interni/pdfPageImport";
 import {
   TEMPLATE_LIBRARY,
   getTemplateSpec,
@@ -73,8 +75,13 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
   const [selectedTemplateId, setSelectedTemplateId] = useState<TemplateId>(TEMPLATE_LIBRARY[0]!.id);
   const [downloadingPageId, setDownloadingPageId] = useState<string | null>(null);
   const [generatedPdf, setGeneratedPdf] = useState<{ blob: Blob; filename: string } | null>(null);
+  const [importingPdf, setImportingPdf] = useState(false);
+  const [importProgress, setImportProgress] = useState<{ done: number; total: number } | null>(
+    null,
+  );
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const pdfInputRef = useRef<HTMLInputElement | null>(null);
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const chargeGuard = useRef(false);
   const pageDownloadGuard = useRef(false);
@@ -157,6 +164,39 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
       })),
     ]);
     if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  /** Importa ogni pagina di un PDF già impaginato (es. un interno disegnato altrove) come
+   * pagina-immagine, nello stesso ordine del documento sorgente. */
+  async function handleImportPdf(fileList: FileList | null) {
+    const file = fileList?.[0];
+    if (!file) return;
+    setImportingPdf(true);
+    setImportProgress({ done: 0, total: 0 });
+    try {
+      const imported = await extractPdfPagesAsImages(file, (done, total) =>
+        setImportProgress({ done, total }),
+      );
+      setPages((prev) => [
+        ...prev,
+        ...imported.map((f) => ({
+          id: nextPageId(),
+          kind: "image" as const,
+          file: f,
+          name: f.name,
+          fillModeOverride: "default" as const,
+        })),
+      ]);
+      toast.success(
+        `${imported.length} ${imported.length === 1 ? "pagina importata" : "pagine importate"} dal PDF`,
+      );
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Importazione PDF non riuscita.");
+    } finally {
+      setImportingPdf(false);
+      setImportProgress(null);
+      if (pdfInputRef.current) pdfInputRef.current.value = "";
+    }
   }
 
   function addTemplatePage() {
@@ -459,6 +499,41 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
           <p className="text-[11px] text-muted-foreground">
             Puoi ripetere la selezione per aggiungere altre immagini: verranno accodate in ordine
             alfabetico/numerico.
+          </p>
+        </div>
+
+        {/* Importa da PDF esistente */}
+        <div className="space-y-2">
+          <Label
+            htmlFor="interni-pdf-file"
+            className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-border bg-surface p-4 text-sm text-muted-foreground hover:border-accent has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2"
+          >
+            {importingPdf ? (
+              <Loader2 className="size-4 shrink-0 animate-spin" />
+            ) : (
+              <FileUp className="size-4 shrink-0" />
+            )}
+            <span>
+              {importingPdf
+                ? importProgress && importProgress.total > 0
+                  ? `Importazione pagina ${importProgress.done} di ${importProgress.total}...`
+                  : "Analisi del PDF in corso..."
+                : "Oppure importa le pagine da un PDF già impaginato"}
+            </span>
+            <input
+              id="interni-pdf-file"
+              ref={pdfInputRef}
+              type="file"
+              accept="application/pdf,.pdf"
+              disabled={importingPdf}
+              onChange={(e) => void handleImportPdf(e.target.files)}
+              className="sr-only"
+            />
+          </Label>
+          <p className="text-[11px] text-muted-foreground">
+            Ogni pagina del PDF diventa una pagina-immagine qui sotto, nello stesso ordine del
+            documento: utile per riprendere un interno già pronto (o disegnato in un altro
+            programma) e reimpaginarlo con formato, margini e stampa di Interni.
           </p>
         </div>
 

@@ -10,18 +10,28 @@
 
 export type TemplateId =
   | "lines-narrow"
+  | "lines-medium"
   | "lines-wide"
   | "dot-grid"
+  | "isometric-dot-grid"
   | "graph-paper"
   | "blank-title"
+  | "cornell-notes"
+  | "music-staff"
   | "checklist"
   | "weekly-planner"
+  | "daily-planner"
   | "habit-tracker"
   | "mini-calendar"
+  | "meal-planner"
+  | "gratitude-journal"
   | "maze"
   | "connect-dots"
   | "mandala"
   | "tracing-dots"
+  | "alphabet-tracing"
+  | "sudoku-grid"
+  | "tic-tac-toe-grid"
   | "decorative-frame";
 
 export interface TemplateSpec {
@@ -32,18 +42,32 @@ export interface TemplateSpec {
 
 export const TEMPLATE_LIBRARY: TemplateSpec[] = [
   { id: "lines-narrow", label: "Righe strette", category: "Quaderno" },
+  { id: "lines-medium", label: "Righe medie", category: "Quaderno" },
   { id: "lines-wide", label: "Righe larghe", category: "Quaderno" },
   { id: "dot-grid", label: "Puntinata (dot grid)", category: "Quaderno" },
+  { id: "isometric-dot-grid", label: "Puntinata isometrica (disegno 3D)", category: "Quaderno" },
   { id: "graph-paper", label: "Quadretti", category: "Quaderno" },
   { id: "blank-title", label: "Pagina bianca con titolo", category: "Quaderno" },
+  { id: "cornell-notes", label: "Metodo Cornell (appunti)", category: "Quaderno" },
+  { id: "music-staff", label: "Pentagramma musicale", category: "Quaderno" },
   { id: "checklist", label: "Lista cose da fare", category: "Organizzazione" },
   { id: "weekly-planner", label: "Planner settimanale", category: "Organizzazione" },
+  { id: "daily-planner", label: "Planner giornaliero (orario)", category: "Organizzazione" },
   { id: "habit-tracker", label: "Tracker abitudini mensile", category: "Organizzazione" },
   { id: "mini-calendar", label: "Calendario mensile", category: "Organizzazione" },
+  { id: "meal-planner", label: "Planner pasti settimanale", category: "Organizzazione" },
+  { id: "gratitude-journal", label: "Diario della gratitudine", category: "Organizzazione" },
   { id: "maze", label: "Labirinto", category: "Attività / basso contenuto" },
   { id: "connect-dots", label: "Unisci i puntini", category: "Attività / basso contenuto" },
   { id: "mandala", label: "Mandala da colorare", category: "Attività / basso contenuto" },
   { id: "tracing-dots", label: "Tracciato guidato", category: "Attività / basso contenuto" },
+  {
+    id: "alphabet-tracing",
+    label: "Alfabeto da ricalcare",
+    category: "Attività / basso contenuto",
+  },
+  { id: "sudoku-grid", label: "Griglia Sudoku vuota", category: "Attività / basso contenuto" },
+  { id: "tic-tac-toe-grid", label: "Griglie Tris", category: "Attività / basso contenuto" },
   { id: "decorative-frame", label: "Cornice decorativa", category: "Attività / basso contenuto" },
 ];
 
@@ -51,11 +75,19 @@ export const getTemplateSpec = (id: string): TemplateSpec | undefined =>
   TEMPLATE_LIBRARY.find((t) => t.id === id);
 
 /** Disegna il template scelto su un canvas già dimensionato (w×h in pixel, sfondo bianco). */
-export function drawTemplate(ctx: CanvasRenderingContext2D, id: TemplateId, w: number, h: number): void {
+export function drawTemplate(
+  ctx: CanvasRenderingContext2D,
+  id: TemplateId,
+  w: number,
+  h: number,
+): void {
   const margin = Math.round(Math.min(w, h) * 0.06);
   switch (id) {
     case "lines-narrow":
       drawRuledLines(ctx, w, h, margin, Math.round(h * 0.028));
+      break;
+    case "lines-medium":
+      drawRuledLines(ctx, w, h, margin, Math.round(h * 0.038));
       break;
     case "lines-wide":
       drawRuledLines(ctx, w, h, margin, Math.round(h * 0.05));
@@ -63,11 +95,20 @@ export function drawTemplate(ctx: CanvasRenderingContext2D, id: TemplateId, w: n
     case "dot-grid":
       drawDotGrid(ctx, w, h, margin, Math.round(Math.min(w, h) * 0.035));
       break;
+    case "isometric-dot-grid":
+      drawIsometricDotGrid(ctx, w, h, margin, Math.round(Math.min(w, h) * 0.045));
+      break;
     case "graph-paper":
       drawGraphPaper(ctx, w, h, margin, Math.round(Math.min(w, h) * 0.035));
       break;
     case "blank-title":
       drawBlankWithTitle(ctx, w, h, margin);
+      break;
+    case "cornell-notes":
+      drawCornellNotes(ctx, w, h, margin);
+      break;
+    case "music-staff":
+      drawMusicStaff(ctx, w, h, margin);
       break;
     case "checklist":
       drawChecklist(ctx, w, h, margin);
@@ -75,11 +116,20 @@ export function drawTemplate(ctx: CanvasRenderingContext2D, id: TemplateId, w: n
     case "weekly-planner":
       drawWeeklyPlanner(ctx, w, h, margin);
       break;
+    case "daily-planner":
+      drawDailyPlanner(ctx, w, h, margin);
+      break;
     case "habit-tracker":
       drawHabitTracker(ctx, w, h, margin);
       break;
     case "mini-calendar":
       drawMiniCalendar(ctx, w, h, margin);
+      break;
+    case "meal-planner":
+      drawMealPlanner(ctx, w, h, margin);
+      break;
+    case "gratitude-journal":
+      drawGratitudeJournal(ctx, w, h, margin);
       break;
     case "maze":
       drawMaze(ctx, w, h, margin);
@@ -93,6 +143,15 @@ export function drawTemplate(ctx: CanvasRenderingContext2D, id: TemplateId, w: n
     case "tracing-dots":
       drawTracingDots(ctx, w, h, margin);
       break;
+    case "alphabet-tracing":
+      drawAlphabetTracing(ctx, w, h, margin);
+      break;
+    case "sudoku-grid":
+      drawSudokuGrid(ctx, w, h, margin);
+      break;
+    case "tic-tac-toe-grid":
+      drawTicTacToeGrid(ctx, w, h, margin);
+      break;
     case "decorative-frame":
       drawDecorativeFrame(ctx, w, h, margin);
       break;
@@ -103,7 +162,13 @@ export function drawTemplate(ctx: CanvasRenderingContext2D, id: TemplateId, w: n
 /* Quaderno                                                                  */
 /* ------------------------------------------------------------------------ */
 
-function drawRuledLines(ctx: CanvasRenderingContext2D, w: number, h: number, margin: number, gap: number) {
+function drawRuledLines(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  margin: number,
+  gap: number,
+) {
   ctx.strokeStyle = "#c7d2e0";
   ctx.lineWidth = Math.max(1, w * 0.0015);
   for (let y = margin * 1.4; y <= h - margin; y += gap) {
@@ -120,7 +185,13 @@ function drawRuledLines(ctx: CanvasRenderingContext2D, w: number, h: number, mar
   ctx.stroke();
 }
 
-function drawDotGrid(ctx: CanvasRenderingContext2D, w: number, h: number, margin: number, gap: number) {
+function drawDotGrid(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  margin: number,
+  gap: number,
+) {
   ctx.fillStyle = "#a9b6c9";
   const r = Math.max(1, w * 0.0016);
   for (let y = margin; y <= h - margin; y += gap) {
@@ -132,7 +203,13 @@ function drawDotGrid(ctx: CanvasRenderingContext2D, w: number, h: number, margin
   }
 }
 
-function drawGraphPaper(ctx: CanvasRenderingContext2D, w: number, h: number, margin: number, gap: number) {
+function drawGraphPaper(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  margin: number,
+  gap: number,
+) {
   ctx.strokeStyle = "#d7e0ec";
   ctx.lineWidth = Math.max(1, w * 0.0012);
   for (let x = margin; x <= w - margin; x += gap) {
@@ -163,6 +240,89 @@ function drawBlankWithTitle(ctx: CanvasRenderingContext2D, w: number, h: number,
   ctx.lineTo(w - margin, margin);
   ctx.stroke();
   ctx.setLineDash([]);
+}
+
+function drawIsometricDotGrid(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  margin: number,
+  gap: number,
+) {
+  ctx.fillStyle = "#a9b6c9";
+  const r = Math.max(1, w * 0.0016);
+  const rowH = (gap * Math.sqrt(3)) / 2;
+  let row = 0;
+  for (let y = margin; y <= h - margin; y += rowH) {
+    const offset = row % 2 === 0 ? 0 : gap / 2;
+    for (let x = margin + offset; x <= w - margin; x += gap) {
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    row += 1;
+  }
+}
+
+/** Griglia per il metodo di appunti Cornell: colonna spunti a sinistra, righe di nota, riepilogo in fondo. */
+function drawCornellNotes(ctx: CanvasRenderingContext2D, w: number, h: number, margin: number) {
+  const cueColW = (w - margin * 2) * 0.28;
+  const summaryH = (h - margin * 2) * 0.16;
+  const noteTop = margin;
+  const noteBottom = h - margin - summaryH;
+
+  ctx.strokeStyle = "#94a3b8";
+  ctx.lineWidth = Math.max(1.5, w * 0.0018);
+  ctx.strokeRect(margin, margin, w - margin * 2, h - margin * 2);
+  ctx.beginPath();
+  ctx.moveTo(margin + cueColW, noteTop);
+  ctx.lineTo(margin + cueColW, noteBottom);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(margin, noteBottom);
+  ctx.lineTo(w - margin, noteBottom);
+  ctx.stroke();
+
+  ctx.strokeStyle = "#e2e8f0";
+  const rowGap = Math.round(h * 0.032);
+  for (let y = noteTop + rowGap; y < noteBottom; y += rowGap) {
+    ctx.beginPath();
+    ctx.moveTo(margin + cueColW + margin * 0.3, y);
+    ctx.lineTo(w - margin - margin * 0.2, y);
+    ctx.stroke();
+  }
+
+  ctx.fillStyle = "#94a3b8";
+  ctx.font = `${Math.round(margin * 0.45)}px sans-serif`;
+  ctx.fillText("SPUNTI", margin + margin * 0.2, noteTop + margin * 0.5);
+  ctx.fillText("RIASSUNTO", margin + margin * 0.2, noteBottom + summaryH * 0.35);
+}
+
+/** Pentagrammi impilati per spartiti musicali scritti a mano. */
+function drawMusicStaff(ctx: CanvasRenderingContext2D, w: number, h: number, margin: number) {
+  const staveCount = 6;
+  const staveGap = (h - margin * 2) / staveCount;
+  const lineGap = staveGap * 0.16;
+  ctx.strokeStyle = "#334155";
+  ctx.lineWidth = Math.max(1, w * 0.0014);
+  for (let s = 0; s < staveCount; s++) {
+    const top = margin + staveGap * s + staveGap * 0.3;
+    for (let l = 0; l < 5; l++) {
+      const y = top + l * lineGap;
+      ctx.beginPath();
+      ctx.moveTo(margin, y);
+      ctx.lineTo(w - margin, y);
+      ctx.stroke();
+    }
+    ctx.beginPath();
+    ctx.moveTo(margin, top);
+    ctx.lineTo(margin, top + lineGap * 4);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(w - margin, top);
+    ctx.lineTo(w - margin, top + lineGap * 4);
+    ctx.stroke();
+  }
 }
 
 /* ------------------------------------------------------------------------ */
@@ -271,6 +431,109 @@ function drawMiniCalendar(ctx: CanvasRenderingContext2D, w: number, h: number, m
   }
 }
 
+/** Programma orario giornaliero (6:00-22:00) con colonna oraria e area appunti. */
+function drawDailyPlanner(ctx: CanvasRenderingContext2D, w: number, h: number, margin: number) {
+  const startHour = 6;
+  const endHour = 22;
+  const hours = endHour - startHour + 1;
+  const headerH = margin * 1.2;
+  const gridTop = margin + headerH;
+  const rowH = (h - margin - gridTop) / hours;
+  const timeColW = (w - margin * 2) * 0.14;
+
+  ctx.fillStyle = "#475569";
+  ctx.font = `bold ${Math.round(margin * 0.55)}px sans-serif`;
+  ctx.fillText("PROGRAMMA DI OGGI", margin, margin * 0.85);
+
+  ctx.font = `${Math.round(rowH * 0.32)}px sans-serif`;
+  for (let i = 0; i <= hours; i++) {
+    const y = gridTop + i * rowH;
+    ctx.strokeStyle = i === 0 || i === hours ? "#94a3b8" : "#e2e8f0";
+    ctx.lineWidth = Math.max(1, w * 0.0012);
+    ctx.beginPath();
+    ctx.moveTo(margin, y);
+    ctx.lineTo(w - margin, y);
+    ctx.stroke();
+    if (i < hours) {
+      ctx.fillStyle = "#64748b";
+      ctx.fillText(
+        `${String(startHour + i).padStart(2, "0")}:00`,
+        margin + margin * 0.1,
+        y + rowH * 0.65,
+      );
+    }
+  }
+  ctx.strokeStyle = "#94a3b8";
+  ctx.lineWidth = Math.max(1.2, w * 0.0015);
+  ctx.beginPath();
+  ctx.moveTo(margin + timeColW, gridTop);
+  ctx.lineTo(margin + timeColW, h - margin);
+  ctx.stroke();
+}
+
+/** Planner settimanale dei pasti: 7 giorni × colazione/pranzo/cena. */
+function drawMealPlanner(ctx: CanvasRenderingContext2D, w: number, h: number, margin: number) {
+  const days = ["LUN", "MAR", "MER", "GIO", "VEN", "SAB", "DOM"];
+  const meals = ["Colazione", "Pranzo", "Cena"];
+  const labelColW = (w - margin * 2) * 0.14;
+  const gridW = w - margin * 2 - labelColW;
+  const colW = gridW / days.length;
+  const headerH = margin * 1.2;
+  const top = margin + headerH;
+  const rowH = (h - margin - top) / meals.length;
+
+  ctx.fillStyle = "#475569";
+  ctx.font = `${Math.round(colW * 0.16)}px sans-serif`;
+  days.forEach((d, i) => {
+    const x = margin + labelColW + i * colW;
+    ctx.fillText(d, x + colW * 0.28, margin + headerH * 0.7);
+  });
+
+  ctx.strokeStyle = "#94a3b8";
+  ctx.lineWidth = Math.max(1.2, w * 0.0015);
+  meals.forEach((m, i) => {
+    const y = top + i * rowH;
+    ctx.fillStyle = "#475569";
+    ctx.fillText(m, margin, y + rowH * 0.55);
+    ctx.strokeStyle = "#e2e8f0";
+    ctx.beginPath();
+    ctx.moveTo(margin, y);
+    ctx.lineTo(w - margin, y);
+    ctx.stroke();
+  });
+  ctx.strokeStyle = "#94a3b8";
+  ctx.strokeRect(margin + labelColW, top, gridW, rowH * meals.length);
+  for (let i = 1; i < days.length; i++) {
+    const x = margin + labelColW + i * colW;
+    ctx.beginPath();
+    ctx.moveTo(x, top);
+    ctx.lineTo(x, top + rowH * meals.length);
+    ctx.stroke();
+  }
+}
+
+/** Diario della gratitudine: titolo + righe numerate per una breve riflessione quotidiana. */
+function drawGratitudeJournal(ctx: CanvasRenderingContext2D, w: number, h: number, margin: number) {
+  ctx.fillStyle = "#1f2937";
+  ctx.font = `bold ${Math.round(margin * 0.6)}px sans-serif`;
+  ctx.fillText("OGGI SONO GRATO/A PER...", margin, margin * 1.1);
+
+  const rows = 5;
+  const rowGap = (h - margin * 2.4) / rows;
+  ctx.strokeStyle = "#94a3b8";
+  ctx.lineWidth = Math.max(1.5, w * 0.0018);
+  ctx.font = `${Math.round(rowGap * 0.3)}px sans-serif`;
+  for (let i = 0; i < rows; i++) {
+    const y = margin * 1.8 + i * rowGap;
+    ctx.fillStyle = "#94a3b8";
+    ctx.fillText(`${i + 1}.`, margin, y);
+    ctx.beginPath();
+    ctx.moveTo(margin + margin * 0.6, y);
+    ctx.lineTo(w - margin, y);
+    ctx.stroke();
+  }
+}
+
 /* ------------------------------------------------------------------------ */
 /* Attività / basso contenuto                                                */
 /* ------------------------------------------------------------------------ */
@@ -280,8 +543,8 @@ function drawMaze(ctx: CanvasRenderingContext2D, w: number, h: number, margin: n
   const cols = 16;
   const rows = 20;
   const size = Math.min((w - margin * 2) / cols, (h - margin * 2) / rows);
-  const ox = margin + ((w - margin * 2) - size * cols) / 2;
-  const oy = margin + ((h - margin * 2) - size * rows) / 2;
+  const ox = margin + (w - margin * 2 - size * cols) / 2;
+  const oy = margin + (h - margin * 2 - size * rows) / 2;
 
   const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
   const wallsV = Array.from({ length: rows }, () => Array(cols + 1).fill(true)); // muri verticali (tra colonne)
@@ -414,6 +677,88 @@ function drawTracingDots(ctx: CanvasRenderingContext2D, w: number, h: number, ma
     ctx.stroke();
   }
   ctx.setLineDash([]);
+}
+
+/** Alfabeto maiuscolo tratteggiato, in griglia, per esercizi di ricalco. */
+function drawAlphabetTracing(ctx: CanvasRenderingContext2D, w: number, h: number, margin: number) {
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+  const cols = 5;
+  const rows = 6;
+  const cellW = (w - margin * 2) / cols;
+  const cellH = (h - margin * 2) / rows;
+  const fontSize = Math.round(Math.min(cellW, cellH) * 0.55);
+
+  ctx.strokeStyle = "#94a3b8";
+  ctx.lineWidth = Math.max(1.5, fontSize * 0.03);
+  ctx.setLineDash([fontSize * 0.06, fontSize * 0.06]);
+  ctx.font = `bold ${fontSize}px sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  letters.forEach((letter, i) => {
+    const r = Math.floor(i / cols);
+    const c = i % cols;
+    if (r >= rows) return;
+    const x = margin + c * cellW + cellW / 2;
+    const y = margin + r * cellH + cellH / 2;
+    ctx.strokeText(letter, x, y);
+  });
+
+  ctx.setLineDash([]);
+  ctx.textAlign = "left";
+  ctx.textBaseline = "alphabetic";
+}
+
+/** Griglia Sudoku 9×9 vuota, con i bordi dei blocchi 3×3 in evidenza. */
+function drawSudokuGrid(ctx: CanvasRenderingContext2D, w: number, h: number, margin: number) {
+  const size = Math.min(w, h) - margin * 2;
+  const ox = margin + (w - margin * 2 - size) / 2;
+  const oy = margin + (h - margin * 2 - size) / 2;
+  const cell = size / 9;
+
+  for (let i = 0; i <= 9; i++) {
+    const bold = i % 3 === 0;
+    ctx.strokeStyle = bold ? "#1f2937" : "#94a3b8";
+    ctx.lineWidth = bold ? Math.max(2, size * 0.006) : Math.max(1, size * 0.002);
+    ctx.beginPath();
+    ctx.moveTo(ox + i * cell, oy);
+    ctx.lineTo(ox + i * cell, oy + size);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(ox, oy + i * cell);
+    ctx.lineTo(ox + size, oy + i * cell);
+    ctx.stroke();
+  }
+}
+
+/** Griglie di Tris (3×3) ripetute, pronte da giocare a matita. */
+function drawTicTacToeGrid(ctx: CanvasRenderingContext2D, w: number, h: number, margin: number) {
+  const cols = 2;
+  const rows = 3;
+  const cellW = (w - margin * 2) / cols;
+  const cellH = (h - margin * 2) / rows;
+  const boardSize = Math.min(cellW, cellH) * 0.7;
+
+  ctx.strokeStyle = "#334155";
+  ctx.lineWidth = Math.max(2, boardSize * 0.02);
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cx = margin + c * cellW + cellW / 2;
+      const cy = margin + r * cellH + cellH / 2;
+      const x0 = cx - boardSize / 2;
+      const y0 = cy - boardSize / 2;
+      for (let i = 1; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(x0 + (boardSize * i) / 3, y0);
+        ctx.lineTo(x0 + (boardSize * i) / 3, y0 + boardSize);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x0, y0 + (boardSize * i) / 3);
+        ctx.lineTo(x0 + boardSize, y0 + (boardSize * i) / 3);
+        ctx.stroke();
+      }
+    }
+  }
 }
 
 function drawDecorativeFrame(ctx: CanvasRenderingContext2D, w: number, h: number, margin: number) {
