@@ -11,10 +11,10 @@ da `service_role` (già garantito da `pg_cron`, che gira come superuser).
 | `cleanup_old_audit_logs()` | Elimina `audit_logs` più vecchi di 1 anno | Giornaliera, notte |
 | `cleanup_old_admin_notifications()` | Elimina `admin_notifications` più vecchie di 90 giorni | Giornaliera, notte |
 | `cleanup_rate_limit_hits()` | Elimina le righe di `rate_limit_hits` scadute | Ogni ora |
-| `cleanup_expired_book_projects()` | Elimina i `book_projects` scaduti (6h da ultimo utilizzo) e i relativi file su Storage | Ogni ora |
+| `cleanup_expired_book_projects()` | Elimina i `book_projects` scaduti (48h da ultimo utilizzo) e i relativi file su Storage | Ogni ora |
 
 (Definite in `20260901050000_retention_cleanup.sql`, `20260901040000_rate_limiting.sql` e
-`20260902000000_book_projects.sql`.)
+`20260902000000_book_projects.sql`; TTL alzato da 6 a 48 ore in `20260902020000_book_projects_ttl_48h.sql`.)
 
 `generations` (cronologia generazioni di Pubblicazione/Blurb/Bio/Promo, vedi
 `20260902010000_generations_history.sql`) **non ha bisogno di un job pg_cron**: un trigger

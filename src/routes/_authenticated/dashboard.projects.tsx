@@ -104,7 +104,7 @@ function ProjectsPage() {
             Crea un progetto per ogni libro a cui stai lavorando, carica copertina e/o interno da un
             qualsiasi tool (Pubblicazione, A+, Blurb, Bio, Promo, o come output di Interni e
             Copertine) e riusali negli altri tool senza ricaricarli. Ogni progetto scade
-            automaticamente 6 ore dopo l'ultimo utilizzo.
+            automaticamente 48 ore dopo l'ultimo utilizzo.
           </p>
         </div>
 

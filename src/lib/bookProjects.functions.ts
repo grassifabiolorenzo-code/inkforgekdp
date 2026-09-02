@@ -32,8 +32,14 @@ const upsertInput = z.object({
   interiorPath: z.string().max(500).nullable().optional(),
 });
 
-/** 6 ore di scadenza scorrevole: si rinnova a ogni creazione/aggiornamento, mai fissa da quando è nato. */
-const PROJECT_TTL_MS = 6 * 60 * 60 * 1000;
+/**
+ * 48 ore di scadenza scorrevole: si rinnova a ogni creazione/aggiornamento, mai fissa da
+ * quando è nato. Alzato da 6 a 48 ore (audit modernizzazione, 2026-09-02): un workflow che
+ * attraversa 6 tool diversi spesso non si esaurisce in un'unica sessione di poche ore, e un
+ * utente che lavora a intermittenza durante la giornata (o su più giorni) non deve dover
+ * ricaricare cover/interno solo perché è passato troppo tempo dall'ultimo utilizzo.
+ */
+const PROJECT_TTL_MS = 48 * 60 * 60 * 1000;
 
 export const upsertBookProject = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
