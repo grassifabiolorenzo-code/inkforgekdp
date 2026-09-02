@@ -3,11 +3,13 @@
  *
  * Generazione primaria: AI (Lovable AI Gateway), multilingua secondo il
  * selettore di lingua di output della piattaforma. Motore a template locale
- * mantenuto come fallback automatico se l'AI non è disponibile (resta in
- * italiano; la generazione AI copre tutte le lingue supportate).
+ * mantenuto come fallback automatico se l'AI non è disponibile: copre le
+ * stesse 7 lingue di output della piattaforma (vedi promoLocales.ts), non
+ * solo l'italiano.
  */
 
 import { type AiToneId } from "@/components/tools/ai/aiStyle";
+import { PROMO_LOCALE_PACKS, type PromoLocale } from "./promoLocales";
 
 export type PromoPlatform = "instagram" | "facebook" | "tiktok" | "twitter";
 
@@ -33,7 +35,11 @@ export interface PromoOutput {
   launchEmail: string;
 }
 
-export const PLATFORMS: { id: PromoPlatform; label: string; hashtagStyle: "many" | "few" | "none" }[] = [
+export const PLATFORMS: {
+  id: PromoPlatform;
+  label: string;
+  hashtagStyle: "many" | "few" | "none";
+}[] = [
   { id: "instagram", label: "Instagram", hashtagStyle: "many" },
   { id: "facebook", label: "Facebook", hashtagStyle: "few" },
   { id: "tiktok", label: "TikTok / Reels", hashtagStyle: "many" },
@@ -53,58 +59,38 @@ function slugHashtag(value: string) {
     .join(" ");
 }
 
-const POST_TEMPLATES: Record<PromoPlatform, string[]> = {
-  instagram: [
-    "📖 \"{title}\" è finalmente disponibile.\n\n{usp}\n\nPensato per {audience}. {cta} 👇",
-    "Ci ho messo il cuore in \"{title}\" — {usp}\n\nSe ti riconosci in {audience}, questo libro fa per te.\n{cta}",
-  ],
-  facebook: [
-    "Novità in libreria (digitale e cartacea): \"{title}\".\n\n{usp}\n\nConsigliato a {audience}. {cta}",
-    "\"{title}\" è online. {usp} Se ti interessa {audience_lower}, dagli un'occhiata: {cta}",
-  ],
-  tiktok: [
-    "POV: hai appena scoperto \"{title}\" 📚✨ {usp} #booktok",
-    "Se sei {audience_lower}, devi assolutamente leggere \"{title}\". {usp} {cta}",
-  ],
-  twitter: [
-    "\"{title}\" è uscito. {usp} {cta}",
-    "Nuovo libro: \"{title}\". Pensato per {audience_lower}. {cta}",
-  ],
-};
-
-const AD_HEADLINE_TEMPLATES = [
-  "{title}: {usp_short}",
-  "Scopri {title} — {usp_short}",
-  "{usp_short}. Leggi {title} oggi stesso",
-];
-
-const AD_BULLET_TEMPLATES = [
-  "Perfetto per {audience_lower}",
-  "{usp_short}",
-  "Disponibile in formato cartaceo ed eBook",
-  "Il libro di cui {audience_lower} sta parlando",
-];
-
-function fill(template: string, input: PromoInput) {
+function fill(template: string, input: PromoInput, pack: (typeof PROMO_LOCALE_PACKS)["it"]) {
   const uspShort = input.usp.length > 60 ? `${input.usp.slice(0, 57)}...` : input.usp;
   return template
-    .replaceAll("{title}", input.bookTitle || "il libro")
-    .replaceAll("{usp}", input.usp || "una storia che non dimenticherai")
-    .replaceAll("{usp_short}", uspShort || "una lettura da non perdere")
-    .replaceAll("{audience}", input.audience || "chi ama leggere")
-    .replaceAll("{audience_lower}", (input.audience || "chi ama leggere").toLowerCase())
-    .replaceAll("{cta}", input.cta || "Disponibile ora su Amazon.");
+    .replaceAll("{title}", input.bookTitle || pack.defaults.title)
+    .replaceAll("{usp}", input.usp || pack.defaults.usp)
+    .replaceAll("{usp_short}", uspShort || pack.defaults.uspShort)
+    .replaceAll("{audience}", input.audience || pack.defaults.audience)
+    .replaceAll("{audience_lower}", (input.audience || pack.defaults.audience).toLowerCase())
+    .replaceAll("{cta}", input.cta || pack.defaults.cta);
 }
 
-/** Fallback locale (solo italiano), usato automaticamente se l'AI non è disponibile. */
-export function generatePromoKitLocal(input: PromoInput): PromoOutput {
-  const platforms = input.platforms.length > 0 ? input.platforms : (["instagram", "facebook"] as PromoPlatform[]);
+/**
+ * Fallback a template, usato automaticamente se l'AI non è disponibile. Copre
+ * le stesse 7 lingue di output della piattaforma (vedi promoLocales.ts) — non
+ * ripiega più sempre sull'italiano indipendentemente dalla lingua richiesta.
+ */
+export function generatePromoKitLocal(input: PromoInput, locale: string = "it"): PromoOutput {
+  const pack =
+    PROMO_LOCALE_PACKS[
+      (locale as PromoLocale) in PROMO_LOCALE_PACKS ? (locale as PromoLocale) : "it"
+    ];
+  const platforms =
+    input.platforms.length > 0 ? input.platforms : (["instagram", "facebook"] as PromoPlatform[]);
 
   const posts: SocialPost[] = platforms.map((platform) => {
     const meta = PLATFORMS.find((p) => p.id === platform)!;
-    let caption = fill(pick(POST_TEMPLATES[platform]), input);
+    let caption = fill(pick(pack.postTemplates[platform]), input, pack);
     if (meta.hashtagStyle !== "none") {
-      const tags = [slugHashtag(input.genre || "libri"), meta.hashtagStyle === "many" ? "#bookstagram #leggere" : ""]
+      const tags = [
+        slugHashtag(input.genre || pack.defaults.genreFallback),
+        meta.hashtagStyle === "many" ? pack.hashtagMany : "",
+      ]
         .filter(Boolean)
         .join(" ");
       if (tags.trim()) caption = `${caption}\n\n${tags}`;
@@ -112,23 +98,24 @@ export function generatePromoKitLocal(input: PromoInput): PromoOutput {
     return { platform, caption };
   });
 
-  const adsHeadlines = AD_HEADLINE_TEMPLATES.map((t) => fill(t, input));
-  const adsBullets = AD_BULLET_TEMPLATES.map((t) => fill(t, input));
+  const adsHeadlines = pack.adHeadlineTemplates.map((t) => fill(t, input, pack));
+  const adsBullets = pack.adBulletTemplates.map((t) => fill(t, input, pack));
 
+  const email = pack.email;
+  const emailTitle = input.bookTitle || pack.defaults.title;
   const launchEmail = [
-    `Oggetto: "${input.bookTitle || "Il mio nuovo libro"}" è disponibile da oggi`,
+    `${email.subjectPrefix} "${emailTitle}" ${email.subjectAvailable}`,
     "",
-    `Ciao,`,
+    email.greeting,
     "",
-    `sono felice di annunciare che "${input.bookTitle || "il mio nuovo libro"}" è finalmente disponibile.`,
+    email.announce(emailTitle),
     "",
     input.usp ? `${input.usp}` : "",
     "",
-    input.audience ? `Se sei ${input.audience.toLowerCase()}, penso che questo libro possa fare al caso tuo.` : "",
+    input.audience ? email.audienceLine(input.audience.toLowerCase()) : "",
+    input.cta || email.defaultCta,
     "",
-    input.cta || "Puoi trovarlo su Amazon, in formato cartaceo ed eBook.",
-    "",
-    "Grazie per il supporto, come sempre.",
+    email.closing,
   ]
     .filter((line) => line !== "")
     .join("\n");
