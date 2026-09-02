@@ -98,6 +98,11 @@ export interface InteriorDocSpec {
   /** Layout per mancini: specchia il lato del margine di rilegatura (e gli elementi asimmetrici
    * dei template, es. il margine rosso delle righe) su ogni pagina del documento. */
   leftHanded: boolean;
+  /** Abbondanza (bleed) KDP: scelta esplicita dell'utente, non più dedotta implicitamente dallo
+   * stile "piena pagina" di qualche pagina — così come nel form ufficiale di KDP, dove è
+   * un'opzione a sé (interno con o senza abbondanza), indipendente da come sono impaginate le
+   * singole pagine. */
+  useBleed: boolean;
 }
 
 function resolveFillMode(page: InteriorPage, defaultFillMode: FillMode): FillMode {
@@ -133,7 +138,7 @@ export async function renderSinglePagePreview(
   spec: InteriorDocSpec,
   isRecto = true,
 ): Promise<HTMLCanvasElement> {
-  const bleed = resolveFillMode(page, spec.defaultFillMode) === "cover" ? BLEED_IN : 0;
+  const bleed = spec.useBleed ? BLEED_IN : 0;
   return renderContentCanvas(
     page,
     spec.trimWidthIn + bleed * 2,
@@ -154,10 +159,7 @@ async function renderAllPhysicalPages(
   dpi: number,
 ): Promise<{ canvases: HTMLCanvasElement[]; pageWIn: number; pageHIn: number }> {
   const sequence = buildPhysicalSequence(pages, spec.printMode);
-  const usesBleedAnywhere = sequence.some(
-    (p) => !p.isFiller && p.source && resolveFillMode(p.source, spec.defaultFillMode) === "cover",
-  );
-  const bleed = usesBleedAnywhere ? BLEED_IN : 0;
+  const bleed = spec.useBleed ? BLEED_IN : 0;
   const pageWIn = spec.trimWidthIn + bleed * 2;
   const pageHIn = spec.trimHeightIn + bleed * 2;
 
@@ -204,10 +206,7 @@ export async function renderPreviewPages(
   if (pages.length === 0) return [];
 
   const sequence = buildPhysicalSequence(pages, spec.printMode);
-  const usesBleedAnywhere = sequence.some(
-    (p) => !p.isFiller && p.source && resolveFillMode(p.source, spec.defaultFillMode) === "cover",
-  );
-  const bleed = usesBleedAnywhere ? BLEED_IN : 0;
+  const bleed = spec.useBleed ? BLEED_IN : 0;
   const pageWIn = spec.trimWidthIn + bleed * 2;
   const pageHIn = spec.trimHeightIn + bleed * 2;
   const previewDpi = Math.max(20, Math.min(maxWidthPx / pageWIn, maxHeightPx / pageHIn));
@@ -239,8 +238,8 @@ export async function renderPreviewPages(
 
 /**
  * Assembla tutte le pagine in un unico PDF pronto per KDP. Le dimensioni fisiche della pagina
- * restano uniformi in tutto il documento: se almeno una pagina usa "piena pagina", l'intero PDF
- * include il bleed KDP (0.125") su tutti i lati.
+ * restano uniformi in tutto il documento: con `spec.useBleed` attivo, l'intero PDF include il
+ * bleed KDP (0.125") su tutti i lati, indipendentemente dallo stile delle singole pagine.
  */
 export async function buildInteriorPdf(
   pages: InteriorPage[],

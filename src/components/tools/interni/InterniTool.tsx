@@ -34,6 +34,7 @@ import {
   DEFAULT_MARGINS,
   TRIM_SIZES,
   getTrimSize,
+  suggestedKdpMargins,
 } from "@/components/tools/interni/constants";
 import {
   buildInteriorImagesZip,
@@ -107,6 +108,7 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
   const [printMode, setPrintMode] = useState<PrintMode>("continuous");
   const [fillerColor, setFillerColor] = useState(DEFAULT_FILLER_COLOR);
   const [leftHanded, setLeftHanded] = useState(false);
+  const [useBleed, setUseBleed] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<TemplateId>(TEMPLATE_LIBRARY[0]!.id);
   const [templateCount, setTemplateCount] = useState(1);
@@ -155,6 +157,7 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
     printMode,
     fillerColor,
     leftHanded,
+    useBleed,
   };
 
   // Anteprima scorrevole di TUTTE le pagine fisiche (inclusi i retro di riempimento), a bassa
@@ -198,6 +201,7 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
     printMode,
     fillerColor,
     leftHanded,
+    useBleed,
   ]);
 
   // Il file già generato non corrisponde più alle impostazioni correnti: invalida il download
@@ -213,6 +217,7 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
     printMode,
     fillerColor,
     leftHanded,
+    useBleed,
   ]);
 
   function triggerBlobDownload(blob: Blob, filename: string) {
@@ -613,20 +618,42 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {TRIM_SIZES.map((t) => (
-                  <SelectItem key={t.id} value={t.id}>
-                    {t.label}
-                  </SelectItem>
+                {(["Standard", "Grande"] as const).map((category) => (
+                  <div key={category}>
+                    <p className="px-2 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      {category === "Standard" ? "Standard" : "Grande (costo di stampa maggiore)"}
+                    </p>
+                    {TRIM_SIZES.filter((t) => t.category === category).map((t) => (
+                      <SelectItem key={t.id} value={t.id}>
+                        {t.label}
+                      </SelectItem>
+                    ))}
+                  </div>
                 ))}
               </SelectContent>
             </Select>
+            <p className="text-[11px] text-muted-foreground">
+              Tutti i 16 formati brossura ufficiali KDP. "Grande" (oltre 6.12"×9") costa di più per
+              pagina in stampa, quindi riduce la royalty a parità di prezzo di copertina.
+            </p>
           </div>
 
           {/* Margini asimmetrici */}
           <div className="space-y-2 rounded-md border border-border bg-surface p-3">
-            <Label className="text-xs tracking-wide uppercase text-muted-foreground">
-              Margini (pollici) — per modalità "con margine"
-            </Label>
+            <div className="flex items-center justify-between gap-3">
+              <Label className="text-xs tracking-wide uppercase text-muted-foreground">
+                Margini (pollici) — per modalità "con margine"
+              </Label>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 shrink-0 px-2 text-[11px]"
+                onClick={() => setMargins(suggestedKdpMargins(Math.max(1, pages.length), useBleed))}
+              >
+                Applica margini consigliati KDP
+              </Button>
+            </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div className="space-y-1">
                 <Label htmlFor="m-top" className="text-[11px]">
@@ -683,10 +710,26 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
             </div>
             <p className="text-[11px] text-muted-foreground">
               "Interno" è il lato verso il dorso/rilegatura e viene specchiato automaticamente tra
-              pagine destre e sinistre; di solito conviene tenerlo leggermente più ampio di
-              "Esterno". Nessun limite fisso: imposta il valore che preferisci, l'anteprima qui a
-              destra si aggiorna subito.
+              pagine destre e sinistre; KDP richiede un margine interno minimo crescente con il
+              numero di pagine del libro (più spesso = dorso più "ingombrante"). Nessun limite fisso
+              qui: "Applica margini consigliati KDP" li imposta in base al numero di pagine attuali,
+              ma restano sempre modificabili a mano — l'anteprima si aggiorna subito.
             </p>
+          </div>
+
+          <div className="flex items-start justify-between gap-3 rounded-md border border-border bg-surface p-3">
+            <div className="space-y-0.5">
+              <Label htmlFor="interni-bleed" className="text-sm">
+                Abbondanza (bleed)
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Aggiunge 0.125" di margine oltre il bordo di taglio su ogni lato, come richiesto da
+                KDP quando il contenuto arriva fino al bordo pagina. Scelta indipendente dallo stile
+                delle singole pagine: se disattiva, il documento resta esattamente al formato di
+                trim scelto.
+              </p>
+            </div>
+            <Switch id="interni-bleed" checked={useBleed} onCheckedChange={setUseBleed} />
           </div>
 
           <div className="flex items-start justify-between gap-3 rounded-md border border-border bg-surface p-3">
@@ -717,12 +760,13 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
                   Con margine (ridimensionamento automatico, nessun ritaglio)
                 </SelectItem>
                 <SelectItem value="cover">
-                  Piena pagina (con abbondanza/bleed, ritaglia l'eccesso)
+                  Piena pagina (riempie il bordo, ritaglia l'eccesso)
                 </SelectItem>
               </SelectContent>
             </Select>
             <p className="text-[11px] text-muted-foreground">
               Puoi comunque scegliere uno stile diverso per ogni singola pagina qui sotto.
+              L&apos;abbondanza (bleed) è un&apos;impostazione a parte, più sotto.
             </p>
           </div>
 
@@ -1135,7 +1179,8 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
             {trim.label} · interno {margins.insideIn}" / esterno {margins.outsideIn}" · alto{" "}
             {margins.topIn}" / basso {margins.bottomIn}" ·{" "}
             {defaultFillMode === "cover" ? "piena pagina" : "con margine"} ·{" "}
-            {printMode === "singleSidedWithFiller" ? "solo fronte + riempimento" : "continua"}
+            {printMode === "singleSidedWithFiller" ? "solo fronte + riempimento" : "continua"} ·{" "}
+            {useBleed ? "con abbondanza" : "senza abbondanza"}
           </p>
           {previewPages.length === 0 ? (
             <div className="flex flex-1 items-center justify-center overflow-hidden rounded-md border border-border bg-black/60 p-3">

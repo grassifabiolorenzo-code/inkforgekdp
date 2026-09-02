@@ -1,10 +1,14 @@
-export type TrimSizeId = "8.5x11" | "6x9" | "8.25x11" | "8.5x8.5";
+/** "WxH" in pollici, es. "6x9" — stesso formato stringa usato dal selettore formato di Copertine
+ * (public/tools/copertine-studio.html), per coerenza tra i due tool. */
+export type TrimSizeId = string;
 
 export interface TrimSizeSpec {
   id: TrimSizeId;
   label: string;
   widthIn: number;
   heightIn: number;
+  /** "Grande" = oltre le soglie KDP che comportano un costo di stampa per pagina più alto. */
+  category: "Standard" | "Grande";
 }
 
 /** "cover" = immagine a piena pagina (con bleed, ritaglio se necessario). "contain" = immagine
