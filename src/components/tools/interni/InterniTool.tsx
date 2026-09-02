@@ -82,6 +82,9 @@ const FREE_TEMPLATES_UNLOCK_OPERATION_ID = "interni-unlock-free-templates";
 // La pagina bianca resta gratuita anche prima di sbloccare il resto della libreria: non ha
 // alcun contenuto generato, è l'equivalente del pulsante "Inserisci pagina vuota" già gratuito.
 const ALWAYS_FREE_TEMPLATE_IDS: ReadonlySet<TemplateId> = new Set(["blank-page"]);
+// Stesso pattern di sblocco una tantum della libreria template, applicato a un piccolo "extra":
+// la numerazione automatica delle pagine.
+const PAGE_NUMBERING_UNLOCK_OPERATION_ID = "interni-unlock-page-numbering";
 
 type ExportFormat = "pdf" | "png-zip" | "jpg-zip";
 const EXPORT_FORMATS: { id: ExportFormat; label: string }[] = [
@@ -109,6 +112,8 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
   const [fillerColor, setFillerColor] = useState(DEFAULT_FILLER_COLOR);
   const [leftHanded, setLeftHanded] = useState(false);
   const [useBleed, setUseBleed] = useState(false);
+  const [pageNumbering, setPageNumbering] = useState(false);
+  const [unlockingPageNumbering, setUnlockingPageNumbering] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<TemplateId>(TEMPLATE_LIBRARY[0]!.id);
   const [templateCount, setTemplateCount] = useState(1);
@@ -142,6 +147,7 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
   const sudokuAddGuard = useRef(false);
   const freeTemplateGuard = useRef(false);
   const textOverlayGuard = useRef(false);
+  const pageNumberingGuard = useRef(false);
 
   const trim = getTrimSize(trimSizeId);
 
@@ -158,6 +164,7 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
     fillerColor,
     leftHanded,
     useBleed,
+    pageNumbering,
   };
 
   // Anteprima scorrevole di TUTTE le pagine fisiche (inclusi i retro di riempimento), a bassa
@@ -202,6 +209,7 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
     fillerColor,
     leftHanded,
     useBleed,
+    pageNumbering,
   ]);
 
   // Il file già generato non corrisponde più alle impostazioni correnti: invalida il download
@@ -218,6 +226,7 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
     fillerColor,
     leftHanded,
     useBleed,
+    pageNumbering,
   ]);
 
   function triggerBlobDownload(blob: Blob, filename: string) {
@@ -415,6 +424,41 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
       addAlwaysFreeTemplatePages(selectedTemplateId, templateCount);
     } else {
       void addFreeTemplatePages(selectedTemplateId, templateCount);
+    }
+  }
+
+  /** Attiva/disattiva la numerazione automatica delle pagine. Attivarla la prima volta costa 1
+   * credito una tantum (stesso operationId fisso della libreria template): da lì in poi resta
+   * disponibile per sempre, anche disattivandola e riattivandola. Disattivarla è sempre gratis. */
+  async function handleTogglePageNumbering(next: boolean) {
+    if (!next) {
+      setPageNumbering(false);
+      return;
+    }
+    if (pageNumberingGuard.current) return;
+    pageNumberingGuard.current = true;
+    try {
+      setUnlockingPageNumbering(true);
+      try {
+        const result = await runtime.charge(
+          PAGE_NUMBERING_UNLOCK_OPERATION_ID,
+          "Sblocco numerazione pagine Interni",
+        );
+        if (!result.ok) {
+          runtime.blockOperation();
+          return;
+        }
+        setPageNumbering(true);
+        if (!result.duplicate) {
+          toast.success(
+            "Numerazione pagine sbloccata — 1 credito. Da ora in poi è sempre disponibile.",
+          );
+        }
+      } finally {
+        setUnlockingPageNumbering(false);
+      }
+    } finally {
+      pageNumberingGuard.current = false;
     }
   }
 
@@ -1089,6 +1133,25 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
                 </div>
               ))}
             </div>
+          </div>
+
+          <div className="flex items-start justify-between gap-3 rounded-md border border-border bg-surface p-3">
+            <div className="space-y-0.5">
+              <Label htmlFor="interni-page-numbering" className="text-sm">
+                Numerazione pagine automatica
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Extra opzionale: numera ogni pagina in basso, verso il bordo esterno. Si sblocca una
+                tantum per 1 credito — una volta attivata la prima volta resta disponibile per
+                sempre, anche spegnendola e riaccendendola.
+              </p>
+            </div>
+            <Switch
+              id="interni-page-numbering"
+              checked={pageNumbering}
+              disabled={unlockingPageNumbering || runtime.charging}
+              onCheckedChange={(v) => void handleTogglePageNumbering(v)}
+            />
           </div>
 
           <div className="space-y-1.5">

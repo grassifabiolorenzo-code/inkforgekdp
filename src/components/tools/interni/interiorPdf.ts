@@ -73,6 +73,28 @@ async function renderContentCanvas(
   return canvas;
 }
 
+/** Numero di pagina in basso, verso il bordo esterno (specchiato per mancini come gli altri
+ * elementi asimmetrici) — funzione "extra" opzionale, applicata a ogni pagina fisica finale. */
+function drawPageNumber(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  dpi: number,
+  pageIndex: number,
+  isRecto: boolean,
+  mirrored: boolean,
+): void {
+  const marginPx = 0.35 * dpi;
+  const fontPx = Math.max(8, Math.round(0.13 * dpi));
+  const effectiveIsRecto = mirrored ? !isRecto : isRecto;
+  ctx.font = `${fontPx}px sans-serif`;
+  ctx.fillStyle = "#444444";
+  ctx.textBaseline = "alphabetic";
+  ctx.textAlign = effectiveIsRecto ? "right" : "left";
+  ctx.fillText(String(pageIndex), effectiveIsRecto ? w - marginPx : marginPx, h - marginPx * 0.5);
+  ctx.textAlign = "left";
+}
+
 function renderFillerCanvas(
   pageWIn: number,
   pageHIn: number,
@@ -103,6 +125,9 @@ export interface InteriorDocSpec {
    * un'opzione a sé (interno con o senza abbondanza), indipendente da come sono impaginate le
    * singole pagine. */
   useBleed: boolean;
+  /** Extra a pagamento (sblocco una tantum, vedi InterniTool): numera automaticamente ogni
+   * pagina fisica del documento, in basso verso il bordo esterno. */
+  pageNumbering: boolean;
 }
 
 function resolveFillMode(page: InteriorPage, defaultFillMode: FillMode): FillMode {
@@ -179,6 +204,11 @@ async function renderAllPhysicalPages(
           dpi,
           spec.leftHanded,
         );
+    if (spec.pageNumbering) {
+      const ctx = canvas.getContext("2d");
+      if (ctx)
+        drawPageNumber(ctx, canvas.width, canvas.height, dpi, i + 1, isRecto, spec.leftHanded);
+    }
     canvases.push(canvas);
   }
   return { canvases, pageWIn, pageHIn };
@@ -227,6 +257,19 @@ export async function renderPreviewPages(
           previewDpi,
           spec.leftHanded,
         );
+    if (spec.pageNumbering) {
+      const ctx = canvas.getContext("2d");
+      if (ctx)
+        drawPageNumber(
+          ctx,
+          canvas.width,
+          canvas.height,
+          previewDpi,
+          i + 1,
+          isRecto,
+          spec.leftHanded,
+        );
+    }
     results.push({
       canvas,
       isFiller: physical.isFiller,
