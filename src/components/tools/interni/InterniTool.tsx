@@ -55,6 +55,13 @@ import type {
 
 const TEMPLATE_CATEGORIES = [...new Set(TEMPLATE_LIBRARY.map((t) => t.category))];
 
+// Il Sudoku è un vero puzzle generato e verificato al volo (non una pagina statica gratuita
+// come righe/quadretti): a differenza degli altri template costa 1 credito per pagina, con un
+// tetto più basso per singola aggiunta.
+const SUDOKU_TEMPLATE_ID: TemplateId = "sudoku-grid";
+const MAX_SUDOKU_PER_BATCH = 100;
+const MAX_FREE_TEMPLATES_PER_BATCH = 200;
+
 type ExportFormat = "pdf" | "png-zip" | "jpg-zip";
 const EXPORT_FORMATS: { id: ExportFormat; label: string }[] = [
   { id: "pdf", label: "PDF unico (pronto per la stampa KDP)" },
@@ -99,11 +106,14 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
   >([]);
   const [previewLoading, setPreviewLoading] = useState(false);
 
+  const [addingSudoku, setAddingSudoku] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const pdfInputRef = useRef<HTMLInputElement | null>(null);
   const previewDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const chargeGuard = useRef(false);
   const pageDownloadGuard = useRef(false);
+  const sudokuAddGuard = useRef(false);
 
   const trim = getTrimSize(trimSizeId);
 
@@ -234,23 +244,81 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
     }
   }
 
-  /** Accoda `count` copie del template scelto in un colpo solo (es. 10 pagine di righe strette).
-   * Ogni copia riceve un `templateSeed` casuale proprio: per i template con contenuto generato
-   * (es. Sudoku) garantisce che ogni pagina abbia un puzzle diverso, stabile nel tempo. */
-  function addTemplatePages(count: number) {
-    const spec = getTemplateSpec(selectedTemplateId);
-    const n = Math.max(1, Math.min(200, Math.round(count) || 1));
-    setPages((prev) => [
-      ...prev,
-      ...Array.from({ length: n }, () => ({
-        id: nextPageId(),
-        kind: "template" as const,
-        templateId: selectedTemplateId,
-        templateSeed: Math.floor(Math.random() * 2 ** 31),
-        name: spec?.label ?? "Template",
-        fillModeOverride: "default" as const,
-      })),
-    ]);
+  function makeTemplatePage(templateId: TemplateId): InteriorPage {
+    const spec = getTemplateSpec(templateId);
+    return {
+      id: nextPageId(),
+      kind: "template",
+      templateId,
+      templateSeed: Math.floor(Math.random() * 2 ** 31),
+      name: spec?.label ?? "Template",
+      fillModeOverride: "default",
+    };
+  }
+
+  /** Accoda `count` copie di un template gratuito (righe, quadretti, planner, registri...) in un
+   * colpo solo: nessun credito, nessuna verifica di accesso — sono pagine statiche o comunque
+   * senza un vero "contenuto" da pagare. */
+  function addFreeTemplatePages(templateId: TemplateId, count: number) {
+    const n = Math.max(1, Math.min(MAX_FREE_TEMPLATES_PER_BATCH, Math.round(count) || 1));
+    setPages((prev) => [...prev, ...Array.from({ length: n }, () => makeTemplatePage(templateId))]);
+  }
+
+  /** Genera fino a `count` puzzle Sudoku (max 100 per volta), addebitando 1 credito per ognuno,
+   * uno alla volta: se i crediti finiscono a metà, si fermano l'addebito e l'aggiunta pagine
+   * insieme, mantenendo solo le pagine effettivamente pagate. */
+  async function addSudokuPages(count: number) {
+    if (sudokuAddGuard.current) return;
+    sudokuAddGuard.current = true;
+    try {
+      const n = Math.max(1, Math.min(MAX_SUDOKU_PER_BATCH, Math.round(count) || 1));
+      if (!runtime.canOperate) {
+        runtime.blockOperation();
+        return;
+      }
+      if (!(await runtime.ensureAccess())) return;
+
+      setAddingSudoku(true);
+      try {
+        const newPages: InteriorPage[] = [];
+        for (let i = 0; i < n; i++) {
+          const result = await runtime.charge(
+            newOperationId("interni-sudoku"),
+            "Puzzle Sudoku generato",
+          );
+          if (!result.ok) break;
+          newPages.push(makeTemplatePage(SUDOKU_TEMPLATE_ID));
+        }
+
+        if (newPages.length > 0) {
+          setPages((prev) => [...prev, ...newPages]);
+        }
+
+        if (newPages.length === n) {
+          toast.success(
+            `${newPages.length} ${newPages.length === 1 ? "puzzle Sudoku aggiunto" : "puzzle Sudoku aggiunti"} — ${newPages.length} ${newPages.length === 1 ? "credito" : "crediti"}`,
+          );
+        } else if (newPages.length > 0) {
+          toast.warning(
+            `Aggiunti solo ${newPages.length} di ${n} puzzle Sudoku: crediti esauriti a metà dell'operazione.`,
+          );
+        } else {
+          toast.error("Nessun puzzle Sudoku aggiunto: crediti non disponibili.");
+        }
+      } finally {
+        setAddingSudoku(false);
+      }
+    } finally {
+      sudokuAddGuard.current = false;
+    }
+  }
+
+  function handleAddTemplateClick() {
+    if (selectedTemplateId === SUDOKU_TEMPLATE_ID) {
+      void addSudokuPages(templateCount);
+    } else {
+      addFreeTemplatePages(selectedTemplateId, templateCount);
+    }
   }
 
   /** Scarica una singola pagina come PNG. Azione a parte dal PDF completo: costa 1 credito. */
@@ -597,7 +665,13 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
           <div className="flex items-center gap-2">
             <Select
               value={selectedTemplateId}
-              onValueChange={(v) => setSelectedTemplateId(v as TemplateId)}
+              onValueChange={(v) => {
+                const next = v as TemplateId;
+                setSelectedTemplateId(next);
+                if (next === SUDOKU_TEMPLATE_ID) {
+                  setTemplateCount((c) => Math.min(c, MAX_SUDOKU_PER_BATCH));
+                }
+              }}
             >
               <SelectTrigger className="flex-1">
                 <SelectValue />
@@ -620,20 +694,51 @@ export function InterniTool({ runtime }: { runtime: ToolRuntime }) {
             <Input
               type="number"
               min={1}
-              max={200}
+              max={
+                selectedTemplateId === SUDOKU_TEMPLATE_ID
+                  ? MAX_SUDOKU_PER_BATCH
+                  : MAX_FREE_TEMPLATES_PER_BATCH
+              }
               value={templateCount}
-              onChange={(e) => setTemplateCount(Math.max(1, Number(e.target.value) || 1))}
+              onChange={(e) =>
+                setTemplateCount(
+                  Math.max(
+                    1,
+                    Math.min(
+                      selectedTemplateId === SUDOKU_TEMPLATE_ID
+                        ? MAX_SUDOKU_PER_BATCH
+                        : MAX_FREE_TEMPLATES_PER_BATCH,
+                      Number(e.target.value) || 1,
+                    ),
+                  ),
+                )
+              }
               className="w-16 shrink-0 text-center"
               aria-label="Quante copie aggiungere"
               title="Quante copie aggiungere"
             />
-            <Button type="button" variant="outline" onClick={() => addTemplatePages(templateCount)}>
-              <FilePlus2 className="mr-1.5 size-3.5" /> Aggiungi
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleAddTemplateClick}
+              disabled={
+                selectedTemplateId === SUDOKU_TEMPLATE_ID && (addingSudoku || runtime.charging)
+              }
+            >
+              {selectedTemplateId === SUDOKU_TEMPLATE_ID && (addingSudoku || runtime.charging) ? (
+                <Loader2 className="mr-1.5 size-3.5 animate-spin" />
+              ) : (
+                <FilePlus2 className="mr-1.5 size-3.5" />
+              )}
+              {selectedTemplateId === SUDOKU_TEMPLATE_ID
+                ? `Aggiungi (${templateCount} ${templateCount === 1 ? "credito" : "crediti"})`
+                : "Aggiungi"}
             </Button>
           </div>
           <p className="text-[11px] text-muted-foreground">
-            Imposta un numero maggiore di 1 per accodare più copie dello stesso template in un solo
-            click (es. 20 pagine di righe strette).
+            {selectedTemplateId === SUDOKU_TEMPLATE_ID
+              ? `Ogni pagina Sudoku è un puzzle vero generato al momento (soluzione unica garantita) e costa 1 credito: fino a ${MAX_SUDOKU_PER_BATCH} alla volta.`
+              : "Imposta un numero maggiore di 1 per accodare più copie dello stesso template in un solo click (es. 20 pagine di righe strette) — nessun credito richiesto."}
           </p>
         </div>
 
