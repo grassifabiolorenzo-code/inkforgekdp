@@ -7,12 +7,11 @@
  *
  * ATTENZIONE PRIVACY: sia PostHog sia Google Analytics impostano
  * identificatori lato browser (cookie/localStorage) per riconoscere i
- * visitatori tra una sessione e l'altra. Per un pubblico UE questo richiede
- * tipicamente un consenso esplicito (GDPR/ePrivacy) PRIMA del caricamento —
- * questo modulo si limita a caricarli se configurati (con `respect_dnt` su
- * PostHog come minimo accorgimento), NON implementa alcun banner di
- * consenso: è una decisione di prodotto/legale da prendere a parte, non una
- * scelta tecnica di questo file.
+ * visitatori tra una sessione e l'altra. Questo modulo NON va chiamato
+ * direttamente all'avvio dell'app: il consenso esplicito (GDPR/ePrivacy) va
+ * raccolto PRIMA — vedi src/components/ConsentBanner.tsx, l'unico chiamante
+ * previsto di installAnalytics(). `respect_dnt` su PostHog resta comunque
+ * come ulteriore accorgimento anche dopo il consenso.
  */
 
 declare global {

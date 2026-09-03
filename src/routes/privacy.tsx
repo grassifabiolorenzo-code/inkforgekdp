@@ -73,6 +73,19 @@ function PrivacyPage() {
               scrivendo al supporto.
             </p>
           </section>
+          <section className="space-y-2">
+            <h2 className="text-lg font-semibold text-foreground">
+              6. Cookie e strumenti di analisi
+            </h2>
+            <p>
+              I cookie tecnici indispensabili al funzionamento (sessione di accesso) sono sempre
+              attivi e non richiedono consenso. Gli strumenti di analisi opzionali — PostHog
+              (analisi del prodotto) e Google Analytics (statistiche di traffico) — restano spenti
+              finché non li accetti esplicitamente dal banner mostrato al primo accesso. Puoi
+              cambiare scelta in qualsiasi momento da "Preferenze cookie" nel piè di pagina. Nessuno
+              di questi strumenti riceve i tuoi dati di account o i contenuti che generi nei tool.
+            </p>
+          </section>
         </div>
       </main>
       <SiteFooter />

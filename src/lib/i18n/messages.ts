@@ -46,6 +46,14 @@ const it = {
   "footer.terms": "Termini e condizioni",
   "footer.status": "Stato del sistema",
   "footer.rights": "Tutti i diritti riservati.",
+  "footer.cookiePrefs": "Preferenze cookie",
+
+  "consent.title": "La tua privacy",
+  "consent.description":
+    "Usiamo strumenti di analisi opzionali (PostHog, Google Analytics) per capire come viene usato il sito. Restano spenti finché non acconsenti.",
+  "consent.accept": "Accetta",
+  "consent.reject": "Rifiuta",
+  "consent.privacyLink": "Informativa privacy",
 
   "newsletter.title": "Resta aggiornato",
   "newsletter.subtitle":
@@ -191,6 +199,14 @@ const en: Dictionary = {
   "footer.terms": "Terms and conditions",
   "footer.status": "System status",
   "footer.rights": "All rights reserved.",
+  "footer.cookiePrefs": "Cookie preferences",
+
+  "consent.title": "Your privacy",
+  "consent.description":
+    "We use optional analytics tools (PostHog, Google Analytics) to understand how the site is used. They stay off until you consent.",
+  "consent.accept": "Accept",
+  "consent.reject": "Reject",
+  "consent.privacyLink": "Privacy policy",
 
   "newsletter.title": "Stay in the loop",
   "newsletter.subtitle":
@@ -332,6 +348,14 @@ const de: Dictionary = {
   "footer.terms": "AGB",
   "footer.status": "Systemstatus",
   "footer.rights": "Alle Rechte vorbehalten.",
+  "footer.cookiePrefs": "Cookie-Einstellungen",
+
+  "consent.title": "Deine Privatsphäre",
+  "consent.description":
+    "Wir verwenden optionale Analysetools (PostHog, Google Analytics), um zu verstehen, wie die Website genutzt wird. Sie bleiben deaktiviert, bis du zustimmst.",
+  "consent.accept": "Akzeptieren",
+  "consent.reject": "Ablehnen",
+  "consent.privacyLink": "Datenschutzerklärung",
 
   "newsletter.title": "Bleib auf dem Laufenden",
   "newsletter.subtitle":
@@ -472,6 +496,14 @@ const fr: Dictionary = {
   "footer.terms": "Conditions générales",
   "footer.status": "État du système",
   "footer.rights": "Tous droits réservés.",
+  "footer.cookiePrefs": "Préférences des cookies",
+
+  "consent.title": "Votre vie privée",
+  "consent.description":
+    "Nous utilisons des outils d'analyse optionnels (PostHog, Google Analytics) pour comprendre l'utilisation du site. Ils restent désactivés tant que vous n'avez pas donné votre consentement.",
+  "consent.accept": "Accepter",
+  "consent.reject": "Refuser",
+  "consent.privacyLink": "Politique de confidentialité",
 
   "newsletter.title": "Restez informé",
   "newsletter.subtitle":
@@ -614,6 +646,14 @@ const es: Dictionary = {
   "footer.terms": "Términos y condiciones",
   "footer.status": "Estado del sistema",
   "footer.rights": "Todos los derechos reservados.",
+  "footer.cookiePrefs": "Preferencias de cookies",
+
+  "consent.title": "Tu privacidad",
+  "consent.description":
+    "Usamos herramientas de análisis opcionales (PostHog, Google Analytics) para entender cómo se usa el sitio. Permanecen desactivadas hasta que des tu consentimiento.",
+  "consent.accept": "Aceptar",
+  "consent.reject": "Rechazar",
+  "consent.privacyLink": "Política de privacidad",
 
   "newsletter.title": "Mantente al día",
   "newsletter.subtitle":
@@ -756,6 +796,14 @@ const nl: Dictionary = {
   "footer.terms": "Algemene voorwaarden",
   "footer.status": "Systeemstatus",
   "footer.rights": "Alle rechten voorbehouden.",
+  "footer.cookiePrefs": "Cookievoorkeuren",
+
+  "consent.title": "Jouw privacy",
+  "consent.description":
+    "We gebruiken optionele analysetools (PostHog, Google Analytics) om te begrijpen hoe de site wordt gebruikt. Ze blijven uit totdat je toestemming geeft.",
+  "consent.accept": "Accepteren",
+  "consent.reject": "Weigeren",
+  "consent.privacyLink": "Privacybeleid",
 
   "newsletter.title": "Blijf op de hoogte",
   "newsletter.subtitle":
@@ -894,6 +942,14 @@ const pt: Dictionary = {
   "footer.terms": "Termos e condições",
   "footer.status": "Status do sistema",
   "footer.rights": "Todos os direitos reservados.",
+  "footer.cookiePrefs": "Preferências de cookies",
+
+  "consent.title": "A sua privacidade",
+  "consent.description":
+    "Utilizamos ferramentas de análise opcionais (PostHog, Google Analytics) para perceber como o site é utilizado. Permanecem desativadas até dar o seu consentimento.",
+  "consent.accept": "Aceitar",
+  "consent.reject": "Recusar",
+  "consent.privacyLink": "Política de privacidade",
 
   "newsletter.title": "Fique por dentro",
   "newsletter.subtitle":

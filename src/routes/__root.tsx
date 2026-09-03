@@ -10,8 +10,8 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { ConsentBanner } from "../components/ConsentBanner";
 import { HelpChatWidgetGate } from "../components/chat/HelpChatWidget";
-import { installAnalytics } from "../lib/analytics";
 import { installClientErrorCapture } from "../lib/client-error-capture";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { captureError } from "../lib/sentry";
@@ -125,7 +125,8 @@ function RootComponent() {
 
   useEffect(() => {
     installClientErrorCapture();
-    installAnalytics();
+    // L'analisi (PostHog/GA) parte solo dopo consenso esplicito — vedi ConsentBanner,
+    // che la installa lui stesso se l'utente ha già accettato in passato o accetta ora.
   }, []);
 
   return (
@@ -134,6 +135,7 @@ function RootComponent() {
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
         <HelpChatWidgetGate />
+        <ConsentBanner />
       </I18nProvider>
     </QueryClientProvider>
   );

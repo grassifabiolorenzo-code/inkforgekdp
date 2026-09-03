@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Logo } from "@/components/brand/Logo";
+import { reopenConsentBanner } from "@/lib/consent";
 import { useI18n } from "@/lib/i18n";
 
 export function SiteFooter() {
@@ -54,6 +55,13 @@ export function SiteFooter() {
           <Link to="/status" className="block text-muted-foreground hover:text-foreground">
             {t("footer.status")}
           </Link>
+          <button
+            type="button"
+            onClick={reopenConsentBanner}
+            className="block text-muted-foreground hover:text-foreground"
+          >
+            {t("footer.cookiePrefs")}
+          </button>
         </div>
       </div>
       <div className="border-t border-border/70 py-6 text-center text-xs text-muted-foreground">
