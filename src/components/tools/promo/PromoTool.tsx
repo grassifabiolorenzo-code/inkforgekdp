@@ -269,7 +269,7 @@ export function PromoTool({ runtime }: { runtime: ToolRuntime }) {
           <Label className="text-xs tracking-wide uppercase text-muted-foreground">
             Piattaforme social
           </Label>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {PLATFORMS.map((p) => (
               <label
                 key={p.id}

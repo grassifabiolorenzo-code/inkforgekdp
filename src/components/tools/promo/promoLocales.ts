@@ -52,6 +52,30 @@ export const PROMO_LOCALE_PACKS: Record<PromoLocale, PromoLocalePack> = {
         '"{title}" è uscito. {usp} {cta}',
         'Nuovo libro: "{title}". Pensato per {audience_lower}. {cta}',
       ],
+      linkedin: [
+        'Ho appena pubblicato "{title}".\n\n{usp}\n\nPensato per {audience_lower}. {cta}',
+        'Novità: "{title}" è ora disponibile.\n\n{usp}\n\nSe lavori con {audience_lower} o ne fai parte, potrebbe interessarti. {cta}',
+      ],
+      pinterest: [
+        "{title} — {usp}. Perfetto per {audience_lower}. {cta}",
+        'Idea regalo: "{title}", pensato per {audience_lower}. {usp}',
+      ],
+      youtube: [
+        '📚 "{title}" è uscito! {usp}\n\nPensato per {audience_lower}. {cta}',
+        'Novità in libreria: "{title}". {usp} {cta}',
+      ],
+      threads: [
+        '"{title}" è finalmente qui. {usp} {cta}',
+        'Ci ho messo il cuore in "{title}" — {usp}',
+      ],
+      reddit: [
+        'Ciao a tutti — ho appena pubblicato "{title}". {usp} L\'ho scritto pensando a {audience_lower}, spero possa interessare a qualcuno qui. Feedback benvenuti!',
+        'Dopo un bel po\' di lavoro, "{title}" è finalmente disponibile. {usp} Curioso di sapere cosa ne pensate.',
+      ],
+      whatsapp: [
+        'Ciao! 👋 Volevo dirti che "{title}" è uscito. {usp} {cta}',
+        'Novità: è uscito "{title}". {usp} Se ti va, dagli un\'occhiata — {cta}',
+      ],
     },
     adHeadlineTemplates: [
       "{title}: {usp_short}",
@@ -103,6 +127,30 @@ export const PROMO_LOCALE_PACKS: Record<PromoLocale, PromoLocalePack> = {
         '"{title}" is out now. {usp} {cta}',
         'New book: "{title}". Made for {audience_lower}. {cta}',
       ],
+      linkedin: [
+        'I just published "{title}".\n\n{usp}\n\nMade for {audience_lower}. {cta}',
+        'New release: "{title}" is now available.\n\n{usp}\n\nIf you work with (or are) {audience_lower}, this might interest you. {cta}',
+      ],
+      pinterest: [
+        "{title} — {usp}. Perfect for {audience_lower}. {cta}",
+        'Gift idea: "{title}", made for {audience_lower}. {usp}',
+      ],
+      youtube: [
+        '📚 "{title}" is out! {usp}\n\nMade for {audience_lower}. {cta}',
+        'New in stores: "{title}". {usp} {cta}',
+      ],
+      threads: [
+        '"{title}" is finally here. {usp} {cta}',
+        'I poured my heart into "{title}" — {usp}',
+      ],
+      reddit: [
+        'Hey everyone — I just published "{title}". {usp} I wrote it with {audience_lower} in mind, hope it\'s of interest to some of you here. Feedback welcome!',
+        'After a lot of work, "{title}" is finally out. {usp} Curious to hear what you think.',
+      ],
+      whatsapp: [
+        'Hey! 👋 Just wanted to let you know "{title}" is out. {usp} {cta}',
+        'News: "{title}" is out now. {usp} If you\'re interested, check it out — {cta}',
+      ],
     },
     adHeadlineTemplates: [
       "{title}: {usp_short}",
@@ -152,6 +200,30 @@ export const PROMO_LOCALE_PACKS: Record<PromoLocale, PromoLocalePack> = {
       twitter: [
         '„{title}" ist jetzt erhältlich. {usp} {cta}',
         'Neues Buch: „{title}". Gemacht für {audience_lower}. {cta}',
+      ],
+      linkedin: [
+        'Ich habe gerade „{title}" veröffentlicht.\n\n{usp}\n\nGemacht für {audience_lower}. {cta}',
+        'Neuerscheinung: „{title}" ist jetzt erhältlich.\n\n{usp}\n\nWenn du mit {audience_lower} zu tun hast (oder dazugehörst), könnte dich das interessieren. {cta}',
+      ],
+      pinterest: [
+        "{title} — {usp}. Perfekt für {audience_lower}. {cta}",
+        'Geschenkidee: „{title}", gemacht für {audience_lower}. {usp}',
+      ],
+      youtube: [
+        '📚 „{title}" ist da! {usp}\n\nGemacht für {audience_lower}. {cta}',
+        'Neu erhältlich: „{title}". {usp} {cta}',
+      ],
+      threads: [
+        '„{title}" ist endlich da. {usp} {cta}',
+        'Ich habe mein Herz in „{title}" gesteckt — {usp}',
+      ],
+      reddit: [
+        'Hallo zusammen — ich habe gerade „{title}" veröffentlicht. {usp} Ich habe es mit {audience_lower} im Kopf geschrieben, hoffe es interessiert hier den ein oder anderen. Feedback ist willkommen!',
+        'Nach viel Arbeit ist „{title}" endlich draußen. {usp} Bin gespannt, was ihr davon haltet.',
+      ],
+      whatsapp: [
+        'Hey! 👋 Wollte dir nur sagen, dass „{title}" jetzt da ist. {usp} {cta}',
+        "Neuigkeit: „{title}\" ist jetzt erhältlich. {usp} Wenn es dich interessiert, schau's dir an — {cta}",
       ],
     },
     adHeadlineTemplates: [
@@ -205,6 +277,30 @@ export const PROMO_LOCALE_PACKS: Record<PromoLocale, PromoLocalePack> = {
         "« {title} » est sorti. {usp} {cta}",
         "Nouveau livre : « {title} ». Pensé pour {audience_lower}. {cta}",
       ],
+      linkedin: [
+        "Je viens de publier « {title} ».\n\n{usp}\n\nPensé pour {audience_lower}. {cta}",
+        "Nouveauté : « {title} » est maintenant disponible.\n\n{usp}\n\nSi vous travaillez avec {audience_lower} (ou en faites partie), cela pourrait vous intéresser. {cta}",
+      ],
+      pinterest: [
+        "{title} — {usp}. Parfait pour {audience_lower}. {cta}",
+        "Idée cadeau : « {title} », pensé pour {audience_lower}. {usp}",
+      ],
+      youtube: [
+        "📚 « {title} » est sorti ! {usp}\n\nPensé pour {audience_lower}. {cta}",
+        "Nouveauté en librairie : « {title} ». {usp} {cta}",
+      ],
+      threads: [
+        "« {title} » est enfin là. {usp} {cta}",
+        "J'ai mis tout mon cœur dans « {title} » — {usp}",
+      ],
+      reddit: [
+        "Bonjour à tous — je viens de publier « {title} ». {usp} Je l'ai écrit en pensant à {audience_lower}, j'espère que ça intéressera certains d'entre vous ici. Vos retours sont les bienvenus !",
+        "Après beaucoup de travail, « {title} » est enfin disponible. {usp} Curieux de savoir ce que vous en pensez.",
+      ],
+      whatsapp: [
+        "Salut ! 👋 Je voulais te dire que « {title} » est sorti. {usp} {cta}",
+        "Nouveauté : « {title} » est disponible. {usp} Si ça t'intéresse, jette un œil — {cta}",
+      ],
     },
     adHeadlineTemplates: [
       "{title} : {usp_short}",
@@ -255,6 +351,27 @@ export const PROMO_LOCALE_PACKS: Record<PromoLocale, PromoLocalePack> = {
       twitter: [
         '"{title}" ya está disponible. {usp} {cta}',
         'Nuevo libro: "{title}". Pensado para {audience_lower}. {cta}',
+      ],
+      linkedin: [
+        'Acabo de publicar "{title}".\n\n{usp}\n\nPensado para {audience_lower}. {cta}',
+        'Novedad: "{title}" ya está disponible.\n\n{usp}\n\nSi trabajas con {audience_lower} (o formas parte de ese grupo), esto podría interesarte. {cta}',
+      ],
+      pinterest: [
+        "{title} — {usp}. Perfecto para {audience_lower}. {cta}",
+        'Idea de regalo: "{title}", pensado para {audience_lower}. {usp}',
+      ],
+      youtube: [
+        '📚 ¡"{title}" ya está aquí! {usp}\n\nPensado para {audience_lower}. {cta}',
+        'Novedad en librerías: "{title}". {usp} {cta}',
+      ],
+      threads: ['"{title}" ya está aquí. {usp} {cta}', 'Le puse el corazón a "{title}" — {usp}'],
+      reddit: [
+        'Hola a todos — acabo de publicar "{title}". {usp} Lo escribí pensando en {audience_lower}, espero que le interese a alguien por aquí. ¡Los comentarios son bienvenidos!',
+        'Después de mucho trabajo, "{title}" ya está disponible. Tengo curiosidad por saber qué opináis.',
+      ],
+      whatsapp: [
+        '¡Hola! 👋 Quería contarte que "{title}" ya está disponible. {usp} {cta}',
+        'Novedad: "{title}" ya está aquí. {usp} Si te interesa, échale un vistazo — {cta}',
       ],
     },
     adHeadlineTemplates: [
@@ -307,6 +424,30 @@ export const PROMO_LOCALE_PACKS: Record<PromoLocale, PromoLocalePack> = {
         '"{title}" is uit. {usp} {cta}',
         'Nieuw boek: "{title}". Gemaakt voor {audience_lower}. {cta}',
       ],
+      linkedin: [
+        'Ik heb net "{title}" gepubliceerd.\n\n{usp}\n\nGemaakt voor {audience_lower}. {cta}',
+        'Nieuw: "{title}" is nu verkrijgbaar.\n\n{usp}\n\nAls je met {audience_lower} werkt (of erbij hoort), is dit misschien interessant. {cta}',
+      ],
+      pinterest: [
+        "{title} — {usp}. Perfect voor {audience_lower}. {cta}",
+        'Cadeau-idee: "{title}", gemaakt voor {audience_lower}. {usp}',
+      ],
+      youtube: [
+        '📚 "{title}" is er! {usp}\n\nGemaakt voor {audience_lower}. {cta}',
+        'Nieuw verkrijgbaar: "{title}". {usp} {cta}',
+      ],
+      threads: [
+        '"{title}" is er eindelijk. {usp} {cta}',
+        'Ik heb mijn hart gestoken in "{title}" — {usp}',
+      ],
+      reddit: [
+        'Hoi allemaal — ik heb net "{title}" gepubliceerd. {usp} Ik schreef het met {audience_lower} in gedachten, hopelijk interessant voor sommigen hier. Feedback is welkom!',
+        'Na veel werk is "{title}" eindelijk uit. Benieuwd wat jullie ervan vinden.',
+      ],
+      whatsapp: [
+        'Hoi! 👋 Wilde je laten weten dat "{title}" er is. {usp} {cta}',
+        'Nieuws: "{title}" is nu verkrijgbaar. {usp} Als je interesse hebt, kijk even — {cta}',
+      ],
     },
     adHeadlineTemplates: [
       "{title}: {usp_short}",
@@ -358,6 +499,27 @@ export const PROMO_LOCALE_PACKS: Record<PromoLocale, PromoLocalePack> = {
       twitter: [
         '"{title}" já saiu. {usp} {cta}',
         'Novo livro: "{title}". Pensado para {audience_lower}. {cta}',
+      ],
+      linkedin: [
+        'Acabei de publicar "{title}".\n\n{usp}\n\nPensado para {audience_lower}. {cta}',
+        'Novidade: "{title}" já está disponível.\n\n{usp}\n\nSe trabalha com {audience_lower} (ou faz parte desse grupo), isto pode interessar-lhe. {cta}',
+      ],
+      pinterest: [
+        "{title} — {usp}. Perfeito para {audience_lower}. {cta}",
+        'Ideia de presente: "{title}", pensado para {audience_lower}. {usp}',
+      ],
+      youtube: [
+        '📚 "{title}" já saiu! {usp}\n\nPensado para {audience_lower}. {cta}',
+        'Novidade: "{title}". {usp} {cta}',
+      ],
+      threads: ['"{title}" já está aqui. {usp} {cta}', 'Coloquei o coração em "{title}" — {usp}'],
+      reddit: [
+        'Olá a todos — acabei de publicar "{title}". {usp} Escrevi a pensar em {audience_lower}, espero que interesse a alguém por aqui. Comentários são bem-vindos!',
+        'Depois de muito trabalho, "{title}" já está disponível. Curioso para saber o que acham.',
+      ],
+      whatsapp: [
+        'Olá! 👋 Queria dizer-te que "{title}" já saiu. {usp} {cta}',
+        'Novidade: "{title}" já está disponível. {usp} Se tiveres interesse, dá uma vista de olhos — {cta}',
       ],
     },
     adHeadlineTemplates: [

@@ -95,7 +95,9 @@ const promoInput = z.object({
   usp: z.string().max(600),
   audience: z.string().max(200),
   cta: z.string().max(200).optional(),
-  platforms: z.array(z.string().max(20)).min(1).max(4),
+  // 10 = numero di piattaforme in PLATFORMS (promoLogic.ts): instagram, facebook, tiktok,
+  // twitter, linkedin, pinterest, youtube, threads, reddit, whatsapp.
+  platforms: z.array(z.string().max(20)).min(1).max(10),
   tone: z.string().max(40).optional(),
   creativity: z.number().int().min(1).max(10).optional(),
   interiorText: z.string().max(20000).optional(),

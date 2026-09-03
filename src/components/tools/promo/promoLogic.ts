@@ -11,7 +11,17 @@
 import { type AiToneId } from "@/components/tools/ai/aiStyle";
 import { PROMO_LOCALE_PACKS, type PromoLocale } from "./promoLocales";
 
-export type PromoPlatform = "instagram" | "facebook" | "tiktok" | "twitter";
+export type PromoPlatform =
+  | "instagram"
+  | "facebook"
+  | "tiktok"
+  | "twitter"
+  | "linkedin"
+  | "pinterest"
+  | "youtube"
+  | "threads"
+  | "reddit"
+  | "whatsapp";
 
 export interface PromoInput {
   bookTitle: string;
@@ -44,6 +54,15 @@ export const PLATFORMS: {
   { id: "facebook", label: "Facebook", hashtagStyle: "few" },
   { id: "tiktok", label: "TikTok / Reels", hashtagStyle: "many" },
   { id: "twitter", label: "X / Twitter", hashtagStyle: "few" },
+  { id: "linkedin", label: "LinkedIn", hashtagStyle: "few" },
+  { id: "pinterest", label: "Pinterest", hashtagStyle: "many" },
+  { id: "youtube", label: "YouTube (community/descrizione)", hashtagStyle: "few" },
+  { id: "threads", label: "Threads", hashtagStyle: "few" },
+  // Reddit e WhatsApp non hanno una cultura di hashtag: un post con hashtag su Reddit legge come
+  // spam, e su WhatsApp semplicemente non ha senso — restano testo puro, coerente con come i
+  // rispettivi post-template sono scritti (registro da community/messaggio diretto, non da ads).
+  { id: "reddit", label: "Reddit", hashtagStyle: "none" },
+  { id: "whatsapp", label: "WhatsApp (broadcast/stato)", hashtagStyle: "none" },
 ];
 
 function pick<T>(arr: T[]): T {
