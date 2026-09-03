@@ -123,11 +123,28 @@ function AdminSystemPage() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-sm">Email transazionale</CardTitle>
+                <CardTitle className="text-sm">Email</CardTitle>
                 <StatusBadge status={data.emailProvider.status} />
               </CardHeader>
-              <CardContent className="text-sm text-muted-foreground">
-                {data.emailProvider.note}
+              <CardContent className="space-y-2 text-sm text-muted-foreground">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                  {[
+                    ["Resend (transazionali/manuali)", data.emailProvider.details.resend],
+                    ["Brevo (promozionali/campagne)", data.emailProvider.details.brevo],
+                  ].map(([label, ok]) => (
+                    <div key={label as string} className="flex items-center gap-1.5">
+                      <span
+                        className={
+                          ok ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"
+                        }
+                      >
+                        {ok ? "✓" : "✗"}
+                      </span>
+                      <span>{label}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs">{data.emailProvider.note}</p>
               </CardContent>
             </Card>
 
@@ -166,6 +183,36 @@ function AdminSystemPage() {
               <CardContent className="space-y-1 text-sm text-muted-foreground">
                 <p className="font-mono text-foreground">{data.domain.url}</p>
                 <p className="text-xs">{data.domain.source}</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Monitoraggio & analytics</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-1 text-sm text-muted-foreground">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs sm:grid-cols-3">
+                  {[
+                    ["Sentry (errori)", data.monitoring.sentry],
+                    ["PostHog (prodotto)", data.monitoring.posthog],
+                    ["Google Analytics", data.monitoring.googleAnalytics],
+                  ].map(([label, ok]) => (
+                    <div key={label as string} className="flex items-center gap-1.5">
+                      <span
+                        className={
+                          ok ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"
+                        }
+                      >
+                        {ok ? "✓" : "✗"}
+                      </span>
+                      <span>{label}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="pt-1 text-xs">
+                  PostHog e Google Analytics, se attivi, richiedono un consenso esplicito per
+                  visitatori UE (non gestito da questa piattaforma).
+                </p>
               </CardContent>
             </Card>
           </>

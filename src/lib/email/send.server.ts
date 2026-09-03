@@ -91,7 +91,7 @@ export async function sendTransactionalEmail(input: TransactionalEmailInput): Pr
       : `InkForgeKdp — ${input.event}`;
     const html = template ? renderTemplate(template.body_html, variables) : `<p>${input.event}</p>`;
 
-    const result = await sendViaProvider({ to: emailLower, subject, html });
+    const result = await sendViaProvider({ to: emailLower, subject, html, kind: "transactional" });
 
     await supabaseAdmin.from("email_sends").insert({
       recipient_email: emailLower,
@@ -207,7 +207,7 @@ export async function sendPromotionalEmail(
     return { status: "skipped_suppressed" };
   }
 
-  const result = await sendViaProvider({ to: emailLower, subject, html });
+  const result = await sendViaProvider({ to: emailLower, subject, html, kind: "promotional" });
   const status = statusFromProviderResult(result.ok, result.error);
 
   await supabaseAdmin.from("email_sends").insert({
@@ -247,6 +247,7 @@ export async function sendManualEmail(input: ManualEmailInput): Promise<{ status
     to: emailLower,
     subject: input.subject,
     html: input.html,
+    kind: "manual",
   });
   const status = statusFromProviderResult(result.ok, result.error);
 

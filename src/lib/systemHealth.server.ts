@@ -51,10 +51,21 @@ export async function computeSystemHealth() {
         creditPackReady: billing.creditPackReady,
       },
     },
-    emailProvider: {
-      status: "not_configured" as const,
-      note: "Nessun provider email transazionale collegato: le notifiche vengono solo registrate nei log del server.",
-    },
+    emailProvider: (() => {
+      const resendReady = Boolean(
+        process.env["RESEND_API_KEY"] && process.env["RESEND_FROM_EMAIL"],
+      );
+      const brevoReady = Boolean(process.env["BREVO_API_KEY"] && process.env["BREVO_FROM_EMAIL"]);
+      return {
+        status: (resendReady || brevoReady ? "operational" : "not_configured") as
+          "operational" | "not_configured",
+        details: { resend: resendReady, brevo: brevoReady },
+        note:
+          resendReady || brevoReady
+            ? "Resend per transazionali/manuali, Brevo per promozionali/campagne — vedi il dettaglio sopra per cosa manca."
+            : "Nessun provider email collegato: le notifiche restano solo registrate come 'in coda' nei log del server.",
+      };
+    })(),
     aiText: {
       status: process.env["GEMINI_API_KEY"]
         ? ("operational" as const)
@@ -70,5 +81,12 @@ export async function computeSystemHealth() {
     // src/config/site.ts) — NON letto da una variabile d'ambiente nonostante PUBLIC_APP_URL sia
     // presente in .env.example: è un valore fisso nel codice, da aggiornare lì a mano se cambia.
     domain: { url: SITE_URL, source: "config/site.ts (valore fisso nel codice)" },
+    // Solo presenza/assenza della chiave: mai capire se il servizio sta davvero ricevendo eventi
+    // da qui (richiederebbe chiamare le rispettive API), solo se è configurato per riceverli.
+    monitoring: {
+      sentry: Boolean(process.env["SENTRY_DSN"]),
+      posthog: Boolean(process.env["VITE_POSTHOG_KEY"]),
+      googleAnalytics: Boolean(process.env["VITE_GA_MEASUREMENT_ID"]),
+    },
   };
 }

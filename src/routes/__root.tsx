@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { HelpChatWidgetGate } from "../components/chat/HelpChatWidget";
+import { installAnalytics } from "../lib/analytics";
 import { installClientErrorCapture } from "../lib/client-error-capture";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { captureError } from "../lib/sentry";
@@ -124,6 +125,7 @@ function RootComponent() {
 
   useEffect(() => {
     installClientErrorCapture();
+    installAnalytics();
   }, []);
 
   return (
