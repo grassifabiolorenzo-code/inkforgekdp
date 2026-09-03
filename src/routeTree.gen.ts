@@ -56,6 +56,7 @@ import { Route as AuthenticatedDashboardTool7RouteImport } from './routes/_authe
 import { Route as AuthenticatedDashboardTool8RouteImport } from './routes/_authenticated/dashboard.tool-8'
 import { Route as AuthenticatedDashboardUsageRouteImport } from './routes/_authenticated/dashboard.usage'
 import { Route as AdminAdminUsersIdRouteImport } from './routes/_admin/admin.users.$id'
+import { Route as AuthenticatedDashboardReferralGuidaRouteImport } from './routes/_authenticated/dashboard.referral.guida'
 import { Route as ApiPublicLemonSqueezyWebhookRouteImport } from './routes/api/public/lemon-squeezy.webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -308,6 +309,12 @@ const AdminAdminUsersIdRoute = AdminAdminUsersIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AdminAdminUsersRoute,
 } as any)
+const AuthenticatedDashboardReferralGuidaRoute =
+  AuthenticatedDashboardReferralGuidaRouteImport.update({
+    id: '/guida',
+    path: '/guida',
+    getParentRoute: () => AuthenticatedDashboardReferralRoute,
+  } as any)
 const ApiPublicLemonSqueezyWebhookRoute =
   ApiPublicLemonSqueezyWebhookRouteImport.update({
     id: '/api/public/lemon-squeezy/webhook',
@@ -346,7 +353,7 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AdminAdminUsersRouteWithChildren
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
   '/dashboard/projects': typeof AuthenticatedDashboardProjectsRoute
-  '/dashboard/referral': typeof AuthenticatedDashboardReferralRoute
+  '/dashboard/referral': typeof AuthenticatedDashboardReferralRouteWithChildren
   '/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
   '/dashboard/subscription': typeof AuthenticatedDashboardSubscriptionRoute
   '/dashboard/tool-1': typeof AuthenticatedDashboardTool1Route
@@ -361,6 +368,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminAdminIndexRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/admin/users/$id': typeof AdminAdminUsersIdRoute
+  '/dashboard/referral/guida': typeof AuthenticatedDashboardReferralGuidaRoute
   '/api/public/lemon-squeezy/webhook': typeof ApiPublicLemonSqueezyWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -392,7 +400,7 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AdminAdminUsersRouteWithChildren
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
   '/dashboard/projects': typeof AuthenticatedDashboardProjectsRoute
-  '/dashboard/referral': typeof AuthenticatedDashboardReferralRoute
+  '/dashboard/referral': typeof AuthenticatedDashboardReferralRouteWithChildren
   '/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
   '/dashboard/subscription': typeof AuthenticatedDashboardSubscriptionRoute
   '/dashboard/tool-1': typeof AuthenticatedDashboardTool1Route
@@ -407,6 +415,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminAdminIndexRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/admin/users/$id': typeof AdminAdminUsersIdRoute
+  '/dashboard/referral/guida': typeof AuthenticatedDashboardReferralGuidaRoute
   '/api/public/lemon-squeezy/webhook': typeof ApiPublicLemonSqueezyWebhookRoute
 }
 export interface FileRoutesById {
@@ -443,7 +452,7 @@ export interface FileRoutesById {
   '/_admin/admin/users': typeof AdminAdminUsersRouteWithChildren
   '/_authenticated/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
   '/_authenticated/dashboard/projects': typeof AuthenticatedDashboardProjectsRoute
-  '/_authenticated/dashboard/referral': typeof AuthenticatedDashboardReferralRoute
+  '/_authenticated/dashboard/referral': typeof AuthenticatedDashboardReferralRouteWithChildren
   '/_authenticated/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
   '/_authenticated/dashboard/subscription': typeof AuthenticatedDashboardSubscriptionRoute
   '/_authenticated/dashboard/tool-1': typeof AuthenticatedDashboardTool1Route
@@ -458,6 +467,7 @@ export interface FileRoutesById {
   '/_admin/admin/': typeof AdminAdminIndexRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_admin/admin/users/$id': typeof AdminAdminUsersIdRoute
+  '/_authenticated/dashboard/referral/guida': typeof AuthenticatedDashboardReferralGuidaRoute
   '/api/public/lemon-squeezy/webhook': typeof ApiPublicLemonSqueezyWebhookRoute
 }
 export interface FileRouteTypes {
@@ -508,6 +518,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/dashboard/'
     | '/admin/users/$id'
+    | '/dashboard/referral/guida'
     | '/api/public/lemon-squeezy/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -554,6 +565,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/dashboard'
     | '/admin/users/$id'
+    | '/dashboard/referral/guida'
     | '/api/public/lemon-squeezy/webhook'
   id:
     | '__root__'
@@ -604,6 +616,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/'
     | '/_authenticated/dashboard/'
     | '/_admin/admin/users/$id'
+    | '/_authenticated/dashboard/referral/guida'
     | '/api/public/lemon-squeezy/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -955,6 +968,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminUsersIdRouteImport
       parentRoute: typeof AdminAdminUsersRoute
     }
+    '/_authenticated/dashboard/referral/guida': {
+      id: '/_authenticated/dashboard/referral/guida'
+      path: '/guida'
+      fullPath: '/dashboard/referral/guida'
+      preLoaderRoute: typeof AuthenticatedDashboardReferralGuidaRouteImport
+      parentRoute: typeof AuthenticatedDashboardReferralRoute
+    }
     '/api/public/lemon-squeezy/webhook': {
       id: '/api/public/lemon-squeezy/webhook'
       path: '/api/public/lemon-squeezy/webhook'
@@ -1031,10 +1051,25 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
   AdminRouteRouteChildren,
 )
 
+interface AuthenticatedDashboardReferralRouteChildren {
+  AuthenticatedDashboardReferralGuidaRoute: typeof AuthenticatedDashboardReferralGuidaRoute
+}
+
+const AuthenticatedDashboardReferralRouteChildren: AuthenticatedDashboardReferralRouteChildren =
+  {
+    AuthenticatedDashboardReferralGuidaRoute:
+      AuthenticatedDashboardReferralGuidaRoute,
+  }
+
+const AuthenticatedDashboardReferralRouteWithChildren =
+  AuthenticatedDashboardReferralRoute._addFileChildren(
+    AuthenticatedDashboardReferralRouteChildren,
+  )
+
 interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardProfileRoute: typeof AuthenticatedDashboardProfileRoute
   AuthenticatedDashboardProjectsRoute: typeof AuthenticatedDashboardProjectsRoute
-  AuthenticatedDashboardReferralRoute: typeof AuthenticatedDashboardReferralRoute
+  AuthenticatedDashboardReferralRoute: typeof AuthenticatedDashboardReferralRouteWithChildren
   AuthenticatedDashboardSettingsRoute: typeof AuthenticatedDashboardSettingsRoute
   AuthenticatedDashboardSubscriptionRoute: typeof AuthenticatedDashboardSubscriptionRoute
   AuthenticatedDashboardTool1Route: typeof AuthenticatedDashboardTool1Route
@@ -1053,7 +1088,8 @@ const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
   {
     AuthenticatedDashboardProfileRoute: AuthenticatedDashboardProfileRoute,
     AuthenticatedDashboardProjectsRoute: AuthenticatedDashboardProjectsRoute,
-    AuthenticatedDashboardReferralRoute: AuthenticatedDashboardReferralRoute,
+    AuthenticatedDashboardReferralRoute:
+      AuthenticatedDashboardReferralRouteWithChildren,
     AuthenticatedDashboardSettingsRoute: AuthenticatedDashboardSettingsRoute,
     AuthenticatedDashboardSubscriptionRoute:
       AuthenticatedDashboardSubscriptionRoute,
